@@ -12,11 +12,12 @@ function createWindow() {mainWindow = new BrowserWindow({
   // alwaysOnTop: true,
   frame: false,
   transparent: true});
-mainWindow.setAlwaysOnTop(true, 'screen');
+// mainWindow.setAlwaysOnTop(true, 'screen');
 mainWindow.loadURL(isDev? "http://localhost:3000": `file://${path.join(__dirname, "../build/index.html")}`);
 // mainWindow.on("closed", () => (mainWindow = null));
 mainWindow.on("close", () => (mainWindow = null));
 mainWindow.once('ready-to-show', function(){mainWindow.show()});
+
 };
 
 app.on("ready", () => setTimeout(createWindow, 2000)); //WTF TIME BASED????

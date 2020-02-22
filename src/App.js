@@ -27,6 +27,7 @@ import './App.css';
 
 import React from 'react';
 import {Motion, spring} from 'react-motion';
+import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 
 // function _extends() {
 //   var _extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {if (window.CP.shouldStopExecution(0)) break;var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}window.CP.exitedLoop(0);return target;};return _extends.apply(this, arguments);
@@ -112,6 +113,8 @@ class MenuButton extends React.Component {
   constructor(props) {
     super(props);
 
+    this.toggleMenu.bind(this)
+
     this.state = {
       isOpen: false
     };
@@ -124,6 +127,18 @@ class MenuButton extends React.Component {
     this.setState(prevState => ({
       isOpen: !prevState.isOpen
     }));
+  }
+
+  myDrag() {
+    this.setState({dragging: true})
+  }
+
+  myStop(...args) {
+    const {dragging} = this.state
+    this.setState({dragging: false})
+    if (dragging == false) {
+      this.toggleMenu()
+    }
   }
 
   /**
@@ -192,7 +207,9 @@ class MenuButton extends React.Component {
       mainButtonProps: () => ({
         className: "button-menu",
         style: this.getMainButtonStyle(),
-        onClick: this.toggleMenu.bind(this)
+        // onClick: this.toggleMenu.bind(this)
+        onDrag: this.myDrag.bind(this),
+        onStop: this.myStop.bind(this)
       }),
 
       childButtonProps: (style, onClick) => ({
@@ -247,12 +264,17 @@ class MenuButton extends React.Component {
     let { elements, mainButtonIcon } = this.props;
 
     return (
+      <Draggable
+        onDrag={this.onDrag} // assume it's bound to `this`
+        onStop={this.onStop} // assume it's bound to `this`
+      >
       <div className="button-container">
         {elements.map((item, i) => this.renderChildButton(item, i))}
         <div {...cp.mainButtonProps()}>
           <i {...cp.mainButtonIconProps(mainButtonIcon)} />
         </div>
       </div>
+      </Draggable>
     );
   }
 }
@@ -267,7 +289,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.addElement = this.addElement.bind(this);
+    // this.addElement = this.addElement.bind(this);
 
     this.state = {
       flyOutRadius: 120,
