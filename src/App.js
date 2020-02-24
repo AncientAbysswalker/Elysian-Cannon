@@ -114,32 +114,44 @@ class MenuButton extends React.Component {
     super(props);
 
     this.toggleMenu.bind(this)
+    // this.onDrag.bind(this)
+    // this.onStop.bind(this)
+    // this.onDrop.bind(this)
 
     this.state = {
-      isOpen: false
+      isOpen: false,
+      isDragging: false
     };
   }
 
   /**
    * Toggles the main button open and closed.
    */
-  toggleMenu() {
-    this.setState(prevState => ({
-      isOpen: !prevState.isOpen
-    }));
+  toggleMenu(...args) {
+    if (!this.isDragging) {
+      this.setState(prevState => ({
+        isOpen: !prevState.isOpen
+      }));}
   }
 
-  myDrag() {
-    this.setState({dragging: true})
-  }
-
-  myStop(...args) {
-    const {dragging} = this.state
-    this.setState({dragging: false})
-    if (dragging == false) {
-      this.toggleMenu()
-    }
-  }
+  // onDrop() {
+  //   console.log(5)
+  // }
+  //
+  // onDrag() {
+  //   this.toggleMenu()
+  //   this.setState({dragging: true})
+  // }
+  //
+  // onStop(...args) {
+  //   const {dragging} = this.state
+  //   this.setState({dragging: false})
+  //   if (dragging) {
+  //     this.onDrop(...args)
+  //   } else {
+  //     this.toggleMenu(...args)
+  //   }
+  // }
 
   /**
    * Returns the width and height of the main button.
@@ -207,9 +219,9 @@ class MenuButton extends React.Component {
       mainButtonProps: () => ({
         className: "button-menu",
         style: this.getMainButtonStyle(),
-        // onClick: this.toggleMenu.bind(this)
-        onDrag: this.myDrag.bind(this),
-        onStop: this.myStop.bind(this)
+        onClick: this.toggleMenu.bind(this)
+        // onDrag: this.myDrag.bind(this),
+        // onStop: this.myStop.bind(this)
       }),
 
       childButtonProps: (style, onClick) => ({
@@ -262,11 +274,20 @@ class MenuButton extends React.Component {
   render() {
     let cp = this.getCProps();
     let { elements, mainButtonIcon } = this.props;
+    let isDragging = false;
 
     return (
       <Draggable
-        onDrag={this.onDrag} // assume it's bound to `this`
-        onStop={this.onStop} // assume it's bound to `this`
+
+        className="redbord"
+        onDrag={() => this.isDragging = true}
+        onStop={() => {
+          // if (!this.isDragging) {
+          //   this.toggleMenu()
+          // }
+
+          this.isDragging = false;
+        }}
       >
       <div className="button-container">
         {elements.map((item, i) => this.renderChildButton(item, i))}

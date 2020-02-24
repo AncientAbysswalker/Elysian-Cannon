@@ -79,6 +79,16 @@ body {
   flex-grow: 1;
 }
 
+.redbord {
+  position: relative;
+  display: flex;
+  border-style: solid;
+  border-width: 5px;
+  border-color: red;
+  background: #72b0ec;
+  border-radius: 1000px;
+}
+
 .button-container {
   position: relative;
   display: flex;
