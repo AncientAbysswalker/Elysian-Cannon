@@ -82,6 +82,7 @@ body {
 .button-container {
   position: relative;
   display: flex;
+  border-radius: 1000px; /*Button container (click events) must be round*/
 }
 
 .button-menu {
