@@ -119,8 +119,7 @@ class MenuButton extends React.Component {
     // this.onDrop.bind(this)
 
     this.state = {
-      isOpen: false,
-      isDragging: false
+      isOpen: false
     };
   }
 
@@ -128,10 +127,9 @@ class MenuButton extends React.Component {
    * Toggles the main button open and closed.
    */
   toggleMenu(...args) {
-    if (!this.isDragging) {
-      this.setState(prevState => ({
-        isOpen: !prevState.isOpen
-      }));}
+    this.setState(prevState => ({
+      isOpen: !prevState.isOpen
+    }));
   }
 
   // onDrop() {
@@ -219,7 +217,7 @@ class MenuButton extends React.Component {
       mainButtonProps: () => ({
         className: "button-menu",
         style: this.getMainButtonStyle(),
-        onClick: this.toggleMenu.bind(this)
+        // onClick: this.toggleMenu.bind(this)
         // onDrag: this.myDrag.bind(this),
         // onStop: this.myStop.bind(this)
       }),
@@ -272,29 +270,31 @@ class MenuButton extends React.Component {
   }
 
   render() {
+    // Render the main and children buttons, and handlke dragging behaviour
+
     let cp = this.getCProps();
     let { elements, mainButtonIcon } = this.props;
     let isDragging = false;
 
     return (
       <Draggable
-
-        className="redbord"
+        // onDrag work in concert to separate drag and click conditions
+        cancel=".button-child" // Do not respond if child buttons are dragged
         onDrag={() => this.isDragging = true}
         onStop={() => {
-          // if (!this.isDragging) {
-          //   this.toggleMenu()
-          // }
+          if (!this.isDragging) {
+            this.toggleMenu()
+          }
 
           this.isDragging = false;
         }}
       >
-      <div className="button-container">
-        {elements.map((item, i) => this.renderChildButton(item, i))}
-        <div {...cp.mainButtonProps()}>
-          <i {...cp.mainButtonIconProps(mainButtonIcon)} />
+        <div className="button-container">
+          {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
+          <div {...cp.mainButtonProps()}> {/* Button element */}
+            <i {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
+          </div>
         </div>
-      </div>
       </Draggable>
     );
   }
