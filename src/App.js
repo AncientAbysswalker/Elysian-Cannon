@@ -1,42 +1,10 @@
-// import React from 'react';
-// import logo from './logo.svg';
-import './App.css';
-//
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
-//
-// export default App;
-
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 
-// function _extends() {
-//   var _extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {if (window.CP.shouldStopExecution(0)) break;var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}window.CP.exitedLoop(0);return target;};return _extends.apply(this, arguments);
-// } // React Motion
-// let Motion = ReactMotion.Motion;
-// let spring = ReactMotion.spring;
+import './App.css';
 
 // CONSTANTS
-// Value of 1 degree in radians
 const DEG_TO_RAD = 0.0174533;
 const ELEMENTS = [
   {
@@ -215,7 +183,7 @@ class MenuButton extends React.Component {
   getCProps() {
     return {
       mainButtonProps: () => ({
-        className: "button-menu",
+        className: "button-menu tangible",
         style: this.getMainButtonStyle(),
         // onClick: this.toggleMenu.bind(this)
         // onDrag: this.myDrag.bind(this),
@@ -223,7 +191,7 @@ class MenuButton extends React.Component {
       }),
 
       childButtonProps: (style, onClick) => ({
-        className: "button-child",
+        className: "button-child tangible",
         style,
         onClick
       }),
@@ -237,14 +205,14 @@ class MenuButton extends React.Component {
 
       // handle Icons
       childButtonIconProps: name => ({
-        className: "child-button-icon fa fa-" + name,
+        className: "child-button-icon tangible fa fa-" + name,
         style: {
           fontSize: this.props.childButtonDiam * this.props.childButtonIconSize
         }
       }),
 
       mainButtonIconProps: name => ({
-        className: "main-button-icon fa fa-" + name,
+        className: "main-button-icon tangible fa fa-" + name,
         style: {
           fontSize: this.props.mainButtonDiam * this.props.mainButtonIconSize
         }
@@ -289,7 +257,7 @@ class MenuButton extends React.Component {
           this.isDragging = false;
         }}
       >
-        <div className="button-container">
+        <div className="button-container tangible">
           {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
           <div {...cp.mainButtonProps()}> {/* Button element */}
             <i {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
@@ -376,8 +344,8 @@ class App extends React.Component {
           </div>
 
           <div id="config">
-            <div onClick={this.addElement.bind(this)}>ADD</div>
-            <div onClick={this.removeElement.bind(this)}>REMOVE</div>
+            <button type="button" className="tangible" onClick={this.addElement.bind(this)}>ADD</button>
+            <button type="button" className="tangible" onClick={this.removeElement.bind(this)}>REMOVE</button>
             <h2>Props</h2>
             <table>
               <tbody>
