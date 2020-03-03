@@ -13,8 +13,8 @@ window.addEventListener('mousemove', event => {
     window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
 
     // Clear timeout and reset. Required or elements will remain intangible
-    if (t) clearTimeout(t)
-    t = setTimeout(function() {window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)}, 150)
+    // if (t) clearTimeout(t)
+    // t = setTimeout(function() {window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)}, 1)
   } else {
     window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)
   }
