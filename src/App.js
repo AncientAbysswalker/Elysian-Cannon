@@ -13,11 +13,23 @@ const ELEMENTS = [
   },
   {
     icon: "clock-o",
-    onClick: () => alert("clicked clock")
+    onClick: () => window.open('C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe')
   },
   {
     icon: "lock",
-    onClick: () => alert("clicked lock")
+    onClick: () => {
+      var child = window.require('child_process').execFile;
+      var executablePath = 'C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe';
+
+      child(executablePath, function(err, data) {
+          if(err){
+             console.error(err);
+             return;
+          }
+
+          console.log(data.toString());
+      });
+    }
   },
   {
     icon: "globe",
@@ -65,10 +77,6 @@ const ELEMENTS = [
   // }
 ];
 
-
-
-
-
 // UTILITY FUNCTIONS
 function toRadians(degrees) {
   return degrees * DEG_TO_RAD;
@@ -82,9 +90,6 @@ class MenuButton extends React.Component {
     super(props);
 
     this.toggleMenu.bind(this)
-    // this.onDrag.bind(this)
-    // this.onStop.bind(this)
-    // this.onDrop.bind(this)
 
     this.state = {
       isOpen: false
@@ -99,25 +104,6 @@ class MenuButton extends React.Component {
       isOpen: !prevState.isOpen
     }));
   }
-
-  // onDrop() {
-  //   console.log(5)
-  // }
-  //
-  // onDrag() {
-  //   this.toggleMenu()
-  //   this.setState({dragging: true})
-  // }
-  //
-  // onStop(...args) {
-  //   const {dragging} = this.state
-  //   this.setState({dragging: false})
-  //   if (dragging) {
-  //     this.onDrop(...args)
-  //   } else {
-  //     this.toggleMenu(...args)
-  //   }
-  // }
 
   /**
    * Returns the width and height of the main button.
@@ -185,9 +171,6 @@ class MenuButton extends React.Component {
       mainButtonProps: () => ({
         className: "button-menu tangible",
         style: this.getMainButtonStyle(),
-        // onClick: this.toggleMenu.bind(this)
-        // onDrag: this.myDrag.bind(this),
-        // onStop: this.myStop.bind(this)
       }),
 
       childButtonProps: (style, onClick) => ({
@@ -224,8 +207,6 @@ class MenuButton extends React.Component {
     let { isOpen } = this.state;
     let cp = this.getCProps();
 
-    //return <div {...cp.childButtonProps(index, isOpen)}/>;
-
     return (
       <Motion {...cp.childButtonMotionProps(index, isOpen)}>
         {style => (
@@ -249,6 +230,9 @@ class MenuButton extends React.Component {
         // onDrag work in concert to separate drag and click conditions
         cancel=".button-child" // Do not respond if child buttons are dragged
         onDrag={() => this.isDragging = true}
+        onClick={() => {
+          this.toggleMenu()
+        }}
         onStop={() => {
           if (!this.isDragging) {
             this.toggleMenu()
