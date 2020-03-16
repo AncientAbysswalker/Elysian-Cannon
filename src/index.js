@@ -7,18 +7,18 @@ import * as serviceWorker from './serviceWorker';
 // Render application
 ReactDOM.render(<App />, document.getElementById('root'));
 
-// Handle application file-drag functionality
-window.addEventListener('dragover', event => window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true}));
-window.addEventListener('drop', event => window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false));
-
-// Handle application click-through functionality
-window.addEventListener('mousemove', event => {
-  if (!event.target.classList.contains('tangible')) {
-    window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
-  } else {
-    window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)
-  }
-})
+// // Handle application file-drag functionality
+// window.addEventListener('dragover', event => window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true}));
+// window.addEventListener('drop', event => window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false));
+//
+// // Handle application click-through functionality
+// window.addEventListener('mousemove', event => {
+//   if (!event.target.classList.contains('tangible')) {
+//     window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
+//   } else {
+//     window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)
+//   }
+// })
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -8,11 +8,11 @@ import './App.css';
 const DEG_TO_RAD = 0.0174533;
 const ELEMENTS = [
   {
-    icon: "home",
+    icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
     onClick: () => alert("clicked home")
   },
   {
-    icon: "clock-o",
+    icon: "C:\\Users\\Ancient Abysswalker\\Electron\\Elysian Cannon\\public\\logo192.png",
     onClick: () => window.open('C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe')
   },
   {
@@ -90,11 +90,52 @@ class MenuButton extends React.Component {
     super(props);
 
     this.toggleMenu.bind(this)
+    this.handleDragEnter.bind(this)
+    this.handleDragLeave.bind(this)
+    this.handleDragOver.bind(this)
+    this.handleDrop.bind(this)
 
     this.state = {
-      isOpen: false
+      isOpen: false,
+      isAddingItem: false
     };
   }
+
+  handleDragEnter(e) {
+    this.setState({isAddingItem: true});
+    // this.props.setMainIcon("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png")
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  handleDragLeave(e) {
+    this.setState({isAddingItem: false});
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  handleDrop(e) {
+    const fs = window.require("fs");
+    const ws = window.require('windows-shortcuts-ps');
+
+    this.setState({isAddingItem: false});
+
+    var link = e.dataTransfer.files[0].path;
+    alert(link);
+    ws.getPath(link).then((actualPath) => alert(actualPath));
+    e.preventDefault();
+    e.stopPropagation();
+    // alert(fs.readlink(link, (err, tarPath)=>{
+    //         if(err){
+    //             console.log(err.message);
+    //             return '';
+    //         }})
+    //       );
+    //alert(e.dataTransfer.files[0].path);
+  }
+
 
   /**
    * Toggles the main button open and closed.
@@ -188,16 +229,28 @@ class MenuButton extends React.Component {
 
       // handle Icons
       childButtonIconProps: name => ({
-        className: "child-button-icon tangible fa fa-" + name,
+        className: "child-button-icon tangible fa fa-",
+        src: name,
+        draggable: false,
         style: {
-          fontSize: this.props.childButtonDiam * this.props.childButtonIconSize
+          fontSize: this.props.childButtonDiam * this.props.childButtonIconSize,
+          width: this.props.childButtonDiam * this.props.childButtonIconSize,
+          height: this.props.childButtonDiam * this.props.childButtonIconSize,
+          "user-select": "none" // So that icon cannot be highlighted
         }
       }),
 
       mainButtonIconProps: name => ({
-        className: "main-button-icon tangible fa fa-" + name,
+        className: "main-button-icon tangible fa fa-bars",
+        src: (this.state.isAddingItem ? this.props.mainButtonIconActive
+                                      : this.props.mainButtonIcon),
+        draggable: false,
         style: {
-          fontSize: this.props.mainButtonDiam * this.props.mainButtonIconSize
+          fontSize: this.props.mainButtonDiam * this.props.mainButtonIconSize,
+          width: this.props.mainButtonDiam * this.props.mainButtonIconSize,
+          height: this.props.mainButtonDiam * this.props.mainButtonIconSize,
+          "pointer-events": "none", // So that handleDragLeave() does not trigger on entering icon
+          "user-select": "none" // So that icon cannot be highlighted
         }
       })
     };
@@ -211,7 +264,7 @@ class MenuButton extends React.Component {
       <Motion {...cp.childButtonMotionProps(index, isOpen)}>
         {style => (
           <div {...cp.childButtonProps(style, item.onClick)}>
-            <i {...cp.childButtonIconProps(item.icon)} />
+            <img {...cp.childButtonIconProps(item.icon)} onError={(e)=>{e.target.onerror = null; e.target.src=this.src=require("./sad.jpg")}} />
           </div>
         )}
       </Motion>
@@ -241,10 +294,15 @@ class MenuButton extends React.Component {
           this.isDragging = false;
         }}
       >
-        <div className="button-container tangible">
+        <div className="button-container tangible"
+        onDrop={e => this.handleDrop(e)}
+        onDragOver={e => this.handleDragOver(e)}
+        onDragEnter={e => this.handleDragEnter(e)}
+        onDragLeave={e => this.handleDragLeave(e)}
+        >
           {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
           <div {...cp.mainButtonProps()}> {/* Button element */}
-            <i {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
+            <img {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
           </div>
         </div>
       </Draggable>
@@ -263,6 +321,7 @@ class App extends React.Component {
     super(props);
 
     // this.addElement = this.addElement.bind(this);
+    this.setMainIcon = this.setMainIcon.bind(this)
 
     this.state = {
       flyOutRadius: 120,
@@ -273,10 +332,17 @@ class App extends React.Component {
       stiffness: 320,
       damping: 17,
       rotation: 0,
-      mainButtonIcon: "bars",
+      mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+      mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
       mainButtonIconSize: 0.5,
       childButtonIconSize: 0.5
     };
+  }
+
+  setMainIcon(icon) {
+    this.setState(prevState => ({
+      mainButtonIcon: icon
+    }));
   }
 
   getInputProps(type, title) {
@@ -323,6 +389,7 @@ class App extends React.Component {
           <div id="component">
             <MenuButton
               {...this.state}
+              setMainIcon={this.setMainIcon}
               elements={ELEMENTS.slice(0, this.state.numElements)}
             />
           </div>
