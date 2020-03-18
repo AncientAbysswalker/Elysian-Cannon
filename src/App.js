@@ -82,6 +82,26 @@ function toRadians(degrees) {
   return degrees * DEG_TO_RAD;
 }
 
+/**
+ * Converts a path, link, or URL into the absolute path to the resource
+ * @param {string} filePath The string path of the original file or link
+ * @return {string} The absolute path to the intended file
+ */
+async function getAbsPath(resourcePath) {
+  const shortcut = window.require('windows-shortcuts-ps');
+
+  // If link or URL get absolute path, otherwise we have absolute path
+  let fileExtension = resourcePath.split('.').pop();
+
+  if (fileExtension === 'url' ||
+      fileExtension === 'lnk') {
+        return await shortcut.getPath(resourcePath)
+        .catch(err => alert(err));
+  } else {
+    return resourcePath;
+  }
+}
+
 // -------------------------------------------------------
 // ---------------   COMPONENT START   -------------------
 // -------------------------------------------------------
@@ -97,7 +117,8 @@ class MenuButton extends React.Component {
 
     this.state = {
       isOpen: false,
-      isAddingItem: false
+      isAddingItem: false,
+      specIcon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png"
     };
   }
 
@@ -119,21 +140,38 @@ class MenuButton extends React.Component {
   handleDrop(e) {
     const fs = window.require("fs");
     const ws = window.require('windows-shortcuts-ps');
+    var iconExtractor = window.require('icon-extractor');
 
+    // iconExtractor.emitter.on('icon', function(data){
+    //   alert('Here is my context: ' + data.Context);
+    //   alert('Here is the path it was for: ' + data.Path);
+    //   alert('Here is the base64 image: ' + data.Base256ImageData);
+    //
+    //   fs.writeFile("O:\\False Apparition\\Desktop\\test.png", data.Base64ImageData, 'base64', function(err) {
+    //     console.log(err);
+    //   });
+    // });
+    //
+    // iconExtractor.getIcon('SomeContextLikeAName',"C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe");
+    //
+    // this.setState({isAddingItem: false});
+    // alert(e.dataTransfer.files[0].context);
+    var link = e.dataTransfer.files[0].path;
+
+    // Get
+    //this.props.addElement("O:\\False Apparition\\Desktop\\test.png", link)
+    getAbsPath(link).then((actualPath) => alert(actualPath))
+    // ws.getPath(link).then((actualPath) => this.props.addElement("O:\\False Apparition\\Desktop\\test.png", actualPath));
+
+    // Testing method for dropped file parameters
+    //alert(...getDroppedParameters())
+
+    // Reset CSS
     this.setState({isAddingItem: false});
 
-    var link = e.dataTransfer.files[0].path;
-    alert(link);
-    ws.getPath(link).then((actualPath) => alert(actualPath));
+    // Required to hijack activate-on-drop event
     e.preventDefault();
     e.stopPropagation();
-    // alert(fs.readlink(link, (err, tarPath)=>{
-    //         if(err){
-    //             console.log(err.message);
-    //             return '';
-    //         }})
-    //       );
-    //alert(e.dataTransfer.files[0].path);
   }
 
 
@@ -322,6 +360,7 @@ class App extends React.Component {
 
     // this.addElement = this.addElement.bind(this);
     this.setMainIcon = this.setMainIcon.bind(this)
+    this.addElement = this.addElement.bind(this)
 
     this.state = {
       flyOutRadius: 120,
@@ -356,10 +395,23 @@ class App extends React.Component {
     };
   }
 
-  addElement() {
+  addElement(newIcon, newPath) {
     ELEMENTS.push({
-      icon: "industry",
-      onClick: () => alert("clicked industry")
+      icon: newIcon,
+      onClick: () => {
+        var child = window.require('child_process').execFile;
+        const shell = window.require('electron').shell;
+
+        shell.openItem(newPath)
+        // child(newPath, function(err, data) {
+        //     if(err){
+        //        console.error(err);
+        //        return;
+        //     }
+        //
+        //     console.log(data.toString());
+        // });
+      }
     });
     this.setState(prevState => ({
       numElements: prevState.numElements + 1
@@ -390,6 +442,7 @@ class App extends React.Component {
             <MenuButton
               {...this.state}
               setMainIcon={this.setMainIcon}
+              addElement={this.addElement}
               elements={ELEMENTS.slice(0, this.state.numElements)}
             />
           </div>

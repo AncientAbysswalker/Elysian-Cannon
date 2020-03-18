@@ -17,6 +17,7 @@
     "cross-env": "^7.0.0",
     "electron": "^8.1.1",
     "electron-is-dev": "^1.1.0",
+    "icon-extractor": "^1.0.3",
     "pkg": "^4.4.4",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
