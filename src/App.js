@@ -102,6 +102,33 @@ async function getAbsPath(resourcePath) {
   }
 }
 
+async function getSavedIcon(resourcePath) {
+  /**Produces a pa
+   * @param {string} filePath The string path of the original file or link
+   * @return {string} The absolute path to the intended file
+   */
+
+  const fs = window.require("fs");
+  const iconPromise = window.require('icon-promise');
+  const md5 = require('md5');
+
+  // Get the base64 image data and determine the image hash
+  var iconData = (await iconPromise.getIcon("a", resourcePath)).Base64ImageData;
+  var hashData = md5(iconData);
+
+  // If the icon is not already saved/known then save a copy for the application
+  var savedPath = "O:\\False Apparition\\Desktop\\" + hashData + ".png"
+  if (!fs.existsSync(savedPath)) {
+    alert("Saving")
+    fs.writeFile(savedPath, iconData, 'base64', (err) => {
+      console.log(err);
+    });
+  }
+
+  // Return the path to the saved icon
+  return savedPath
+}
+
 // -------------------------------------------------------
 // ---------------   COMPONENT START   -------------------
 // -------------------------------------------------------
@@ -140,7 +167,7 @@ class MenuButton extends React.Component {
   handleDrop(e) {
     const fs = window.require("fs");
     const ws = window.require('windows-shortcuts-ps');
-    var iconPromise = window.require('icon-promise');
+    const iconPromise = window.require('icon-promise');
 
     // iconExtractor.emitter.on('icon', function(data){
     //   alert('Here is my context: ' + data.Context);
@@ -165,8 +192,9 @@ class MenuButton extends React.Component {
 
     Promise.all([
       getAbsPath(link),
-      iconPromise.getIcon("a", link)
-    ]).then(([absPath, iconPath]) => alert(absPath + "\n" + iconPath.Context))
+      getSavedIcon(link)
+      //iconPromise.getIcon("a", link)
+    ]).then(([absPath, iconPath]) => alert(absPath + "\n" + iconPath))
     // getAbsPath(link).then((actualPath) => alert(actualPath))
     // iconPromise.getIcon("a", link).then((actualPath) => alert(actualPath.Context))
     // ws.getPath(link).then((actualPath) => this.props.addElement("O:\\False Apparition\\Desktop\\test.png", actualPath));
