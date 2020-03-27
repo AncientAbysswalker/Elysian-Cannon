@@ -140,7 +140,7 @@ class MenuButton extends React.Component {
   handleDrop(e) {
     const fs = window.require("fs");
     const ws = window.require('windows-shortcuts-ps');
-    var iconExtractor = window.require('icon-extractor');
+    var iconPromise = window.require('icon-promise');
 
     // iconExtractor.emitter.on('icon', function(data){
     //   alert('Here is my context: ' + data.Context);
@@ -160,7 +160,15 @@ class MenuButton extends React.Component {
 
     // Get
     //this.props.addElement("O:\\False Apparition\\Desktop\\test.png", link)
-    getAbsPath(link).then((actualPath) => alert(actualPath))
+
+
+
+    Promise.all([
+      getAbsPath(link),
+      iconPromise.getIcon("a", link)
+    ]).then(([absPath, iconPath]) => alert(absPath + "\n" + iconPath.Context))
+    // getAbsPath(link).then((actualPath) => alert(actualPath))
+    // iconPromise.getIcon("a", link).then((actualPath) => alert(actualPath.Context))
     // ws.getPath(link).then((actualPath) => this.props.addElement("O:\\False Apparition\\Desktop\\test.png", actualPath));
 
     // Testing method for dropped file parameters
