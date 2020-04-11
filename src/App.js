@@ -4,6 +4,11 @@ import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same ti
 
 import './App.css';
 
+// Development build or production?
+const isDev = window.require('electron-is-dev');
+
+
+
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
 const ELEMENTS = [
@@ -12,14 +17,18 @@ const ELEMENTS = [
     onClick: () => alert("clicked home")
   },
   {
-    icon: "C:\\Users\\Ancient Abysswalker\\Electron\\Elysian Cannon\\public\\logo192.png",
-    onClick: () => window.open('C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe')
+    icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+    onClick: () => alert("clicked home")
+  },
+  {
+    icon: "\\logo192.png",
+    onClick: () => window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
   },
   {
     icon: "lock",
     onClick: () => {
       var child = window.require('child_process').execFile;
-      var executablePath = 'C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe';
+      var executablePath = 'C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe';
 
       child(executablePath, function(err, data) {
           if(err){
@@ -33,6 +42,10 @@ const ELEMENTS = [
   },
   {
     icon: "globe",
+    onClick: () => window.open("https://www.w3schools.com")
+  },
+  {
+    icon: "\\816af0c328484d2b325590aeb000ee63.png",
     onClick: () => window.open("https://www.w3schools.com")
   }
   // {
@@ -82,52 +95,139 @@ function toRadians(degrees) {
   return degrees * DEG_TO_RAD;
 }
 
+
 /**
  * Converts a path, link, or URL into the absolute path to the resource
- * @param {string} filePath The string path of the original file or link
- * @return {string} The absolute path to the intended file
+ * @param {string} resourcePath The string path of the original file or link
+ * @return {Promise: string} The absolute path to the intended file
  */
 async function getAbsPath(resourcePath) {
   const shortcut = window.require('windows-shortcuts-ps');
+
+  alert("abspath");
 
   // If link or URL get absolute path, otherwise we have absolute path
   let fileExtension = resourcePath.split('.').pop();
 
   if (fileExtension === 'url' ||
       fileExtension === 'lnk') {
+        alert("url");
         return await shortcut.getPath(resourcePath)
         .catch(err => alert(err));
   } else {
+    alert("exe");
     return resourcePath;
   }
 }
 
+
+/**
+ * Extracts image data from a file's icon and saves it to the application's
+ *     AppData folder.
+ * @param {string} resourcePath The string path of the original file or link
+ * @return {Promise: base64} The absolute path of the extracted icon image file
+ */
 async function getSavedIcon(resourcePath) {
+
+  const fs = window.require('fs');
+  //const fs = window.require("mkdirp");
+  const iconPromise = window.require('icon-promise');
+  const md5 = require('md5');
+  const path = window.require('path');
+
+
+  alert("post const getsavedicon");
+
+  // If production, point to app.asar.unpacked for IconExtractor.exe
+  alert("isDev");
+  alert(isDev);
+  if (!isDev) {
+    iconPromise.overrideExtractorPath(
+      path.join(
+        window.require('electron').remote.app.getAppPath() + '.unpacked',
+        'node_modules',
+        'icon-promise',
+        'bin'
+      )
+    );
+  }
+
+  // Get 256x256 icon image data, and determine its MD5 hash
+  let iconData = null;
+  let hashData = null;
+  try {
+    iconData = (await iconPromise.getIcon256(resourcePath)).Base64ImageData;
+    hashData = md5(iconData);
+  } catch(err) {
+    alert(err);
+  }
+
+  // If the icon is not already saved/known then save a copy for the application
+  let savedPath = getIconPath(hashData + '.png');
+  if (!fs.existsSync(savedPath)) {
+
+    if (!fs.existsSync(getIconPath())) {
+      fs.mkdirSync(getIconPath());
+    }
+
+    alert("Saving");
+    fs.writeFileSync(savedPath, iconData, 'base64', (err) => {
+      alert(777);
+    });
+  }
+  alert("getAppPath");
+  alert(getIconPath(hashData + ".png"));
+
+  // Return the path to the saved icon
+  return savedPath;
+}
+
+
+/**
+ * Provides *********.
+ * @param {string} fileName The string path of the original file or link
+ * @return {Promise} The absolute path of the extracted icon image file
+ */
+function getAppPath(fileName = "") {
   /**Produces a pa
-   * @param {string} filePath The string path of the original file or link
+   * @param {string} fileName The string path of the original file or link
    * @return {string} The absolute path to the intended file
    */
 
-  const fs = window.require("fs");
-  const iconPromise = window.require('icon-promise');
-  const md5 = require('md5');
+  const isDev = window.require('electron-is-dev');
+  const path = require('path');
 
-  // Get the base64 image data and determine the image hash
-  var iconData = (await iconPromise.getIcon("a", resourcePath)).Base64ImageData;
-  var hashData = md5(iconData);
-
-  // If the icon is not already saved/known then save a copy for the application
-  var savedPath = "O:\\False Apparition\\Desktop\\" + hashData + ".png"
-  if (!fs.existsSync(savedPath)) {
-    alert("Saving")
-    fs.writeFile(savedPath, iconData, 'base64', (err) => {
-      console.log(err);
-    });
+  if (isDev) {
+  	return "./public/" + fileName;
+  } else {
+    const app = window.require('electron').remote.app;
+  	return path.join(app.getPath('userData'), fileName);
   }
-
-  // Return the path to the saved icon
-  return savedPath
 }
+
+
+/**
+ * Provides *********.
+ * @param {string} fileName The string path of the original file or link
+ * @return {Promise} The absolute path of the extracted icon image file
+ */
+function getIconPath(fileName = "") {
+  /**Produces a pa
+   * @param {string} fileName The string path of the original file or link
+   * @return {string} The absolute path to the intended file
+   */
+
+  const isDev = window.require('electron-is-dev');
+  const path = require('path');
+
+  if (isDev) {
+  	return './public/icon_storage/' + fileName;
+  } else {
+    const app = window.require('electron').remote.app;
+  	return path.join(app.getPath('userData'), 'icon_storage', fileName);
+  }
+}
+
 
 // -------------------------------------------------------
 // ---------------   COMPONENT START   -------------------
@@ -165,9 +265,12 @@ class MenuButton extends React.Component {
     e.stopPropagation();
   }
   handleDrop(e) {
+    alert("dnd")
     const fs = window.require("fs");
     const ws = window.require('windows-shortcuts-ps');
     const iconPromise = window.require('icon-promise');
+
+    alert("dnd")
 
     // iconExtractor.emitter.on('icon', function(data){
     //   alert('Here is my context: ' + data.Context);
@@ -194,7 +297,9 @@ class MenuButton extends React.Component {
       getAbsPath(link),
       getSavedIcon(link)
       //iconPromise.getIcon("a", link)
-    ]).then(([absPath, iconPath]) => alert(absPath + "\n" + iconPath))
+    ]).then(([absPath, iconPath]) => {
+      this.props.addElement(iconPath, absPath)
+    })
     // getAbsPath(link).then((actualPath) => alert(actualPath))
     // iconPromise.getIcon("a", link).then((actualPath) => alert(actualPath.Context))
     // ws.getPath(link).then((actualPath) => this.props.addElement("O:\\False Apparition\\Desktop\\test.png", actualPath));
@@ -403,7 +508,7 @@ class App extends React.Component {
       seperationAngle: 40,
       mainButtonDiam: 90,
       childButtonDiam: 50,
-      numElements: 4,
+      numElements: ELEMENTS.keys().length,
       stiffness: 320,
       damping: 17,
       rotation: 0,
@@ -449,10 +554,7 @@ class App extends React.Component {
         // });
       }
     });
-    this.setState(prevState => ({
-      numElements: prevState.numElements + 1
-    }));
-    console.log("added");
+    this.setState();
   }
 
   removeElement() {
