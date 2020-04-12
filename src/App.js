@@ -482,7 +482,7 @@ class App extends React.Component {
       seperationAngle: 40,
       mainButtonDiam: 90,
       childButtonDiam: 50,
-      numElements: ELEMENTS.keys().length,
+      numElements: Object.keys(ELEMENTS).length,
       stiffness: 320,
       damping: 17,
       rotation: 0,
@@ -528,7 +528,9 @@ class App extends React.Component {
         // });
       }
     });
-    this.setState({});
+    this.setState(prevState => ({
+      numElements: prevState.numElements + 1
+    }));
   }
 
   removeElement() {
