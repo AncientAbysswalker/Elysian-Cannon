@@ -20,39 +20,88 @@ const DEG_TO_RAD = 0.0174533;
 const ELEMENTS = [
   {
     icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-    onClick: () => alert("clicked home")
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
+
+      } else {
+        alert("clicked 0")
+      }
+    }
   },
   {
     icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-    onClick: () => alert("clicked home")
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
+
+      } else {
+        alert("clicked 1")
+      }
+    }
   },
   {
     icon: "\\logo192.png",
-    onClick: () => window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
+
+      } else {
+        alert("clicked 2")
+        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
+      }
+    }
   },
   {
     icon: "lock",
-    onClick: () => {
-      var child = window.require('child_process').execFile;
-      var executablePath = 'C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe';
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
 
-      child(executablePath, function(err, data) {
-          if(err){
-             console.error(err);
-             return;
-          }
+      } else {
+        var child = window.require('child_process').execFile;
+        var executablePath = 'C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe';
 
-          console.log(data.toString());
-      });
+        child(executablePath, function(err, data) {
+            if(err){
+               console.error(err);
+               return;
+            }
+
+            console.log(data.toString());
+        });
+      }
     }
   },
   {
     icon: "globe",
-    onClick: () => window.open("https://www.w3schools.com")
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
+
+      } else {
+        alert("clicked 4")
+        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
+      }
+    }
   },
   {
     icon: "\\816af0c328484d2b325590aeb000ee63.png",
-    onClick: () => window.open("https://www.w3schools.com")
+    onClick: (index) => {
+      if (window.event.ctrlKey) {
+        //this.setState({isOpen: false})
+        alert(index);
+
+      } else {
+        alert("clicked 5")
+        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
+      }
+    }
   }
   // {
   //   icon: "asterisk",
@@ -416,7 +465,7 @@ class MenuButton extends React.Component {
     return (
       <Motion {...cp.childButtonMotionProps(index, isOpen)}>
         {style => (
-          <div {...cp.childButtonProps(style, item.onClick)}>
+          <div {...cp.childButtonProps(style, () => item.onClick(index))}>
             <img {...cp.childButtonIconProps(item.icon)} onError={(e)=>{e.target.onerror = null; e.target.src=this.src=require("./sad.jpg")}} />
           </div>
         )}
@@ -528,13 +577,11 @@ class App extends React.Component {
         // });
       }
     });
-    this.setState(prevState => ({
-      numElements: prevState.numElements + 1
-    }));
+    this.setState({});
   }
 
   removeElement() {
-    ELEMENTS.pop();
+    ELEMENTS.splice(2, 1); //s
     this.setState(prevState => ({
       numElements: prevState.numElements - 1
     }));
@@ -550,14 +597,14 @@ class App extends React.Component {
         <div id="headline">
           <h1>React Menu Button</h1>
         </div>
-        {/* <button onClick={this.addElement>Click me</button> */}
+        {/* <button onClick={this.addElementf>Click me</button> */}
         <div id="content">
           <div id="component">
             <MenuButton
               {...this.state}
               setMainIcon={this.setMainIcon}
               addElement={this.addElement}
-              elements={ELEMENTS.slice(0, this.state.numElements)}
+              elements={ELEMENTS}
             />
           </div>
 
