@@ -7,7 +7,13 @@ import './App.css';
 // Development build or production?
 const isDev = window.require('electron-is-dev');
 
-
+// Common module requirements
+const fs = window.require('fs');
+const path = window.require('path');
+const app = window.require('electron').remote.app;
+const symlink = window.require('windows-shortcuts-ps');
+const md5 = require('md5');
+const iconPromise = window.require('icon-promise');
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
@@ -90,7 +96,14 @@ const ELEMENTS = [
   // }
 ];
 
+
 // UTILITY FUNCTIONS
+
+/**
+ * Converts an angle from degrees to radians.
+ * @param {number} degrees The angle in degrees
+ * @return {number} The angle in radians
+ */
 function toRadians(degrees) {
   return degrees * DEG_TO_RAD;
 }
@@ -99,23 +112,16 @@ function toRadians(degrees) {
 /**
  * Converts a path, link, or URL into the absolute path to the resource
  * @param {string} resourcePath The string path of the original file or link
- * @return {Promise: string} The absolute path to the intended file
+ * @return {string} The absolute path to the intended file
  */
 async function getAbsPath(resourcePath) {
-  const shortcut = window.require('windows-shortcuts-ps');
-
-  alert("abspath");
-
-  // If link or URL get absolute path, otherwise we have absolute path
+  // If symlink or URL get absolute path, otherwise we already have absolute path
   let fileExtension = resourcePath.split('.').pop();
-
   if (fileExtension === 'url' ||
       fileExtension === 'lnk') {
-        alert("url");
-        return await shortcut.getPath(resourcePath)
+        return await symlink.getPath(resourcePath)
         .catch(err => alert(err));
   } else {
-    alert("exe");
     return resourcePath;
   }
 }
@@ -125,26 +131,14 @@ async function getAbsPath(resourcePath) {
  * Extracts image data from a file's icon and saves it to the application's
  *     AppData folder.
  * @param {string} resourcePath The string path of the original file or link
- * @return {Promise: base64} The absolute path of the extracted icon image file
+ * @return {base64} The absolute path of the extracted icon image file
  */
 async function getSavedIcon(resourcePath) {
-
-  const fs = window.require('fs');
-  //const fs = window.require("mkdirp");
-  const iconPromise = window.require('icon-promise');
-  const md5 = require('md5');
-  const path = window.require('path');
-
-
-  alert("post const getsavedicon");
-
-  // If production, point to app.asar.unpacked for IconExtractor.exe
-  alert("isDev");
-  alert(isDev);
+  // If production, point to app.asar.unpacked location for IconExtractor.exe
   if (!isDev) {
     iconPromise.overrideExtractorPath(
       path.join(
-        window.require('electron').remote.app.getAppPath() + '.unpacked',
+        app.getAppPath() + '.unpacked',
         'node_modules',
         'icon-promise',
         'bin'
@@ -165,65 +159,52 @@ async function getSavedIcon(resourcePath) {
   // If the icon is not already saved/known then save a copy for the application
   let savedPath = getIconPath(hashData + '.png');
   if (!fs.existsSync(savedPath)) {
-
+    // If the icon_storage folder does not already exist then create it
     if (!fs.existsSync(getIconPath())) {
       fs.mkdirSync(getIconPath());
     }
 
-    alert("Saving");
+    // Save a copy of the icon for the application
     fs.writeFileSync(savedPath, iconData, 'base64', (err) => {
-      alert(777);
+      alert(err);
     });
   }
-  alert("getAppPath");
-  alert(getIconPath(hashData + ".png"));
 
-  // Return the path to the saved icon
-  return savedPath;
+  // Return the path to the saved icon.
+  if (isDev) {
+    // I HATE THIS LINE, but in dev mode electron looks for resources oddly
+    return './icon_storage/' + hashData + '.png';
+  } else {
+    return savedPath;
+  }
 }
 
 
 /**
- * Provides *********.
- * @param {string} fileName The string path of the original file or link
- * @return {Promise} The absolute path of the extracted icon image file
+ * Provides the path to the applictaion resources directory. If an argument
+ *     is provided the filepath to the argument will be provided
+ * @param {string} fileName The string name of a file within the intended path
+ * @return {string} The path of the applictaion resources directory or file
  */
 function getAppPath(fileName = "") {
-  /**Produces a pa
-   * @param {string} fileName The string path of the original file or link
-   * @return {string} The absolute path to the intended file
-   */
-
-  const isDev = window.require('electron-is-dev');
-  const path = require('path');
-
   if (isDev) {
   	return "./public/" + fileName;
   } else {
-    const app = window.require('electron').remote.app;
   	return path.join(app.getPath('userData'), fileName);
   }
 }
 
 
 /**
- * Provides *********.
+ * Provides the path to the icon resources directory. If an argument
+ *     is provided the filepath to the argument will be provided
  * @param {string} fileName The string path of the original file or link
- * @return {Promise} The absolute path of the extracted icon image file
+ * @return {string} The path of the icon resources directory or file
  */
 function getIconPath(fileName = "") {
-  /**Produces a pa
-   * @param {string} fileName The string path of the original file or link
-   * @return {string} The absolute path to the intended file
-   */
-
-  const isDev = window.require('electron-is-dev');
-  const path = require('path');
-
   if (isDev) {
   	return './public/icon_storage/' + fileName;
   } else {
-    const app = window.require('electron').remote.app;
   	return path.join(app.getPath('userData'), 'icon_storage', fileName);
   }
 }
@@ -265,13 +246,6 @@ class MenuButton extends React.Component {
     e.stopPropagation();
   }
   handleDrop(e) {
-    alert("dnd")
-    const fs = window.require("fs");
-    const ws = window.require('windows-shortcuts-ps');
-    const iconPromise = window.require('icon-promise');
-
-    alert("dnd")
-
     // iconExtractor.emitter.on('icon', function(data){
     //   alert('Here is my context: ' + data.Context);
     //   alert('Here is the path it was for: ' + data.Path);
@@ -298,7 +272,7 @@ class MenuButton extends React.Component {
       getSavedIcon(link)
       //iconPromise.getIcon("a", link)
     ]).then(([absPath, iconPath]) => {
-      this.props.addElement(iconPath, absPath)
+      this.props.addElement(iconPath, absPath);
     })
     // getAbsPath(link).then((actualPath) => alert(actualPath))
     // iconPromise.getIcon("a", link).then((actualPath) => alert(actualPath.Context))
