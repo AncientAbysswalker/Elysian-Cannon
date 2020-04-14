@@ -10,6 +10,7 @@ const isDev = window.require('electron-is-dev');
 // Common module requirements
 const fs = window.require('fs');
 const path = window.require('path');
+const shell = window.require('electron').shell;
 const app = window.require('electron').remote.app;
 const symlink = window.require('windows-shortcuts-ps');
 const md5 = require('md5');
@@ -19,130 +20,21 @@ const iconPromise = window.require('icon-promise');
 const DEG_TO_RAD = 0.0174533;
 const ELEMENTS = [
   {
-    icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        alert("clicked 0")
-      }
-    }
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
+    onClick: () => { shell.openItem('https://www.wikipedia.org/') }
   },
   {
-    icon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        alert("clicked 1")
-      }
-    }
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png",
+    onClick: () => { shell.openItem('https://www.google.com/') }
   },
   {
-    icon: "\\logo192.png",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        alert("clicked 2")
-        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
-      }
-    }
+    icon: "https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-512.png",
+    onClick: () => { shell.openItem('https://reactjs.org/') }
   },
   {
-    icon: "lock",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        var child = window.require('child_process').execFile;
-        var executablePath = 'C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe';
-
-        child(executablePath, function(err, data) {
-            if(err){
-               console.error(err);
-               return;
-            }
-
-            console.log(data.toString());
-        });
-      }
-    }
-  },
-  {
-    icon: "globe",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        alert("clicked 4")
-        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
-      }
-    }
-  },
-  {
-    icon: "\\816af0c328484d2b325590aeb000ee63.png",
-    onClick: (index) => {
-      if (window.event.ctrlKey) {
-        //this.setState({isOpen: false})
-        alert(index);
-
-      } else {
-        alert("clicked 5")
-        window.open('C:\\Users\\Abysswalker\\AppData\\Local\\atom\\atom.exe')
-      }
-    }
+    icon: "https://intentionallt_errored_search",
+    onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
   }
-  // {
-  //   icon: "asterisk",
-  //   onClick: () => alert("clicked asterisk")
-  // },
-  // {
-  //   icon: "fighter-jet",
-  //   onClick: () => alert("clicked fighter-jet")
-  // },
-  // {
-  //   icon: "clipboard",
-  //   onClick: () => alert("clicked clipboard")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "industry",
-  //   onClick: () => alert("clicked industry")
-  // },
-  // {
-  //   icon: "eye",
-  //   onClick: () => alert("clicked eye")
-  // }
 ];
 
 
@@ -260,75 +152,68 @@ function getIconPath(fileName = "") {
 
 
 // -------------------------------------------------------
-// ---------------   COMPONENT START   -------------------
+// --------------   MENU BUTTON CLASS   ------------------
 // -------------------------------------------------------
 class MenuButton extends React.Component {
   constructor(props) {
     super(props);
 
+    // Component Bindings
     this.toggleMenu.bind(this)
     this.handleDragEnter.bind(this)
     this.handleDragLeave.bind(this)
     this.handleDragOver.bind(this)
     this.handleDrop.bind(this)
 
+    // Initial State
     this.state = {
       isOpen: false,
-      isAddingItem: false,
-      specIcon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png"
+      isAddingItem: false
     };
   }
 
+  /**
+   * Triggers an event when a dragged item enters the element's bounding
+   * @param {event} e The triggering drag-enter event
+   */
   handleDragEnter(e) {
     this.setState({isAddingItem: true});
-    // this.props.setMainIcon("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png")
     e.preventDefault();
     e.stopPropagation();
   }
+
+  /**
+   * Triggers an event when a dragged item leaves the element's bounding
+   * @param {event} e The triggering drag-leave event
+   */
   handleDragLeave(e) {
     this.setState({isAddingItem: false});
     e.preventDefault();
     e.stopPropagation();
   }
+
+  /**
+   * Triggers an event when a dragged item is hovering over the element
+   * @param {event} e The triggering drag-over event
+   */
   handleDragOver(e) {
     e.preventDefault();
     e.stopPropagation();
   }
+
+  /**
+   * Add a new child button when file or folder is dropped on the center button
+   * @param {event} e The triggering drop event
+   */
   handleDrop(e) {
-    // iconExtractor.emitter.on('icon', function(data){
-    //   alert('Here is my context: ' + data.Context);
-    //   alert('Here is the path it was for: ' + data.Path);
-    //   alert('Here is the base64 image: ' + data.Base256ImageData);
-    //
-    //   fs.writeFile("O:\\False Apparition\\Desktop\\test.png", data.Base64ImageData, 'base64', function(err) {
-    //     console.log(err);
-    //   });
-    // });
-    //
-    // iconExtractor.getIcon('SomeContextLikeAName',"C:\\Users\\Ancient Abysswalker\\AppData\\Local\\atom\\atom.exe");
-    //
-    // this.setState({isAddingItem: false});
-    // alert(e.dataTransfer.files[0].context);
-    var link = e.dataTransfer.files[0].path;
-
-    // Get
-    //this.props.addElement("O:\\False Apparition\\Desktop\\test.png", link)
-
-
-
+    // Get the path of the dropped object and add a new child button element
+    let link = e.dataTransfer.files[0].path;
     Promise.all([
       getAbsPath(link),
       getSavedIcon(link)
-      //iconPromise.getIcon("a", link)
     ]).then(([absPath, iconPath]) => {
-      this.props.addElement(iconPath, absPath);
+      this.addElement(iconPath, absPath);
     })
-    // getAbsPath(link).then((actualPath) => alert(actualPath))
-    // iconPromise.getIcon("a", link).then((actualPath) => alert(actualPath.Context))
-    // ws.getPath(link).then((actualPath) => this.props.addElement("O:\\False Apparition\\Desktop\\test.png", actualPath));
-
-    // Testing method for dropped file parameters
-    //alert(...getDroppedParameters())
 
     // Reset CSS
     this.setState({isAddingItem: false});
@@ -340,12 +225,52 @@ class MenuButton extends React.Component {
 
 
   /**
-   * Toggles the main button open and closed.
+   * Append a new child button to the ELEMENTS array
+   * @param {string} newIcon The path to the new button's icon
+   * @param {string} newPath The path to the file, executable, etc to launch
    */
-  toggleMenu(...args) {
+  addElement(newIcon, newPath) {
+    ELEMENTS.push({
+      icon: newIcon,
+      onClick: () => { shell.openItem(newPath) }
+    });
+    this.setState({});
+  }
+
+  /**
+   * Remove a child button by its index from the ELEMENTS array
+   * @param {number} index The index in ELEMENTS array to remove
+   */
+  removeElement(index) {
+    ELEMENTS.splice(index, 1);
+    this.setState({});
+  }
+
+  /**
+   * Toggles the main button.
+   */
+  toggleMenu() {
     this.setState(prevState => ({
       isOpen: !prevState.isOpen
     }));
+  }
+
+  /**
+   * Opens the main button.
+   */
+  openMenu() {
+    this.setState({
+      isOpen: true
+    });
+  }
+
+  /**
+   * Closes the main button.
+   */
+  closeMenu() {
+    this.setState({
+      isOpen: false
+    });
   }
 
   /**
@@ -465,8 +390,14 @@ class MenuButton extends React.Component {
     return (
       <Motion {...cp.childButtonMotionProps(index, isOpen)}>
         {style => (
-          <div {...cp.childButtonProps(style, () => item.onClick(index))}>
-            <img {...cp.childButtonIconProps(item.icon)} onError={(e)=>{e.target.onerror = null; e.target.src=this.src=require("./sad.jpg")}} />
+          <div {...cp.childButtonProps(style, () => {
+            if (window.event.ctrlKey) {
+              this.removeElement(index);
+            } else {
+              item.onClick()
+            }
+          })}>
+            <img {...cp.childButtonIconProps(item.icon)} onError={(e)=>{e.target.onerror = null; e.target.src=this.src=require("./missing_icon.png")}} />
           </div>
         )}
       </Motion>
@@ -486,7 +417,7 @@ class MenuButton extends React.Component {
         cancel=".button-child" // Do not respond if child buttons are dragged
         onDrag={() => this.isDragging = true}
         onClick={() => {
-          this.toggleMenu()
+          this.toggleMenu();
         }}
         onStop={() => {
           if (!this.isDragging) {
@@ -513,18 +444,15 @@ class MenuButton extends React.Component {
 }
 
 // -------------------------------------------------------
-// ----------------   COMPONENT END   --------------------
+// -------------   APP CONTROLLER CLASS   ----------------
 // -------------------------------------------------------
-
-
-// APP
 class App extends React.Component {
   constructor(props) {
     super(props);
 
     // this.addElement = this.addElement.bind(this);
     this.setMainIcon = this.setMainIcon.bind(this)
-    this.addElement = this.addElement.bind(this)
+    //this.addElement = this.addElement.bind(this)
 
     this.state = {
       flyOutRadius: 120,
@@ -537,8 +465,8 @@ class App extends React.Component {
       rotation: 0,
       mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
       mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-      mainButtonIconSize: 0.5,
-      childButtonIconSize: 0.5
+      mainButtonIconSize: 0.7,
+      childButtonIconSize: 0.7
     };
   }
 
@@ -559,45 +487,12 @@ class App extends React.Component {
     };
   }
 
-  addElement(newIcon, newPath) {
-    ELEMENTS.push({
-      icon: newIcon,
-      onClick: () => {
-        var child = window.require('child_process').execFile;
-        const shell = window.require('electron').shell;
-
-        shell.openItem(newPath)
-        // child(newPath, function(err, data) {
-        //     if(err){
-        //        console.error(err);
-        //        return;
-        //     }
-        //
-        //     console.log(data.toString());
-        // });
-      }
-    });
-    this.setState({});
-  }
-
-  removeElement() {
-    ELEMENTS.splice(2, 1); //s
-    this.setState(prevState => ({
-      numElements: prevState.numElements - 1
-    }));
-    console.log("removed");
-  }
-
   render() {
     const NUM = "number";
     const TEX = "text";
 
     return (
       <div id="app">
-        <div id="headline">
-          <h1>React Menu Button</h1>
-        </div>
-        {/* <button onClick={this.addElementf>Click me</button> */}
         <div id="content">
           <div id="component">
             <MenuButton
@@ -608,111 +503,113 @@ class App extends React.Component {
             />
           </div>
 
-          <div id="config">
-            <button type="button" className="tangible" onClick={this.addElement.bind(this)}>ADD</button>
-            <button type="button" className="tangible" onClick={this.removeElement.bind(this)}>REMOVE</button>
-            <h2>Props</h2>
-            <table>
-              <tbody>
-                <tr>
-                  <td>fly out radius:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "flyOutRadius")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>seperation angle:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "seperationAngle")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>main button diam:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "mainButtonDiam")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>child button diam:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "childButtonDiam")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>num elements:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "numElements")} />
-                  </td>
-                  <td>
-                    <i
-                      className="fa fa-info"
-                      onClick={() =>
-                        alert(
-                          "normaly no number, but an array of obj {icon, onClick}"
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>stiffness:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "stiffness")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>damping:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "damping")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>rotation:</td>
-                  <td>
-                    <input {...this.getInputProps(NUM, "rotation")} />
-                  </td>
-                </tr>
-                <tr>
-                  <td>main button icon:</td>
-                  <td>
-                    <input {...this.getInputProps(TEX, "mainButtonIcon")} />
-                  </td>
-                  <td>
-                    <i
-                      className="fa fa-info"
-                      onClick={() => alert("font awesome icon")}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>main button icon size:</td>
-                  <td>
-                    <input {...this.getInputProps(TEX, "mainButtonIconSize")} />
-                  </td>
-                  <td>
-                    <i
-                      className="fa fa-info"
-                      onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>child button icon size:</td>
-                  <td>
-                    <input
-                      {...this.getInputProps(TEX, "childButtonIconSize")}
-                    />
-                  </td>
-                  <td>
-                    <i
-                      className="fa fa-info"
-                      onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <Draggable
+            // onDrag work in concert to separate drag and click conditions
+            cancel=".non-drag" // Do not respond if child buttons are dragged
+            onDrag={() => this.isDragging = true}
+            onClick={() => {
+              this.toggleMenu();
+            }}
+            onStop={() => {
+              if (!this.isDragging) {
+                return;
+              }
+
+              this.isDragging = false;
+            }}
+          >
+            <div id="config">
+              <h2>Application Properties</h2>
+              <ul>
+                <li>Add element: drag a file from your computer onto the center icon.</li>
+                <li>Remove element: Ctrl-Click on element to delete.</li>
+              </ul>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>fly out radius:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "flyOutRadius")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>seperation angle:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "seperationAngle")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>main button diam:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "mainButtonDiam")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>child button diam:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "childButtonDiam")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>stiffness:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "stiffness")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>damping:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "damping")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>rotation:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(NUM, "rotation")} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>main button icon:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIcon")} />
+                    </td>
+                    <td>
+                      <i
+                        className="fa fa-info"
+                        onClick={() => alert("font awesome icon")}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>main button icon size:</td>
+                    <td>
+                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIconSize")} />
+                    </td>
+                    <td>
+                      <i
+                        className="fa fa-info"
+                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x notereallt")}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>child button icon size:</td>
+                    <td>
+                      <input
+                        className="non-drag" {...this.getInputProps(TEX, "childButtonIconSize")}
+                      />
+                    </td>
+                    <td>
+                      <i
+                        className="fa fa-info"
+                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Draggable>
         </div>
       </div>
     );
