@@ -1,7 +1,6 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-import {MenuButton} from './MenuButton.js'
 
 import './App.css';
 
@@ -32,7 +31,7 @@ async function loadMenuButton(datastore, query_id) {
         return element;
       })
 
-      //alert(elements);
+      alert(elements);
       resolve(elements);
       // alert(JSON.stringify(a.properties.elements[0].onClick));
       // alert(elements[0].onClick);
@@ -61,7 +60,6 @@ async function dbFind(datastore, token) {
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
-let COMP = [];//[<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>];
 let ELEMENTS = [
   {
     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
@@ -102,31 +100,6 @@ let ELEMENTS = [
   //   onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
   // }
 ];
-
-// ui_elements.insert({
-//   ref_id : "dummy_id",
-//   name : "Circle Menu",
-//   properties : {
-//     "elements" : ELEMENTS
-//   }});
-
-// ui_elements.update({ref_id : "dummy_id"}, {
-//   ref_id : "dummy_id",
-//   name : "Circle Menu",
-//   properties : {
-//     "elements" : ELEMENTS
-//   }});
-
-//dbFind(ui_elements, {ref_id : "dummy_id"}).then(a => alert(JSON.stringify(a.properties.elements[0].symlink)));
-
-//loadMenuButton(ui_elements, "dummy_id").then(a => {ELEMENTS.push(a);});
-
-// alert(loadMenuButton(ui_elements, "dummy_id"));
-
-// db.insert({
-//   applet : "MenuButton",
-//   props : {"ELEMENTS" : ELEMENTS}
-// });
 
 // UTILITY FUNCTIONS
 
@@ -244,7 +217,7 @@ function getIconPath(fileName = "") {
 // -------------------------------------------------------
 // --------------   MENU BUTTON CLASS   ------------------
 // -------------------------------------------------------
-class MenuButton2 extends React.Component {
+class MenuButton extends React.Component {
   constructor(props) {
     super(props);
 
@@ -533,290 +506,31 @@ class MenuButton2 extends React.Component {
   }
 }
 
-// -------------------------------------------------------
-// -------------   APP CONTROLLER CLASS   ----------------
-// -------------------------------------------------------
-class App extends React.Component {
+class test extends React.Component {
   constructor(props) {
     super(props);
 
-    // this.addElement = this.addElement.bind(this);
-    this.setMainIcon = this.setMainIcon.bind(this)
-    this.dummyLoad3 = this.dummyLoad3.bind(this)
-    //this.addElement = this.addElement.bind(this)
-
-    this.state = {
-      flyOutRadius: 120,
-      seperationAngle: 40,
-      mainButtonDiam: 90,
-      childButtonDiam: 50,
-      numElements: Object.keys(ELEMENTS).length,
-      stiffness: 320,
-      damping: 17,
-      rotation: 0,
-      mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-      mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-      mainButtonIconSize: 0.7,
-      childButtonIconSize: 0.7,
-
-      components : [<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>],
-
-      ui_props: {"dummy_id" : {elements: []}}
-    };
-
-    this.dummyLoad1();
-    this.dummyLoad2();
-
-    // this.dummyLoad3();
-    // this.state.ui_props = {elements: [
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
+    // // Component Bindings
+    // this.toggleMenu.bind(this)
+    // this.handleDragEnter.bind(this)
+    // this.handleDragLeave.bind(this)
+    // this.handleDragOver.bind(this)
+    // this.handleDrop.bind(this)
     //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   },
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
-    //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   }
-    // ]};
-  }
-
-  componentDidMount() {
-    this.dummyLoad3();
-  }
-
-
-  dummyLoad1() {
-    this.setState(() => ({
-      ui_props : {"dummy_id" : {
-        elements : [],
-        name : ""
-      }}
-    }));
-  }
-
-  dummyLoad2() {
-    loadMenuButton(ui_elements, "dummy_id").then(a => {
-      this.setState(prevState => ({
-        ui_props : {"dummy_id" : {
-          elements : a
-        }}
-      }));
-
-
-
-      //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
-    })}//.then(this.dummyLoad3())}
-
-  dummyLoad3() {
-    let new_applet = require("./MenuButton.js");
-    //alert(Object.keys(new_applet));
-    //alert(new_applet.MenuButton);
-    let new_new_applet =  <MenuButton
-      {...this.state}
-      setMainIcon={this.setMainIcon}
-      addElement={this.addElement}
-      elements={this.state.ui_props["dummy_id"].elements}
-    />
-
-    COMP.push(new_applet);
-    COMP.push(new_applet);
-    alert(COMP);
-    // COMP.push(<MenuButton
-    //   {...this.state}
-    //   setMainIcon={this.setMainIcon}
-    //   addElement={this.addElement}
-    //   elements={this.state.ui_props["dummy_id"].elements}
-    // />)
-
-    // this.setState(prevState => ({
-    //
-    //   components : [...prevState.components, new_new_applet]
-    // }));
-  }
-
-  setMainIcon(icon) {
-    this.setState(prevState => ({
-      mainButtonIcon: icon
-    }));
-  }
-
-  getInputProps(type, title) {
-    return {
-      type: type,
-      value: this.state[title],
-      onChange: e =>
-        type === "number"
-          ? this.setState({ [title]: parseInt(e.target.value || 0, 10) })
-          : this.setState({ [title]: e.target.value })
-    };
+    // // Initial State
+    // this.state = {
+    //   isOpen: false,
+    //   isAddingItem: false
+    // };
   }
 
   render() {
-    const NUM = "number";
-    const TEX = "text";
-    let new_applet = require("./MenuButton.js");
-
     return (
-      <div id="app">
-        <div id="content">
-
-
-          <div id="component">
-            {COMP.map( component => <component.MenuButton
-              {...this.state}
-              setMainIcon={this.setMainIcon}
-              addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].elements}
-            />)}
-          </div>
-
-
-
-          <div id="component">
-            <new_applet.MenuButton
-              {...this.state}
-              setMainIcon={this.setMainIcon}
-              addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].elements}
-            />
-          </div>
-
-
-
-
-
-          <Draggable
-            // onDrag work in concert to separate drag and click conditions
-            cancel=".non-drag" // Do not respond if child buttons are dragged
-            onDrag={() => this.isDragging = true}
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={() => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-            }}
-          >
-            <div id="config">
-              <h2>Application Properties</h2>
-              <ul>
-                <li>Add element: drag a file from your computer onto the center icon.</li>
-                <li>Remove element: Ctrl-Click on element to delete.</li>
-              </ul>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>fly out radius:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "flyOutRadius")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>seperation angle:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "seperationAngle")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "mainButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "childButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>stiffness:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "stiffness")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>damping:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "damping")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>rotation:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "rotation")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIcon")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => this.dummyLoad3()}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon size:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIconSize")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x notereallt")}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button icon size:</td>
-                    <td>
-                      <input
-                        className="non-drag" {...this.getInputProps(TEX, "childButtonIconSize")}
-                      />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Draggable>
-        </div>
+      <div>
+        <p>TESTING COMPONENT</p>
       </div>
     );
   }
 }
 
-
-export default App
+export {ELEMENTS, MenuButton, test}
