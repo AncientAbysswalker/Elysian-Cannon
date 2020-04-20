@@ -1,7 +1,7 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-import {MenuButton} from './MenuButton.js'
+//import {MenuButton} from './applet_modules/MenuButton.js'
 
 import './App.css';
 
@@ -22,6 +22,38 @@ let ui_elements = new Datastore({
   filename : 'ui_elements',
   autoload : true
 });
+
+async function loadStateyBois(datastore, query_id) {
+
+  let promise = new Promise((resolve, reject) => {
+    dbFindAll(datastore, {load_on_start : true}).then(a => {
+      // let elements = a.properties.elements.map(element => {
+      //   element.onClick = () => { shell.openItem(element.symlink) };
+      //   return element;
+      // })
+      let fullState = a.map(apple => {
+        apple.properties.elements = apple.properties.elements.map(element => {
+          element.onClick = () => { shell.openItem(element.symlink) };
+          return element;
+        })
+        //alert(apple.properties.elements[0].onClick)
+        return apple;
+      })
+
+      //alert("id" + JSON.stringify(a[0].properties.elements[0]));
+      //alert(Object.keys(fullState[0]));
+      //alert(fullState[0].properties.elements[0].icon + "\n" +
+      //fullState[0].properties.elements[0].symlink + "\n" +
+      //fullState[0].properties.elements[0].onClick);
+      //alert(elements);
+      resolve(fullState);
+      // alert(JSON.stringify(a.properties.elements[0].onClick));
+      // alert(elements[0].onClick);
+    });
+  });
+
+  return await promise;
+}
 
 async function loadMenuButton(datastore, query_id) {
 
@@ -53,6 +85,17 @@ async function dbFind(datastore, token) {
   return await promise;
 }
 
+async function dbFindAll(datastore, token) {
+
+  let promise = new Promise((resolve, reject) => {
+    datastore.find(token, (err,docs) => resolve(docs));
+  });
+
+  //db.find({year : 1990}, function (err,docs){ let result = docs;});
+
+  return await promise;
+}
+
 //let a = 0;
 //db.find({year : 1990}, function (err,docs){ a = docs; alert(a)});
 // dbFind(db, {year : 1990}).then(a => alert(JSON.stringify(a)));
@@ -61,6 +104,7 @@ async function dbFind(datastore, token) {
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
+let APPLET_MODULES = {};
 let COMP = [];//[<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>];
 let ELEMENTS = [
   {
@@ -76,39 +120,32 @@ let ELEMENTS = [
       // db.insert({name : "fender jazz bass", year:1977});
       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
     }
-  }
-  // {
-  //   icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png",
-  //   symlink: 'https://www.google.com/',
-  //   onClick: () => {
-  //     shell.openItem('https://www.google.com/')
-  //     // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-  //     // db.loadDatabase();
-  //
-  //     // db.find({year : 1990}, function (err,docs){ alert(JSON.stringify(docs)); });
-  //     // db.find({year : 1977}, function (err,docs){ alert(JSON.stringify(docs)); });
-  //     // const db = require('./db.js');
-  //     // alert(db.tags.find("pork"));
-  //   }
-  // },
-  // {
-  //   icon: "https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-512.png",
-  //   symlink: 'https://reactjs.org/',
-  //   onClick: () => { shell.openItem('https://reactjs.org/') }
-  // },
-  // {
-  //   icon: "https://intentionallt_errored_search",
-  //   symlink: 'https://en.wikipedia.org/wiki/Kitten',
-  //   onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
-  // }
-];
+  },
+  {
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png",
+    symlink: 'https://www.google.com/',
+    onClick: () => {
+      shell.openItem('https://www.google.com/')
+      // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
+      // db.loadDatabase();
 
-// ui_elements.insert({
-//   ref_id : "dummy_id",
-//   name : "Circle Menu",
-//   properties : {
-//     "elements" : ELEMENTS
-//   }});
+      // db.find({year : 1990}, function (err,docs){ alert(JSON.stringify(docs)); });
+      // db.find({year : 1977}, function (err,docs){ alert(JSON.stringify(docs)); });
+      // const db = require('./db.js');
+      // alert(db.tags.find("pork"));
+    }
+  },
+  {
+    icon: "https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-512.png",
+    symlink: 'https://reactjs.org/',
+    onClick: () => { shell.openItem('https://reactjs.org/') }
+  },
+  {
+    icon: "https://intentionallt_errored_search",
+    symlink: 'https://en.wikipedia.org/wiki/Kitten',
+    onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
+  }
+];
 
 // ui_elements.update({ref_id : "dummy_id"}, {
 //   ref_id : "dummy_id",
@@ -561,11 +598,18 @@ class App extends React.Component {
 
       components : [<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>],
 
-      ui_props: {"dummy_id" : {elements: []}}
+      // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
+      ui_props: {"dummy_id" : {properties : {elements: []}}}
     };
 
+    //this.firstLoad();
+    this.loadAppletModules();
+
     this.dummyLoad1();
+    alert(10);
+    //alert(this.state.ui_props["dummy_id"].properties.elements);
     this.dummyLoad2();
+
 
     // this.dummyLoad3();
     // this.state.ui_props = {elements: [
@@ -601,25 +645,120 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.dummyLoad3();
+    this.loadAppletInstances();
+    alert(11);
+    //alert(this.state.ui_props["dummy_id"].properties.elements);
+    // First load APPLET_MODULES that are acceptable by applet id
+    //APPLET_MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
+
+    //const applets_to_load = ["MenuButton.js"]//["D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\MenuButton.js"];
+    // applets_to_load.forEach( applet_module => {
+    //   //this.loads(applet_module);
+    //   //APPLET_MODULES["dummy_applet_id"] = require("./applet_modules/" + applet_module);
+    //   // if (isDev) {
+    //   //   APPLET_MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
+    //   // } else {
+    //   //   APPLET_MODULES["dummy_applet_id"] = require("D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\applet_modules\\" + applet_module);
+    //   // }
+    //
+    //   //APPLET_MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
+    // //   alert(applet_module);
+    // //   let new_applet = await import(applet_module).then( m => {
+    // //     APPLET_MODULES["dummy_applet_id"] = m;
+    // //   });
+    // });
+
+    //this.dummyLoad3();
   }
 
+  // async loads(applet_module) {
+  //   alert(applet_module);
+  //   let new_applet = await import(applet_module);
+  //   APPLET_MODULES["dummy_applet_id"] = new_applet;
+  // }
+
+  firstLoad() {
+    ui_elements.insert({
+      id_instance : "dummy_id",
+      id_applet : "dummy_applet_id",
+      load_on_start : true,
+      properties : {
+        elements : ELEMENTS,
+        flyOutRadius: 120,
+        seperationAngle: 40,
+        mainButtonDiam: 90,
+        childButtonDiam: 50,
+        numElements: 4,
+        stiffness: 320,
+        damping: 17,
+        rotation: 0,
+        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+        mainButtonIconSize: 0.7,
+        childButtonIconSize: 0.7
+      }});
+  }
+
+  loadAppletModules() {
+    let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
+    //alert(md5(new_module.MenuButton));
+    APPLET_MODULES["dummy_applet_id"] = new_module;
+  }
+
+  loadAppletInstances() {
+    loadStateyBois(ui_elements).then(a => {
+      let mapped_state = a.reduce(function(map, obj) {
+        let { _id, ...qux } = obj;
+        map["dummy_id"] = qux; //qux should be handled by and returned from child methods
+        return map;
+      }, {});
+
+      // this.setState(prevState => ({
+      //   ui_props : {"dummy_id" : {
+      //     elements : a
+      //   }}
+      // }));
+
+      alert(JSON.stringify(mapped_state["dummy_id"].properties));
+      // this.setState(prevState => ({
+      //   ui_props : mapped_state//{...prevState.ui_props, ...mapped_state}
+      // }));
+
+
+      //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
+    })}//.then(this.dummyLoad3())}
 
   dummyLoad1() {
     this.setState(() => ({
-      ui_props : {"dummy_id" : {
-        elements : [],
-        name : ""
+      ui_props : {
+        "dummy_id" : {
+          properties : {
+            elements : [],
+            flyOutRadius: 120,
+            seperationAngle: 40,
+            mainButtonDiam: 90,
+            childButtonDiam: 50,
+            numElements: 4,
+            stiffness: 320,
+            damping: 17,
+            rotation: 0,
+            mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+            mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+            mainButtonIconSize: 0.7,
+            childButtonIconSize: 0.7
+        }}
       }}
-    }));
+    ));
   }
 
   dummyLoad2() {
     loadMenuButton(ui_elements, "dummy_id").then(a => {
       this.setState(prevState => ({
-        ui_props : {"dummy_id" : {
-          elements : a
-        }}
+        ui_props : {
+          "dummy_id" : {
+            properties : {
+              elements : a
+        }}}
       }));
 
 
@@ -628,19 +767,14 @@ class App extends React.Component {
     })}//.then(this.dummyLoad3())}
 
   dummyLoad3() {
-    let new_applet = require("./MenuButton.js");
+    //let new_applet = require("./applet_modules/MenuButton.js");
     //alert(Object.keys(new_applet));
     //alert(new_applet.MenuButton);
-    let new_new_applet =  <MenuButton
-      {...this.state}
-      setMainIcon={this.setMainIcon}
-      addElement={this.addElement}
-      elements={this.state.ui_props["dummy_id"].elements}
-    />
+    //let frog = APPLET_MODULES["dummy_applet_id"];
+    //let new_new_applet =  frog;
 
-    COMP.push(new_applet);
-    COMP.push(new_applet);
-    alert(COMP);
+    //COMP.push(new_new_applet);
+    //alert(COMP);
     // COMP.push(<MenuButton
     //   {...this.state}
     //   setMainIcon={this.setMainIcon}
@@ -674,7 +808,11 @@ class App extends React.Component {
   render() {
     const NUM = "number";
     const TEX = "text";
-    let new_applet = require("./MenuButton.js");
+    //let new_applet = require("./applet_modules/MenuButton.js");
+
+    const appPass = APPLET_MODULES["dummy_applet_id"];
+    //alert(9);
+    //alert(this.state.ui_props["dummy_id"].properties.elements);
 
     return (
       <div id="app">
@@ -686,18 +824,18 @@ class App extends React.Component {
               {...this.state}
               setMainIcon={this.setMainIcon}
               addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].elements}
+              //elements={this.state.ui_props["dummy_id"].elements}
             />)}
           </div>
 
 
 
           <div id="component">
-            <new_applet.MenuButton
-              {...this.state}
+            <appPass.MenuButton
+              {...this.state} //.ui_props["dummy_id"].properties
               setMainIcon={this.setMainIcon}
               addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].elements}
+              elements={this.state.ui_props["dummy_id"].properties.elements}
             />
           </div>
 
