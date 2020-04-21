@@ -596,7 +596,7 @@ class App extends React.Component {
       mainButtonIconSize: 0.7,
       childButtonIconSize: 0.7,
 
-      components : [<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>],
+      COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
 
       // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
       ui_props: {"dummy_id" : {properties : {elements: []}}}
@@ -608,8 +608,9 @@ class App extends React.Component {
     this.dummyLoad1();
     alert(10);
     //alert(this.state.ui_props["dummy_id"].properties.elements);
-    this.dummyLoad2();
+    //this.dummyLoad2();
 
+    this.loadAppletInstances();
 
     // this.dummyLoad3();
     // this.state.ui_props = {elements: [
@@ -645,8 +646,8 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.loadAppletInstances();
-    alert(11);
+    //this.loadAppletInstances();
+
     //alert(this.state.ui_props["dummy_id"].properties.elements);
     // First load APPLET_MODULES that are acceptable by applet id
     //APPLET_MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
@@ -720,13 +721,34 @@ class App extends React.Component {
       // }));
 
       alert(JSON.stringify(mapped_state["dummy_id"].properties));
-      // this.setState(prevState => ({
-      //   ui_props : mapped_state//{...prevState.ui_props, ...mapped_state}
-      // }));
+      this.setState(prevState => ({
+        ui_props : mapped_state//{...prevState.ui_props, ...mapped_state}
+      }));
 
 
       //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
-    })}//.then(this.dummyLoad3())}
+    }).then(() => {
+
+      alert(this.state.ui_props["dummy_id"].id_applet);
+      let applet_module1 = APPLET_MODULES[this.state.ui_props["dummy_id"].id_applet];
+      //COMP.push(applet_module1);
+
+      alert("pre" + this.state.COMP)
+      this.setState(prevState => ({
+        COMP : [...prevState.COMP, {
+          app : applet_module1.MenuButton,
+          id : "dummy_id"
+        }, {
+          app : MenuButton2,
+          id : "dummy_id"
+        }]
+      }));
+      alert(this.state.COMP)
+      //this.state.COMP.push(<p>NEWEGG</p>);
+    });
+
+
+  }//.then(this.dummyLoad3())}
 
   dummyLoad1() {
     this.setState(() => ({
@@ -797,12 +819,31 @@ class App extends React.Component {
   getInputProps(type, title) {
     return {
       type: type,
-      value: this.state[title],
-      onChange: e =>
+      value: this.state.ui_props["dummy_id"].properties[title],
+      onChange: e => {
+        let target_value = e.target.value;
         type === "number"
-          ? this.setState({ [title]: parseInt(e.target.value || 0, 10) })
-          : this.setState({ [title]: e.target.value })
-    };
+          // ? this.setState({ [title]: parseInt(e.target.value || 0, 10) })
+          // : this.setState({ [title]: e.target.value })
+          ? this.setState(prevState => ({
+            ...prevState,
+            ui_props: {
+              ...prevState.ui_props,
+              dummy_id: {
+                ...prevState.ui_props.dummy_id,
+                properties: {
+                  ...prevState.ui_props.dummy_id.properties,
+                  [title]: parseInt(target_value || 0, 10) }}}}))
+          : this.setState(prevState => ({
+            ...prevState,
+            ui_props: {
+              ...prevState.ui_props,
+              dummy_id: {
+                ...prevState.ui_props.dummy_id,
+                properties: {
+                  ...prevState.ui_props.dummy_id.properties,
+                  [title]: target_value }}}}))
+    }};
   }
 
   render() {
@@ -813,31 +854,33 @@ class App extends React.Component {
     const appPass = APPLET_MODULES["dummy_applet_id"];
     //alert(9);
     //alert(this.state.ui_props["dummy_id"].properties.elements);
+    // alert(JSON.stringify(this.state.ui_props["dummy_id"]));
+    // let applet_module1 = APPLET_MODULES[this.state.ui_props["dummy_id"].id_applet];
 
     return (
       <div id="app">
         <div id="content">
 
+          {/*<div id="component">
+            {this.state.COMP.map( component => component )}
+          </div>*/}
 
           <div id="component">
-            {COMP.map( component => <component.MenuButton
-              {...this.state}
-              setMainIcon={this.setMainIcon}
-              addElement={this.addElement}
+            {this.state.COMP.map( component => <component.app
+              {...this.state.ui_props[component.id].properties}
+
               //elements={this.state.ui_props["dummy_id"].elements}
             />)}
           </div>
 
-
-
-          <div id="component">
+          {/*<div id="component">
             <appPass.MenuButton
               {...this.state} //.ui_props["dummy_id"].properties
               setMainIcon={this.setMainIcon}
               addElement={this.addElement}
               elements={this.state.ui_props["dummy_id"].properties.elements}
             />
-          </div>
+          </div>*/}
 
 
 
@@ -916,7 +959,17 @@ class App extends React.Component {
                     <td>
                       <i
                         className="fa fa-info"
-                        onClick={() => this.dummyLoad3()}
+                        onClick={() =>
+                          this.setState(prevState => ({
+                            ...prevState,
+                            ui_props: {
+                              ...prevState.ui_props,
+                              dummy_id: {
+                                ...prevState.ui_props.dummy_id,
+                                properties: {
+                                  ...prevState.ui_props.dummy_id.properties,
+                                  mainButtonDiam: 5 }}}}))
+                        }
                       />
                     </td>
                   </tr>
