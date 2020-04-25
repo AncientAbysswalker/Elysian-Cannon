@@ -716,7 +716,7 @@ class App extends React.Component {
 
   loadAppletModules() {
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
-    if (DEV_HASHES) alert(md5(new_module.MenuButton));
+    if (DEV_HASHES) alert(md5(new_module.AppletMain));
     APPLET_MODULES["dummy_applet_id"] = new_module;
   }
 
@@ -740,86 +740,17 @@ class App extends React.Component {
 
       //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
     }).then(() => {
-
-      // FOR EACH COMPONENT #FIX#
-      //alert(JSON.stringify(this.state.ui_props));
-      let applet_module1 = APPLET_MODULES[this.state.ui_props["FC4jXzlQZwxLaPd2"].id_applet];
-      //COMP.push(applet_module1);
-
-      alert("KEYS");
-      alert(Object.keys(this.state.ui_props));
-
-      // this.setState(prevState => ({
-      //   COMP : [...prevState.COMP, ...Object.keys(this.state.ui_props).map(id_instance => ({
-      //     app : APPLET_MODULES[this.state.ui_props[id_instance].id_applet.MenuButton],//
-      //     id : id_instance
-      //   }))]
-      // }));
-      // alert(this.state.COMP)//
-      alert(JSON.stringify(Object.keys(this.state.ui_props).map(id_instance => ({
-           app : applet_module1.MenuButton,
-           id : id_instance
-         }))));
-
-       alert("Adding Component");
-       this.setState(prevState => ({
-         COMP : [...prevState.COMP, ...Object.keys(this.state.ui_props).map(id_instance => ({
-              app : applet_module1.MenuButton,
-              id : id_instance
-            }))]
-       }));
-
-      // alert("Adding Component");
-      // this.setState(prevState => ({
-      //   COMP : [...prevState.COMP, {
-      //     app : applet_module1.MenuButton,
-      //     id : "FC4jXzlQZwxLaPd2"
-      //   }]
-      // }));
-      alert(JSON.stringify(this.state.COMP.app))
-      //this.state.COMP.push(<p>NEWEGG</p>);
+      // Map applets to load array from applets' ID
+      this.setState(prevState => ({
+        COMP : Object.keys(prevState.ui_props).map(id_instance => ({
+          app : APPLET_MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
+          id : id_instance
+        }))
+      }));
     });
 
 
-  }//.then(this.dummyLoad3())}
-
-  // dummyLoad1() {
-  //   this.setState(() => ({
-  //     ui_props : {
-  //       "dummy_id" : {
-  //         properties : {
-  //           elements : [],
-  //           flyOutRadius: 120,
-  //           seperationAngle: 40,
-  //           mainButtonDiam: 90,
-  //           childButtonDiam: 50,
-  //           numElements: 4,
-  //           stiffness: 320,
-  //           damping: 17,
-  //           rotation: 0,
-  //           mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-  //           mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-  //           mainButtonIconSize: 0.7,
-  //           childButtonIconSize: 0.7
-  //       }}
-  //     }}
-  //   ));
-  // }
-  //
-  // dummyLoad2() {
-  //   loadMenuButton(db_applets, "dummy_id").then(a => {
-  //     this.setState(prevState => ({
-  //       ui_props : {
-  //         "dummy_id" : {
-  //           properties : {
-  //             elements : a
-  //       }}}
-  //     }));
-
-
-
-      //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
-    // })}
+  }
 
   setMainIcon(icon) {
     this.setState(prevState => ({
