@@ -18,47 +18,39 @@ const md5 = require('md5');
 const iconPromise = window.require('icon-promise');
 
 const Datastore = require('nedb');
-let ui_elements = new Datastore({
+let db_applets = new Datastore({
   filename : 'ui_elements',
   autoload : true
 });
 
-async function loadStateyBois(datastore, query_id) {
 
+async function loadAppletStates(datastore, query_id) {
   let promise = new Promise((resolve, reject) => {
-    dbFindAll(datastore, {load_on_start : true}).then(a => {
-      // let elements = a.properties.elements.map(element => {
-      //   element.onClick = () => { shell.openItem(element.symlink) };
-      //   return element;
-      // })
-      let fullState = a.map(apple => {
-        apple.properties.elements = apple.properties.elements.map(element => {
+    dbFindAll(datastore, {load_on_start : true}).then(applets => {
+
+      // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
+      // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
+      // SHOULD resolve array of state JSON objects
+      resolve(applets.map(applet => {
+        applet.properties.elements = applet.properties.elements.map(element => {
           element.onClick = () => { shell.openItem(element.symlink) };
           return element;
         })
         //alert(apple.properties.elements[0].onClick)
-        return apple;
-      })
-
-      //alert("id" + JSON.stringify(a[0].properties.elements[0]));
-      //alert(Object.keys(fullState[0]));
-      //alert(fullState[0].properties.elements[0].icon + "\n" +
-      //fullState[0].properties.elements[0].symlink + "\n" +
-      //fullState[0].properties.elements[0].onClick);
-      //alert(elements);
-      resolve(fullState);
-      // alert(JSON.stringify(a.properties.elements[0].onClick));
-      // alert(elements[0].onClick);
+        return applet;
+      }));
     });
   });
 
   return await promise;
 }
 
+
+
 async function loadMenuButton(datastore, query_id) {
 
   let promise = new Promise((resolve, reject) => {
-    dbFind(datastore, {ref_id : query_id}).then(a => {
+    dbFindOne(datastore, {ref_id : query_id}).then(a => {
       let elements = a.properties.elements.map(element => {
         element.onClick = () => { shell.openItem(element.symlink) };
         return element;
@@ -74,7 +66,7 @@ async function loadMenuButton(datastore, query_id) {
   return await promise;
 }
 
-async function dbFind(datastore, token) {
+async function dbFindOne(datastore, token) {
 
   let promise = new Promise((resolve, reject) => {
     datastore.findOne(token, (err,docs) => resolve(docs));
@@ -98,9 +90,11 @@ async function dbFindAll(datastore, token) {
 
 //let a = 0;
 //db.find({year : 1990}, function (err,docs){ a = docs; alert(a)});
-// dbFind(db, {year : 1990}).then(a => alert(JSON.stringify(a)));
+// dbFindOne(db, {year : 1990}).then(a => alert(JSON.stringify(a)));
 // alert(JSON.stringify(a));
 
+// TESTING
+const DEV_HASHES = true;
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
@@ -147,18 +141,18 @@ let ELEMENTS = [
   }
 ];
 
-// ui_elements.update({ref_id : "dummy_id"}, {
+// db_applets.update({ref_id : "dummy_id"}, {
 //   ref_id : "dummy_id",
 //   name : "Circle Menu",
 //   properties : {
 //     "elements" : ELEMENTS
 //   }});
 
-//dbFind(ui_elements, {ref_id : "dummy_id"}).then(a => alert(JSON.stringify(a.properties.elements[0].symlink)));
+//dbFindOne(db_applets, {ref_id : "dummy_id"}).then(a => alert(JSON.stringify(a.properties.elements[0].symlink)));
 
-//loadMenuButton(ui_elements, "dummy_id").then(a => {ELEMENTS.push(a);});
+//loadMenuButton(db_applets, "dummy_id").then(a => {ELEMENTS.push(a);});
 
-// alert(loadMenuButton(ui_elements, "dummy_id"));
+// alert(loadMenuButton(db_applets, "dummy_id"));
 
 // db.insert({
 //   applet : "MenuButton",
@@ -579,7 +573,6 @@ class App extends React.Component {
 
     // this.addElement = this.addElement.bind(this);
     this.setMainIcon = this.setMainIcon.bind(this)
-    this.dummyLoad3 = this.dummyLoad3.bind(this)
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
@@ -599,18 +592,19 @@ class App extends React.Component {
       COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
 
       // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
-      ui_props: {"dummy_id" : {properties : {elements: []}}}
+      // ONLY REQUIRED BECAUSE THE HARDCODED PROPS MENU!!!!
+      //ui_props: {"dummy_id" : {properties : {elements: []}}}
     };
 
-    //this.firstLoad();
+    // Load available Applets' modules
     this.loadAppletModules();
 
-    this.dummyLoad1();
-    alert(10);
-    //alert(this.state.ui_props["dummy_id"].properties.elements);
-    //this.dummyLoad2();
-
+    // Load applet instance state from last run of program
     this.loadAppletInstances();
+
+    //this.firstLoad();
+    this.updateLoad();
+
 
     // this.dummyLoad3();
     // this.state.ui_props = {elements: [
@@ -679,8 +673,7 @@ class App extends React.Component {
   // }
 
   firstLoad() {
-    ui_elements.insert({
-      id_instance : "dummy_id",
+    db_applets.insert({
       id_applet : "dummy_applet_id",
       load_on_start : true,
       properties : {
@@ -700,27 +693,46 @@ class App extends React.Component {
       }});
   }
 
+  updateLoad() {
+    db_applets.update({_id : "FC4jXzlQZwxLaPd2"},{
+      id_applet : "dummy_applet_id",
+      load_on_start : true,
+      properties : {
+        elements : ELEMENTS,
+        flyOutRadius: 240,
+        seperationAngle: 40,
+        mainButtonDiam: 90,
+        childButtonDiam: 25,
+        numElements: 4,
+        stiffness: 320,
+        damping: 17,
+        rotation: 0,
+        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+        mainButtonIconSize: 0.7,
+        childButtonIconSize: 0.7
+      }}, {});
+  }
+
   loadAppletModules() {
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
-    //alert(md5(new_module.MenuButton));
+    if (DEV_HASHES) alert(md5(new_module.MenuButton));
     APPLET_MODULES["dummy_applet_id"] = new_module;
   }
 
   loadAppletInstances() {
-    loadStateyBois(ui_elements).then(a => {
-      let mapped_state = a.reduce(function(map, obj) {
-        let { _id, ...qux } = obj;
-        map["dummy_id"] = qux; //qux should be handled by and returned from child methods
+
+    // Get states mapped and
+    loadAppletStates(db_applets).then(applet_state => {
+      let mapped_state = applet_state.reduce(function(map, obj) {
+        let { _id, ..._state } = obj;
+        alert(_id);
+        if (DEV_HASHES) alert(_id);
+        map[_id] = _state;
         return map;
       }, {});
 
-      // this.setState(prevState => ({
-      //   ui_props : {"dummy_id" : {
-      //     elements : a
-      //   }}
-      // }));
-
-      alert(JSON.stringify(mapped_state["dummy_id"].properties));
+      // This will likely break with a second item in the list of applets #FIX#
       this.setState(prevState => ({
         ui_props : mapped_state//{...prevState.ui_props, ...mapped_state}
       }));
@@ -729,86 +741,85 @@ class App extends React.Component {
       //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
     }).then(() => {
 
-      alert(this.state.ui_props["dummy_id"].id_applet);
-      let applet_module1 = APPLET_MODULES[this.state.ui_props["dummy_id"].id_applet];
+      // FOR EACH COMPONENT #FIX#
+      //alert(JSON.stringify(this.state.ui_props));
+      let applet_module1 = APPLET_MODULES[this.state.ui_props["FC4jXzlQZwxLaPd2"].id_applet];
       //COMP.push(applet_module1);
 
-      alert("pre" + this.state.COMP)
-      this.setState(prevState => ({
-        COMP : [...prevState.COMP, {
-          app : applet_module1.MenuButton,
-          id : "dummy_id"
-        }, {
-          app : MenuButton2,
-          id : "dummy_id"
-        }]
-      }));
-      alert(this.state.COMP)
+      alert("KEYS");
+      alert(Object.keys(this.state.ui_props));
+
+      // this.setState(prevState => ({
+      //   COMP : [...prevState.COMP, ...Object.keys(this.state.ui_props).map(id_instance => ({
+      //     app : APPLET_MODULES[this.state.ui_props[id_instance].id_applet.MenuButton],//
+      //     id : id_instance
+      //   }))]
+      // }));
+      // alert(this.state.COMP)//
+      alert(JSON.stringify(Object.keys(this.state.ui_props).map(id_instance => ({
+           app : applet_module1.MenuButton,
+           id : id_instance
+         }))));
+
+       alert("Adding Component");
+       this.setState(prevState => ({
+         COMP : [...prevState.COMP, ...Object.keys(this.state.ui_props).map(id_instance => ({
+              app : applet_module1.MenuButton,
+              id : id_instance
+            }))]
+       }));
+
+      // alert("Adding Component");
+      // this.setState(prevState => ({
+      //   COMP : [...prevState.COMP, {
+      //     app : applet_module1.MenuButton,
+      //     id : "FC4jXzlQZwxLaPd2"
+      //   }]
+      // }));
+      alert(JSON.stringify(this.state.COMP.app))
       //this.state.COMP.push(<p>NEWEGG</p>);
     });
 
 
   }//.then(this.dummyLoad3())}
 
-  dummyLoad1() {
-    this.setState(() => ({
-      ui_props : {
-        "dummy_id" : {
-          properties : {
-            elements : [],
-            flyOutRadius: 120,
-            seperationAngle: 40,
-            mainButtonDiam: 90,
-            childButtonDiam: 50,
-            numElements: 4,
-            stiffness: 320,
-            damping: 17,
-            rotation: 0,
-            mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-            mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-            mainButtonIconSize: 0.7,
-            childButtonIconSize: 0.7
-        }}
-      }}
-    ));
-  }
-
-  dummyLoad2() {
-    loadMenuButton(ui_elements, "dummy_id").then(a => {
-      this.setState(prevState => ({
-        ui_props : {
-          "dummy_id" : {
-            properties : {
-              elements : a
-        }}}
-      }));
+  // dummyLoad1() {
+  //   this.setState(() => ({
+  //     ui_props : {
+  //       "dummy_id" : {
+  //         properties : {
+  //           elements : [],
+  //           flyOutRadius: 120,
+  //           seperationAngle: 40,
+  //           mainButtonDiam: 90,
+  //           childButtonDiam: 50,
+  //           numElements: 4,
+  //           stiffness: 320,
+  //           damping: 17,
+  //           rotation: 0,
+  //           mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+  //           mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+  //           mainButtonIconSize: 0.7,
+  //           childButtonIconSize: 0.7
+  //       }}
+  //     }}
+  //   ));
+  // }
+  //
+  // dummyLoad2() {
+  //   loadMenuButton(db_applets, "dummy_id").then(a => {
+  //     this.setState(prevState => ({
+  //       ui_props : {
+  //         "dummy_id" : {
+  //           properties : {
+  //             elements : a
+  //       }}}
+  //     }));
 
 
 
       //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
-    })}//.then(this.dummyLoad3())}
-
-  dummyLoad3() {
-    //let new_applet = require("./applet_modules/MenuButton.js");
-    //alert(Object.keys(new_applet));
-    //alert(new_applet.MenuButton);
-    //let frog = APPLET_MODULES["dummy_applet_id"];
-    //let new_new_applet =  frog;
-
-    //COMP.push(new_new_applet);
-    //alert(COMP);
-    // COMP.push(<MenuButton
-    //   {...this.state}
-    //   setMainIcon={this.setMainIcon}
-    //   addElement={this.addElement}
-    //   elements={this.state.ui_props["dummy_id"].elements}
-    // />)
-
-    // this.setState(prevState => ({
-    //
-    //   components : [...prevState.components, new_new_applet]
-    // }));
-  }
+    // })}
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -819,7 +830,7 @@ class App extends React.Component {
   getInputProps(type, title) {
     return {
       type: type,
-      value: this.state.ui_props["dummy_id"].properties[title],
+      value: this.state.ui_props["FC4jXzlQZwxLaPd2"].properties[title],
       onChange: e => {
         let target_value = e.target.value;
         type === "number"
@@ -883,10 +894,10 @@ class App extends React.Component {
           </div>*/}
 
 
+          // UNMASK BELOW FOR PROPS BOXES
 
 
-
-          <Draggable
+          {/*<Draggable
             // onDrag work in concert to separate drag and click conditions
             cancel=".non-drag" // Do not respond if child buttons are dragged
             onDrag={() => this.isDragging = true}
@@ -1002,7 +1013,7 @@ class App extends React.Component {
                 </tbody>
               </table>
             </div>
-          </Draggable>
+          </Draggable>*/}
         </div>
       </div>
     );
