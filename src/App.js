@@ -32,11 +32,9 @@ async function loadAppletStates(datastore, query_id) {
       // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
       // SHOULD resolve array of state JSON objects
       resolve(applets.map(applet => {
-        applet.properties.elements = applet.properties.elements.map(element => {
-          element.onClick = () => { shell.openItem(element.symlink) };
-          return element;
-        })
-        //alert(apple.properties.elements[0].onClick)
+        if ("propsMap" in MODULES[applet.id_applet]){
+          MODULES[applet.id_applet].propsMap(applet.properties);
+        }
         return applet;
       }));
     });
@@ -95,10 +93,11 @@ async function dbFindAll(datastore, token) {
 
 // TESTING
 const DEV_HASHES = true;
+const DEV_IDS = true;
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
-let APPLET_MODULES = {};
+let MODULES = {};
 let COMP = [];//[<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>];
 let ELEMENTS = [
   {
@@ -643,23 +642,23 @@ class App extends React.Component {
     //this.loadAppletInstances();
 
     //alert(this.state.ui_props["dummy_id"].properties.elements);
-    // First load APPLET_MODULES that are acceptable by applet id
-    //APPLET_MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
+    // First load MODULES that are acceptable by applet id
+    //MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
 
     //const applets_to_load = ["MenuButton.js"]//["D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\MenuButton.js"];
     // applets_to_load.forEach( applet_module => {
     //   //this.loads(applet_module);
-    //   //APPLET_MODULES["dummy_applet_id"] = require("./applet_modules/" + applet_module);
+    //   //MODULES["dummy_applet_id"] = require("./applet_modules/" + applet_module);
     //   // if (isDev) {
-    //   //   APPLET_MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
+    //   //   MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
     //   // } else {
-    //   //   APPLET_MODULES["dummy_applet_id"] = require("D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\applet_modules\\" + applet_module);
+    //   //   MODULES["dummy_applet_id"] = require("D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\applet_modules\\" + applet_module);
     //   // }
     //
-    //   //APPLET_MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
+    //   //MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
     // //   alert(applet_module);
     // //   let new_applet = await import(applet_module).then( m => {
-    // //     APPLET_MODULES["dummy_applet_id"] = m;
+    // //     MODULES["dummy_applet_id"] = m;
     // //   });
     // });
 
@@ -669,7 +668,7 @@ class App extends React.Component {
   // async loads(applet_module) {
   //   alert(applet_module);
   //   let new_applet = await import(applet_module);
-  //   APPLET_MODULES["dummy_applet_id"] = new_applet;
+  //   MODULES["dummy_applet_id"] = new_applet;
   // }
 
   firstLoad() {
@@ -717,7 +716,7 @@ class App extends React.Component {
   loadAppletModules() {
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
     if (DEV_HASHES) alert(md5(new_module.AppletMain));
-    APPLET_MODULES["dummy_applet_id"] = new_module;
+    MODULES["dummy_applet_id"] = new_module;
   }
 
   loadAppletInstances() {
@@ -743,7 +742,7 @@ class App extends React.Component {
       // Map applets to load array from applets' ID
       this.setState(prevState => ({
         COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-          app : APPLET_MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
+          app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
           id : id_instance
         }))
       }));
@@ -793,11 +792,11 @@ class App extends React.Component {
     const TEX = "text";
     //let new_applet = require("./applet_modules/MenuButton.js");
 
-    const appPass = APPLET_MODULES["dummy_applet_id"];
+    const appPass = MODULES["dummy_applet_id"];
     //alert(9);
     //alert(this.state.ui_props["dummy_id"].properties.elements);
     // alert(JSON.stringify(this.state.ui_props["dummy_id"]));
-    // let applet_module1 = APPLET_MODULES[this.state.ui_props["dummy_id"].id_applet];
+    // let applet_module1 = MODULES[this.state.ui_props["dummy_id"].id_applet];
 
     return (
       <div id="app">
@@ -808,11 +807,21 @@ class App extends React.Component {
           </div>*/}
 
           <div id="component">
-            {this.state.COMP.map( component => <component.app
-              {...this.state.ui_props[component.id].properties}
-
-              //elements={this.state.ui_props["dummy_id"].elements}
-            />)}
+            {this.state.COMP.map( component =>
+              <div>
+                <component.app
+                id="Target"
+                {...this.state.ui_props[component.id].properties}
+                //elements={this.state.ui_props["dummy_id"].elements}
+                />
+                {DEV_IDS
+                  ? <div class="debug" style={{position: "element(#Target)"}}>
+                      <p>{component.id}</p>
+                      <p>{this.state.ui_props[component.id].id_applet}</p>
+                    </div>
+                  : null}
+              </div>
+            )}
           </div>
 
           {/*<div id="component">
@@ -823,9 +832,6 @@ class App extends React.Component {
               elements={this.state.ui_props["dummy_id"].properties.elements}
             />
           </div>*/}
-
-
-          // UNMASK BELOW FOR PROPS BOXES
 
 
           {/*<Draggable
@@ -945,6 +951,45 @@ class App extends React.Component {
               </table>
             </div>
           </Draggable>*/}
+          <Draggable
+            onDrag={() => this.isDragging = true}
+            onClick={() => {
+              this.toggleMenu();
+            }}
+            onStop={() => {
+              if (!this.isDragging) {
+                return;
+              }
+
+              this.isDragging = false;
+            }}
+          >
+            <div id="addrem" class="notepad">
+              <button
+                className=""
+                onClick={() =>
+                  this.setState(prevState => ({
+                    ...prevState,
+                    ui_props: {
+                      ...prevState.ui_props,
+                      dummy_id: {
+                        ...prevState.ui_props.dummy_id,
+                        properties: {
+                          ...prevState.ui_props.dummy_id.properties,
+                          mainButtonDiam: 5 }}}}))
+                }
+              >Add MenuButton</button>
+              <button
+                className=""
+                onClick={() =>
+                  this.setState(prevState => ({
+                    ...prevState,
+                    COMP: prevState.COMP.splice(0, 1)
+                  }))
+                }
+              >Remove MenuButton</button>
+            </div>
+          </Draggable>
         </div>
       </div>
     );
