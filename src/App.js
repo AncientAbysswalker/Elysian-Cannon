@@ -19,24 +19,37 @@ const iconPromise = window.require('icon-promise');
 
 const Datastore = require('nedb');
 let db_applets = new Datastore({
-  filename : 'ui_elements',
+  filename : 'ui_elements_testing',
   autoload : true
 });
 
+// TESTING
+const DEV_HASHES = false; //
+const DEV_IDS = true;
 
-async function loadAppletStates(datastore, query_id) {
+// async function loadOnStartData(datastore, query_id) {
+//   let promise = new Promise((resolve, reject) => {
+//     dbFindAll(datastore, {load_on_start : true}).then(applets => {
+//
+//       // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
+//       // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
+//       // SHOULD resolve array of state JSON objects
+//       resolve(applets.map(applet => {
+//         if ("propsMap" in MODULES[applet.id_applet]){
+//           MODULES[applet.id_applet].propsMap(applet.properties);
+//         }
+//         return applet;
+//       }));
+//     });
+//   });
+//
+//   return await promise;
+// }
+
+async function dbInsertApplet(datastore, state_object) {
   let promise = new Promise((resolve, reject) => {
-    dbFindAll(datastore, {load_on_start : true}).then(applets => {
-
-      // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
-      // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
-      // SHOULD resolve array of state JSON objects
-      resolve(applets.map(applet => {
-        if ("propsMap" in MODULES[applet.id_applet]){
-          MODULES[applet.id_applet].propsMap(applet.properties);
-        }
-        return applet;
-      }));
+    datastore.insert(state_object, function (err, newDoc) {   // Callback is optional
+      resolve(newDoc);
     });
   });
 
@@ -90,10 +103,6 @@ async function dbFindAll(datastore, token) {
 //db.find({year : 1990}, function (err,docs){ a = docs; alert(a)});
 // dbFindOne(db, {year : 1990}).then(a => alert(JSON.stringify(a)));
 // alert(JSON.stringify(a));
-
-// TESTING
-const DEV_HASHES = true;
-const DEV_IDS = true;
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
@@ -587,6 +596,7 @@ class App extends React.Component {
       mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
       mainButtonIconSize: 0.7,
       childButtonIconSize: 0.7,
+      to_remove: "",
 
       COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
 
@@ -599,7 +609,7 @@ class App extends React.Component {
     this.loadAppletModules();
 
     // Load applet instance state from last run of program
-    this.loadAppletInstances();
+    this.loadAppletsOnStart();
 
     //this.firstLoad();
     this.updateLoad();
@@ -639,7 +649,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    //this.loadAppletInstances();
+    //this.loadAppletsOnStart();
 
     //alert(this.state.ui_props["dummy_id"].properties.elements);
     // First load MODULES that are acceptable by applet id
@@ -713,43 +723,15 @@ class App extends React.Component {
       }}, {});
   }
 
-  loadAppletModules() {
-    let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
-    if (DEV_HASHES) alert(md5(new_module.AppletMain));
-    MODULES["dummy_applet_id"] = new_module;
-  }
-
-  loadAppletInstances() {
-
-    // Get states mapped and
-    loadAppletStates(db_applets).then(applet_state => {
-      let mapped_state = applet_state.reduce(function(map, obj) {
-        let { _id, ..._state } = obj;
-        alert(_id);
-        if (DEV_HASHES) alert(_id);
-        map[_id] = _state;
-        return map;
-      }, {});
-
-      // This will likely break with a second item in the list of applets #FIX#
-      this.setState(prevState => ({
-        ui_props : mapped_state//{...prevState.ui_props, ...mapped_state}
-      }));
 
 
-      //this.state.ui_props.elements.concat(a); alert(JSON.stringify(this.state.ui_props.elements));});
-    }).then(() => {
-      // Map applets to load array from applets' ID
-      this.setState(prevState => ({
-        COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-          app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
-          id : id_instance
-        }))
-      }));
-    });
 
 
-  }
+
+
+
+
+  //
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -786,6 +768,186 @@ class App extends React.Component {
                   [title]: target_value }}}}))
     }};
   }
+
+  getRemoveApplet() {
+    return {
+      value: this.state.to_remove,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.setState(prevState => ({
+          to_remove : target_value
+        }))
+    }};
+  }
+
+
+  /**
+   * Applet and Module - Load, Unload, and Update Functions
+   */
+
+  /**
+   * Load the array of Applet Modules to be available to the user and to the
+   *     application as a whole.
+   */
+  loadAppletModules() {
+    // Currently HARDCODED. TODO: Make dynamic
+    let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
+    if (DEV_HASHES) alert(md5(new_module.AppletMain));
+    MODULES["dummy_applet_id"] = new_module;
+  }
+
+  /**
+   * Load the Applets along with their saved states. Load the user's stored
+   *     state tree for each applet from the datastore into state.ui_props,
+   *     and load the components.
+   * @state Adds all of the user's Applets along with their stored state trees
+   *     from the datastore to the state.ui_props object
+   */
+  loadAppletsOnStart() {
+    // Promise to return an array of loaded state trees of the loaded applets
+    let promise = new Promise((resolve, reject) => {
+      dbFindAll(db_applets, {load_on_start : true}).then(applets => {
+        resolve(applets.map(applet => {
+          // Allow remapping through Module function, if desired/available
+          if ("propsMap" in MODULES[applet.id_applet]){
+            MODULES[applet.id_applet].propsMap(applet.properties);}
+          return applet;
+        }));
+      });
+    });//
+
+    // Get array of loaded state trees then write each tree to state.ui_props
+    promise.then(applet_state => {
+      let state_tree = applet_state.reduce((map, obj) => {
+        let { _id, ..._state } = obj;
+        if (DEV_HASHES) alert(_id);
+        map[_id] = _state;
+        return map;//
+      }, {});
+
+      // Write each stored state tree into the state.ui_props object
+      this.setState(prevState => ({
+        ui_props : state_tree
+      }));
+    }).then(() => {
+      // Add loaded applets to array for dynamic component loading
+      this.setState(prevState => ({
+        COMP : Object.keys(prevState.ui_props).map(id_instance => ({
+          app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
+          id : id_instance
+        }))
+      }));
+    });
+  }
+  // loadAppletsOnStart() {
+  //   // Pull list of stored state trees from the datastore
+  //   loadOnStartData(db_applets).then(applet_state => {
+  //     let state_tree = applet_state.reduce((map, obj) => {
+  //       let { _id, ..._state } = obj;
+  //       if (DEV_HASHES) alert(_id);
+  //       map[_id] = _state;
+  //       return map;//
+  //     }, {});
+  //
+  //     // Write each stored state tree into the state.ui_props object
+  //     this.setState(prevState => ({
+  //       ui_props : state_tree
+  //     }));
+  //   }).then(() => {
+  //     // Add loaded applets to array for dynamic component loading
+  //     this.setState(prevState => ({
+  //       COMP : Object.keys(prevState.ui_props).map(id_instance => ({
+  //         app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
+  //         id : id_instance
+  //       }))
+  //     }));
+  //   });//
+  // }
+
+  /**
+   * Load the Applets that are intended to load-on-start from the datastore. Load the user's stored
+   *     state tree for each applet from the datastore into state.ui_props,
+   * @param {string} resourcePath The string path of the original file or link
+   * @return Adds all of the user's Applets along with their stored state trees
+   *     from the datastore to the state.ui_props object
+   */
+  async loadOnStartData(datastore, query_id) {
+    let promise = new Promise((resolve, reject) => {
+      dbFindAll(datastore, {load_on_start : true}).then(applets => {
+
+        // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
+        // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
+        // SHOULD resolve array of state JSON objects
+        resolve(applets.map(applet => {
+          if ("propsMap" in MODULES[applet.id_applet]){
+            MODULES[applet.id_applet].propsMap(applet.properties);
+          }
+          return applet;
+        }));
+      });
+    });
+
+    return await promise;
+  }
+
+  /**
+   * Load a new Applet by its module id. Load the default state tree into state,
+   *     add a datastore entry to hold the data, and load the component.
+   * @param {string} id_module The module id to reference for the new Applet
+   * @state Adds the default state tree provided by the module to the
+   *     state.ui_props object with id_applet as the key
+   * @nedb Adds a datastore entry to hold the default state tree and other data
+   */
+  loadNewApplet(id_module) {
+    // Insert the default state tree into the datastore
+    dbInsertApplet(db_applets, {
+      id_applet : id_module,
+      load_on_start : true,
+      properties : MODULES[id_module].defaultProps()
+    }).then(db_entry => {
+      // Insert the default state tree into state.ui_props and load the component
+      this.setState(prevState => ({
+        ui_props : {...prevState.ui_props, ...{
+          [db_entry._id] : {
+            id_applet : id_module,
+            load_on_start : true,
+            properties : MODULES[id_module].defaultProps()
+          }
+        }},
+        COMP : [...prevState.COMP, {
+          app : MODULES[id_module].AppletMain,
+          id : db_entry._id
+        }]
+      }));
+    })
+  }
+
+  /**
+   * Remove an Applet by its id. Unload the component and remove its props from
+   *     the datastore and state tree.
+   * @param {string} id_applet The applet id to be removed
+   * @state Removes id_applet from the keys within the state.ui_props object
+   * @nedb Removes the datastore entry with a _id of id_applet
+   */
+  removeAppletById(id_applet) {
+    // Remove Applet props from state and unload component
+    this.setState(prevState => {
+      let {[id_applet]:omit, ...new_ui_props} = prevState.ui_props;
+
+      return {
+        ui_props : new_ui_props,
+        COMP: prevState.COMP.filter(component => component.id !== id_applet)
+      }
+    });
+
+    // Remove Applet props from datastore
+    db_applets.remove({ _id : id_applet }, {})
+  }
+
+
+  /**
+   * Render Application
+   */
 
   render() {
     const NUM = "number";
@@ -953,6 +1115,7 @@ class App extends React.Component {
           </Draggable>*/}
           <Draggable
             onDrag={() => this.isDragging = true}
+            cancel=".non-drag"
             onClick={() => {
               this.toggleMenu();
             }}
@@ -964,30 +1127,29 @@ class App extends React.Component {
               this.isDragging = false;
             }}
           >
-            <div id="addrem" class="notepad">
+            <div id="addrem" className="notepad">
               <button
                 className=""
                 onClick={() =>
-                  this.setState(prevState => ({
-                    ...prevState,
-                    ui_props: {
-                      ...prevState.ui_props,
-                      dummy_id: {
-                        ...prevState.ui_props.dummy_id,
-                        properties: {
-                          ...prevState.ui_props.dummy_id.properties,
-                          mainButtonDiam: 5 }}}}))
+                  this.loadNewApplet("dummy_applet_id")
                 }
               >Add MenuButton</button>
+              <div>
+                <p style={{"margin-bottom":0}}>Remove following id:</p>
+                <div>
+                  <button
+                    className=""
+                    onClick={() => this.removeAppletById(this.state.to_remove)}
+                  >Remove MenuButton</button>
+                  <input
+                    className="non-drag" {...this.getRemoveApplet()}
+                  />
+                </div>
+              </div>
               <button
                 className=""
-                onClick={() =>
-                  this.setState(prevState => ({
-                    ...prevState,
-                    COMP: prevState.COMP.splice(0, 1)
-                  }))
-                }
-              >Remove MenuButton</button>
+                onClick={() => alert(JSON.stringify(this.state.COMP))}
+              >Test State</button>
             </div>
           </Draggable>
         </div>
