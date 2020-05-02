@@ -27,24 +27,6 @@ let db_applets = new Datastore({
 const DEV_HASHES = false; //
 const DEV_IDS = true;
 
-// async function loadOnStartData(datastore, query_id) {
-//   let promise = new Promise((resolve, reject) => {
-//     dbFindAll(datastore, {load_on_start : true}).then(applets => {
-//
-//       // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
-//       // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
-//       // SHOULD resolve array of state JSON objects
-//       resolve(applets.map(applet => {
-//         if ("propsMap" in MODULES[applet.id_applet]){
-//           MODULES[applet.id_applet].propsMap(applet.properties);
-//         }
-//         return applet;
-//       }));
-//     });
-//   });
-//
-//   return await promise;
-// }
 
 async function dbInsertApplet(datastore, state_object) {
   let promise = new Promise((resolve, reject) => {
@@ -361,6 +343,7 @@ class MenuButton2 extends React.Component {
   addElement(newIcon, newPath) {
     ELEMENTS.push({
       icon: newIcon,
+      symlink: newPath,
       onClick: () => { shell.openItem(newPath) }
     });
     this.setState({});
@@ -839,56 +822,6 @@ class App extends React.Component {
       }));
     });
   }
-  // loadAppletsOnStart() {
-  //   // Pull list of stored state trees from the datastore
-  //   loadOnStartData(db_applets).then(applet_state => {
-  //     let state_tree = applet_state.reduce((map, obj) => {
-  //       let { _id, ..._state } = obj;
-  //       if (DEV_HASHES) alert(_id);
-  //       map[_id] = _state;
-  //       return map;//
-  //     }, {});
-  //
-  //     // Write each stored state tree into the state.ui_props object
-  //     this.setState(prevState => ({
-  //       ui_props : state_tree
-  //     }));
-  //   }).then(() => {
-  //     // Add loaded applets to array for dynamic component loading
-  //     this.setState(prevState => ({
-  //       COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-  //         app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
-  //         id : id_instance
-  //       }))
-  //     }));
-  //   });//
-  // }
-
-  /**
-   * Load the Applets that are intended to load-on-start from the datastore. Load the user's stored
-   *     state tree for each applet from the datastore into state.ui_props,
-   * @param {string} resourcePath The string path of the original file or link
-   * @return Adds all of the user's Applets along with their stored state trees
-   *     from the datastore to the state.ui_props object
-   */
-  async loadOnStartData(datastore, query_id) {
-    let promise = new Promise((resolve, reject) => {
-      dbFindAll(datastore, {load_on_start : true}).then(applets => {
-
-        // Eventually this needs to move 100% to the modules so there is no overlap? Each should handle it's own mapping if there is any unique mapping...
-        // This is JUST the mapping that can be handed over, and the location in state is still compartmentalized and thus safe
-        // SHOULD resolve array of state JSON objects
-        resolve(applets.map(applet => {
-          if ("propsMap" in MODULES[applet.id_applet]){
-            MODULES[applet.id_applet].propsMap(applet.properties);
-          }
-          return applet;
-        }));
-      });
-    });
-
-    return await promise;
-  }
 
   /**
    * Load a new Applet by its module id. Load the default state tree into state,
@@ -920,6 +853,18 @@ class App extends React.Component {
         }]
       }));
     })
+  }
+
+  /**
+   * Update the properties stored in the datastore to match the properties
+   *     stored in the current state, based on the id_applet provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates the datastore entry with a _id of id_applet
+   */
+  updateAppletMemoryById(id_applet) {
+    // Remove Applet props from state and unload component
+    alert("porkchop " + id_applet)
+    db_applets.update({_id : id_applet}, this.state.ui_props[id_applet], {});
   }
 
   /**
@@ -973,8 +918,8 @@ class App extends React.Component {
               <div>
                 <component.app
                 id="Target"
+                updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
                 {...this.state.ui_props[component.id].properties}
-                //elements={this.state.ui_props["dummy_id"].elements}
                 />
                 {DEV_IDS
                   ? <div class="debug" style={{position: "element(#Target)"}}>
