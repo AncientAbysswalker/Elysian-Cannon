@@ -20,8 +20,8 @@ const iconPromise = window.require('icon-promise');
 // Datastores
 const Datastore = require('nedb');
 let db_applets = new Datastore({
-  filename : 'ui_elements_testing',
-  autoload : true
+  filename : 'ui_applets',
+  autoload : true //
 });
 
 // TESTING
@@ -334,7 +334,7 @@ class App extends React.Component {
 
   firstLoad() {
     db_applets.insert({
-      id_applet : "dummy_applet_id",
+      id_module : "dummy_applet_id",
       load_on_start : true,
       properties : {
         elements : ELEMENTS,
@@ -355,7 +355,7 @@ class App extends React.Component {
 
   updateLoad() {
     db_applets.update({_id : "FC4jXzlQZwxLaPd2"},{
-      id_applet : "dummy_applet_id",
+      id_module : "dummy_applet_id",
       load_on_start : true,
       properties : {
         elements : ELEMENTS,
@@ -460,8 +460,8 @@ class App extends React.Component {
       dbFindAll(db_applets, {load_on_start : true}).then(applets => {
         resolve(applets.map(applet => {
           // Allow remapping through Module function, if desired/available
-          if ("propsMap" in MODULES[applet.id_applet]){
-            MODULES[applet.id_applet].propsMap(applet.properties);}
+          if ("propsMap" in MODULES[applet.id_module]){
+            MODULES[applet.id_module].propsMap(applet.properties);}
           return applet;
         }));
       });
@@ -484,7 +484,7 @@ class App extends React.Component {
       // Add loaded applets to array for dynamic component loading
       this.setState(prevState => ({
         COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-          app : MODULES[prevState.ui_props[id_instance].id_applet].AppletMain,
+          app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
           id : id_instance
         }))
       }));
@@ -496,13 +496,13 @@ class App extends React.Component {
    *     add a datastore entry to hold the data, and load the component.
    * @param {string} id_module The module id to reference for the new Applet
    * @state Adds the default state tree provided by the module to the
-   *     state.ui_props object with id_applet as the key
+   *     state.ui_props object with id_module as the key
    * @nedb Adds a datastore entry to hold the default state tree and other data
    */
   loadNewApplet(id_module) {
     // Insert the default state tree into the datastore
     dbInsert(db_applets, {
-      id_applet : id_module,
+      id_module : id_module,
       load_on_start : true,
       properties : MODULES[id_module].defaultProps()
     }).then(db_entry => {
@@ -510,7 +510,7 @@ class App extends React.Component {
       this.setState(prevState => ({
         ui_props : {...prevState.ui_props, ...{
           [db_entry._id] : {
-            id_applet : id_module,
+            id_module : id_module,
             load_on_start : true,
             properties : MODULES[id_module].defaultProps()
           }
@@ -525,13 +525,11 @@ class App extends React.Component {
 
   /**
    * Update the properties stored in the datastore to match the properties
-   *     stored in the current state, based on the id_applet provided
+   *     stored in the current state, based on the id_module provided
    * @param {string} id_applet The applet id for which to update memory
    * @nedb Updates the datastore entry with a _id of id_applet
    */
   updateAppletMemoryById(id_applet) {
-    // Remove Applet props from state and unload component
-    alert("porkchop " + id_applet)
     db_applets.update({_id : id_applet}, this.state.ui_props[id_applet], {});
   }
 
@@ -556,7 +554,6 @@ class App extends React.Component {
     // Remove Applet props from datastore
     db_applets.remove({ _id : id_applet }, {})
   }
-
 
   /**
    * Render Application
@@ -592,7 +589,7 @@ class App extends React.Component {
                 {DEV_IDS
                   ? <div class="debug" style={{position: "element(#Target)"}}>
                       <p>{component.id}</p>
-                      <p>{this.state.ui_props[component.id].id_applet}</p>
+                      <p>{this.state.ui_props[component.id].id_module}</p>
                     </div>
                   : null}
               </div>
