@@ -1,7 +1,6 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-//import {MenuButton} from './applet_modules/MenuButton.js'
 
 import './App.css';
 
@@ -17,6 +16,8 @@ const symlink = window.require('windows-shortcuts-ps');
 const md5 = require('md5');
 const iconPromise = window.require('icon-promise');
 
+
+// Datastores
 const Datastore = require('nedb');
 let db_applets = new Datastore({
   filename : 'ui_elements_testing',
@@ -28,9 +29,20 @@ const DEV_HASHES = false; //
 const DEV_IDS = true;
 
 
-async function dbInsertApplet(datastore, state_object) {
+// -------------------------------------------------------
+// ---------------  DATABASE FUNCTIONS   -----------------
+// -------------------------------------------------------
+
+/**
+ * Insert an entry into a nedb datastore, as a promise.
+ * @param {Datastore} datastore The datastore to insert an entry into
+ * @param {string} object_insert The object to insert into the datastore
+ * @nedb Add a datastore entry to hold the defined object_insert
+ * @return Returns a copy of the object_insert stored, including the nedb _id
+ */
+async function dbInsert(datastore, object_insert) {
   let promise = new Promise((resolve, reject) => {
-    datastore.insert(state_object, function (err, newDoc) {   // Callback is optional
+    datastore.insert(object_insert, function (err, newDoc) {
       resolve(newDoc);
     });
   });
@@ -38,53 +50,33 @@ async function dbInsertApplet(datastore, state_object) {
   return await promise;
 }
 
-
-
-async function loadMenuButton(datastore, query_id) {
-
-  let promise = new Promise((resolve, reject) => {
-    dbFindOne(datastore, {ref_id : query_id}).then(a => {
-      let elements = a.properties.elements.map(element => {
-        element.onClick = () => { shell.openItem(element.symlink) };
-        return element;
-      })
-
-      //alert(elements);
-      resolve(elements);
-      // alert(JSON.stringify(a.properties.elements[0].onClick));
-      // alert(elements[0].onClick);
-    });
-  });
-
-  return await promise;
-}
-
+/**
+ * Search a nedb datastore for ONE occurance of the token, as a promise.
+ * @param {Datastore} datastore The datastore to search
+ * @param {string} token The token to search the datastore for
+ * @return Returns a copy of the entry found
+ */
 async function dbFindOne(datastore, token) {
-
   let promise = new Promise((resolve, reject) => {
     datastore.findOne(token, (err,docs) => resolve(docs));
   });
 
-  //db.find({year : 1990}, function (err,docs){ let result = docs;});
-
   return await promise;
 }
 
+/**
+ * Search a nedb datastore for ALL occurance of the token, as a promise.
+ * @param {Datastore} datastore The datastore to search
+ * @param {string} token The token to search the datastore for
+ * @return Returns a list of all entries found
+ */
 async function dbFindAll(datastore, token) {
-
   let promise = new Promise((resolve, reject) => {
     datastore.find(token, (err,docs) => resolve(docs));
   });
 
-  //db.find({year : 1990}, function (err,docs){ let result = docs;});
-
   return await promise;
 }
-
-//let a = 0;
-//db.find({year : 1990}, function (err,docs){ a = docs; alert(a)});
-// dbFindOne(db, {year : 1990}).then(a => alert(JSON.stringify(a)));
-// alert(JSON.stringify(a));
 
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
@@ -96,13 +88,6 @@ let ELEMENTS = [
     symlink: 'https://www.wikipedia.org/',
     onClick: () => {
       shell.openItem('https://www.wikipedia.org/')
-
-      // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-      // db.loadDatabase();
-
-      // alert(9);
-      // db.insert({name : "fender jazz bass", year:1977});
-      //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
     }
   },
   {
@@ -110,13 +95,6 @@ let ELEMENTS = [
     symlink: 'https://www.google.com/',
     onClick: () => {
       shell.openItem('https://www.google.com/')
-      // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-      // db.loadDatabase();
-
-      // db.find({year : 1990}, function (err,docs){ alert(JSON.stringify(docs)); });
-      // db.find({year : 1977}, function (err,docs){ alert(JSON.stringify(docs)); });
-      // const db = require('./db.js');
-      // alert(db.tags.find("pork"));
     }
   },
   {
@@ -131,23 +109,6 @@ let ELEMENTS = [
   }
 ];
 
-// db_applets.update({ref_id : "dummy_id"}, {
-//   ref_id : "dummy_id",
-//   name : "Circle Menu",
-//   properties : {
-//     "elements" : ELEMENTS
-//   }});
-
-//dbFindOne(db_applets, {ref_id : "dummy_id"}).then(a => alert(JSON.stringify(a.properties.elements[0].symlink)));
-
-//loadMenuButton(db_applets, "dummy_id").then(a => {ELEMENTS.push(a);});
-
-// alert(loadMenuButton(db_applets, "dummy_id"));
-
-// db.insert({
-//   applet : "MenuButton",
-//   props : {"ELEMENTS" : ELEMENTS}
-// });
 
 // UTILITY FUNCTIONS
 
@@ -261,299 +222,6 @@ function getIconPath(fileName = "") {
   }
 }
 
-
-// -------------------------------------------------------
-// --------------   MENU BUTTON CLASS   ------------------
-// -------------------------------------------------------
-class MenuButton2 extends React.Component {
-  constructor(props) {
-    super(props);
-
-    // Component Bindings
-    this.toggleMenu.bind(this)
-    this.handleDragEnter.bind(this)
-    this.handleDragLeave.bind(this)
-    this.handleDragOver.bind(this)
-    this.handleDrop.bind(this)
-
-    // Initial State
-    this.state = {
-      isOpen: false,
-      isAddingItem: false
-    };
-  }
-
-  /**
-   * Triggers an event when a dragged item enters the element's bounding
-   * @param {event} e The triggering drag-enter event
-   */
-  handleDragEnter(e) {
-    this.setState({isAddingItem: true});
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  /**
-   * Triggers an event when a dragged item leaves the element's bounding
-   * @param {event} e The triggering drag-leave event
-   */
-  handleDragLeave(e) {
-    this.setState({isAddingItem: false});
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  /**
-   * Triggers an event when a dragged item is hovering over the element
-   * @param {event} e The triggering drag-over event
-   */
-  handleDragOver(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  /**
-   * Add a new child button when file or folder is dropped on the center button
-   * @param {event} e The triggering drop event
-   */
-  handleDrop(e) {
-    // Get the path of the dropped object and add a new child button element
-    let link = e.dataTransfer.files[0].path;
-    Promise.all([
-      getAbsPath(link),
-      getSavedIcon(link)
-    ]).then(([absPath, iconPath]) => {
-      this.addElement(iconPath, absPath);
-    })
-
-    // Reset CSS
-    this.setState({isAddingItem: false});
-
-    // Required to hijack activate-on-drop event
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-
-  /**
-   * Append a new child button to the ELEMENTS array
-   * @param {string} newIcon The path to the new button's icon
-   * @param {string} newPath The path to the file, executable, etc to launch
-   */
-  addElement(newIcon, newPath) {
-    ELEMENTS.push({
-      icon: newIcon,
-      symlink: newPath,
-      onClick: () => { shell.openItem(newPath) }
-    });
-    this.setState({});
-  }
-
-  /**
-   * Remove a child button by its index from the ELEMENTS array
-   * @param {number} index The index in ELEMENTS array to remove
-   */
-  removeElement(index) {
-    ELEMENTS.splice(index, 1);
-    this.setState({});
-  }
-
-  /**
-   * Toggles the main button.
-   */
-  toggleMenu() {
-    this.setState(prevState => ({
-      isOpen: !prevState.isOpen
-    }));
-  }
-
-  /**
-   * Opens the main button.
-   */
-  openMenu() {
-    this.setState({
-      isOpen: true
-    });
-  }
-
-  /**
-   * Closes the main button.
-   */
-  closeMenu() {
-    this.setState({
-      isOpen: false
-    });
-  }
-
-  /**
-   * Returns the width and height of the main button.
-   */
-  getMainButtonStyle() {
-    let { mainButtonDiam } = this.props;
-    return {
-      width: mainButtonDiam,
-      height: mainButtonDiam
-    };
-  }
-
-  getInitalChildButtonStyle() {
-    let { childButtonDiam, mainButtonDiam, stiffness, damping } = this.props;
-    return {
-      width: childButtonDiam,
-      height: childButtonDiam,
-      zIndex: -1,
-      top: spring(mainButtonDiam / 2 - childButtonDiam / 2, {
-        stiffness,
-        damping
-      }),
-      left: spring(mainButtonDiam / 2 - childButtonDiam / 2, {
-        stiffness,
-        damping
-      })
-    };
-  }
-
-  getFinalChildButtonStyle(index) {
-    let { childButtonDiam, mainButtonDiam, stiffness, damping } = this.props;
-    let { deltaX, deltaY } = this.getFinalDeltaPositions(index);
-    return {
-      width: childButtonDiam,
-      height: childButtonDiam,
-      zIndex: spring(0),
-      top: spring(mainButtonDiam / 2 + deltaX, { stiffness, damping }),
-      left: spring(mainButtonDiam / 2 - deltaY, { stiffness, damping })
-    };
-  }
-
-  getFinalDeltaPositions(index) {
-    let NUM_CHILDREN = this.props.elements.length;
-    let CHILD_BUTTON_DIAM = this.props.childButtonDiam;
-    let FLY_OUT_RADIUS = this.props.flyOutRadius;
-    // let SEPARATION_ANGLE = this.props.seperationAngle;
-    let SEPARATION_ANGLE = 360 / NUM_CHILDREN;
-    let ROTATION = this.props.rotation;
-    let FAN_ANGLE = (NUM_CHILDREN - 1) * SEPARATION_ANGLE;
-    let BASE_ANGLE = (180 - FAN_ANGLE) / 2 + 90 + ROTATION;
-
-    let TARGET_ANGLE = BASE_ANGLE + index * SEPARATION_ANGLE;
-    return {
-      deltaX:
-        FLY_OUT_RADIUS * Math.cos(toRadians(TARGET_ANGLE)) -
-        CHILD_BUTTON_DIAM / 2,
-      deltaY:
-        FLY_OUT_RADIUS * Math.sin(toRadians(TARGET_ANGLE)) +
-        CHILD_BUTTON_DIAM / 2
-    };
-  }
-
-  getCProps() {
-    return {
-      mainButtonProps: () => ({
-        className: "button-menu tangible",
-        style: this.getMainButtonStyle(),
-      }),
-
-      childButtonProps: (style, onClick) => ({
-        className: "button-child tangible",
-        style,
-        onClick
-      }),
-
-      childButtonMotionProps: (index, isOpen) => ({
-        key: index,
-        style: isOpen
-          ? this.getFinalChildButtonStyle.call(this, index)
-          : this.getInitalChildButtonStyle.call(this)
-      }),
-
-      // handle Icons
-      childButtonIconProps: name => ({
-        className: "child-button-icon tangible fa fa-",
-        src: name,
-        draggable: false,
-        style: {
-          fontSize: this.props.childButtonDiam * this.props.childButtonIconSize,
-          width: this.props.childButtonDiam * this.props.childButtonIconSize,
-          height: this.props.childButtonDiam * this.props.childButtonIconSize,
-          "user-select": "none" // So that icon cannot be highlighted
-        }
-      }),
-
-      mainButtonIconProps: name => ({
-        className: "main-button-icon tangible fa fa-bars",
-        src: (this.state.isAddingItem ? this.props.mainButtonIconActive
-                                      : this.props.mainButtonIcon),
-        draggable: false,
-        style: {
-          fontSize: this.props.mainButtonDiam * this.props.mainButtonIconSize,
-          width: this.props.mainButtonDiam * this.props.mainButtonIconSize,
-          height: this.props.mainButtonDiam * this.props.mainButtonIconSize,
-          "pointer-events": "none", // So that handleDragLeave() does not trigger on entering icon
-          "user-select": "none" // So that icon cannot be highlighted
-        }
-      })
-    };
-  }
-
-  renderChildButton(item, index) {
-    let { isOpen } = this.state;
-    let cp = this.getCProps();
-
-    return (
-      <Motion {...cp.childButtonMotionProps(index, isOpen)}>
-        {style => (
-          <div {...cp.childButtonProps(style, () => {
-            if (window.event.ctrlKey) {
-              this.removeElement(index);
-            } else {
-              item.onClick()
-            }
-          })}>
-            <img {...cp.childButtonIconProps(item.icon)} onError={(e)=>{e.target.onerror = null; e.target.src=this.src=require("./missing_icon.png")}} />
-          </div>
-        )}
-      </Motion>
-    );
-  }
-
-  render() {
-    // Render the main and children buttons, and handlke dragging behaviour
-
-    let cp = this.getCProps();
-    let { elements, mainButtonIcon } = this.props;
-    let isDragging = false;
-
-    return (
-      <Draggable
-        // onDrag work in concert to separate drag and click conditions
-        cancel=".button-child" // Do not respond if child buttons are dragged
-        onDrag={() => this.isDragging = true}
-        onClick={() => {
-          this.toggleMenu();
-        }}
-        onStop={() => {
-          if (!this.isDragging) {
-            this.toggleMenu()
-          }
-
-          this.isDragging = false;
-        }}
-      >
-        <div className="button-container tangible"
-        onDrop={e => this.handleDrop(e)}
-        onDragOver={e => this.handleDragOver(e)}
-        onDragEnter={e => this.handleDragEnter(e)}
-        onDragLeave={e => this.handleDragLeave(e)}
-        >
-          {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
-          <div {...cp.mainButtonProps()}> {/* Button element */}
-            <img {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
-          </div>
-        </div>
-      </Draggable>
-    );
-  }
-}
 
 // -------------------------------------------------------
 // -------------   APP CONTROLLER CLASS   ----------------
@@ -833,7 +501,7 @@ class App extends React.Component {
    */
   loadNewApplet(id_module) {
     // Insert the default state tree into the datastore
-    dbInsertApplet(db_applets, {
+    dbInsert(db_applets, {
       id_applet : id_module,
       load_on_start : true,
       properties : MODULES[id_module].defaultProps()
