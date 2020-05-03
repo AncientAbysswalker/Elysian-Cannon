@@ -25,7 +25,7 @@ let db_applets = new Datastore({
 });
 
 // TESTING
-const DEV_HASHES = false; //
+const DEV_ALERT_HASHES = false; //
 const DEV_IDS = true;
 
 
@@ -443,7 +443,7 @@ class App extends React.Component {
   loadAppletModules() {
     // Currently HARDCODED. TODO: Make dynamic
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
-    if (DEV_HASHES) alert(md5(new_module.AppletMain));
+    if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
   }
 
@@ -471,7 +471,7 @@ class App extends React.Component {
     promise.then(applet_state => {
       let state_tree = applet_state.reduce((map, obj) => {
         let { _id, ..._state } = obj;
-        if (DEV_HASHES) alert(_id);
+        if (DEV_ALERT_HASHES) alert(_id);
         map[_id] = _state;
         return map;//
       }, {});
@@ -582,14 +582,13 @@ class App extends React.Component {
             {this.state.COMP.map( component =>
               <div>
                 <component.app
-                id="Target"
                 updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
                 {...this.state.ui_props[component.id].properties}
                 />
                 {DEV_IDS
-                  ? <div class="debug" style={{position: "element(#Target)"}}>
-                      <p>{component.id}</p>
-                      <p>{this.state.ui_props[component.id].id_module}</p>
+                  ? <div className="debug tangible">
+                      <p className="tangible">{component.id}</p>
+                      <p className="tangible">{this.state.ui_props[component.id].id_module}</p>
                     </div>
                   : null}
               </div>
@@ -737,29 +736,28 @@ class App extends React.Component {
               this.isDragging = false;
             }}
           >
-            <div id="addrem" className="notepad">
+            <div id="addrem" className="notepad tangible">
               <button
-                className=""
+                className="non-drag tangible"
                 onClick={() =>
                   this.loadNewApplet("dummy_applet_id")
                 }
               >Add MenuButton</button>
+              <p className="tangible" style={{"margin-bottom":0}}>
+                Remove following id:
+              </p>
               <div>
-                <p style={{"margin-bottom":0}}>Remove following id:</p>
-                <div>
-                  <button
-                    className=""
-                    onClick={() => this.removeAppletById(this.state.to_remove)}
-                  >Remove MenuButton</button>
-                  <input
-                    className="non-drag" {...this.getRemoveApplet()}
-                  />
-                </div>
+                <button
+                  className="non-drag tangible"
+                  onClick={() => {
+                    this.removeAppletById(this.state.to_remove);
+                    this.setState({to_remove : ""})
+                  }}
+                >Remove MenuButton</button>
+                <input
+                  className="non-drag tangible" {...this.getRemoveApplet()}
+                />
               </div>
-              <button
-                className=""
-                onClick={() => alert(JSON.stringify(this.state.COMP))}
-              >Test State</button>
             </div>
           </Draggable>
         </div>
