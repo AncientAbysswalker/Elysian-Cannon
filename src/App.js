@@ -1,8 +1,10 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
+import Toggle from 'react-toggle'
 
 import './App.css';
+import './react-toggle.css'
 
 // Development build or production?
 const isDev = window.require('electron-is-dev');
@@ -27,7 +29,7 @@ let db_applets = new Datastore({
 // TESTING
 const DEV_ALERT_HASHES = false;
 const DEV_IDS = false;
-const DEV_unlocked = false;
+var DEV_unlocked = false;
 
 // -------------------------------------------------------
 // ---------------  DATABASE FUNCTIONS   -----------------
@@ -250,6 +252,7 @@ class App extends React.Component {
       to_remove: "",
 
       COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
+      temp_all_unlocked : false
 
       // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
       // ONLY REQUIRED BECAUSE THE HARDCODED PROPS MENU!!!!
@@ -592,9 +595,8 @@ class App extends React.Component {
                 }}
                 onStop={(e) => {e.stopPropagation()}}
               >
-                <div className={DEV_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: 10*(1+index), bottom: "auto", top: 10*(1+index), right: "auto"}}>
+                <div className={this.state.temp_all_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: 10*(1+index), bottom: "auto", top: 10*(1+index), right: "auto", zIndex:(4-index)}}>
                   <component.app
-                    disabled={!DEV_unlocked}
                     updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
 
                     {...this.state.ui_props[component.id].properties}
@@ -752,6 +754,10 @@ class App extends React.Component {
             }}
           >
             <div id="addrem" className="notepad tangible">
+              <Toggle
+                defaultChecked={this.state.temp_all_unlocked}//
+                icons={false}
+                onChange={() => {this.setState(prevState => ({temp_all_unlocked : !prevState.temp_all_unlocked}))}} />
               <p className="tangible" style={{"margin-bottom":0}}>
                 Add Things:
               </p>
