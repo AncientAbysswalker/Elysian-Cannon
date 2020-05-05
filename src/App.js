@@ -580,9 +580,10 @@ class App extends React.Component {
 
           <div id="component">
             {this.state.COMP.map( component =>
-              <div>
+              <div style={{position: "absolute", left: 0, bottom: "auto", top: 0, right: "auto"}}>
                 <component.app
                 updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
+
                 {...this.state.ui_props[component.id].properties}
                 />
                 {DEV_IDS
