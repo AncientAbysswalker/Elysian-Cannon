@@ -25,9 +25,9 @@ let db_applets = new Datastore({
 });
 
 // TESTING
-const DEV_ALERT_HASHES = false; //
-const DEV_IDS = true;
-
+const DEV_ALERT_HASHES = false;
+const DEV_IDS = false;
+const DEV_unlocked = false;
 
 // -------------------------------------------------------
 // ---------------  DATABASE FUNCTIONS   -----------------
@@ -443,8 +443,10 @@ class App extends React.Component {
   loadAppletModules() {
     // Currently HARDCODED. TODO: Make dynamic
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
+    let new_module2 = require('./applet_modules/TestStaticBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
+    MODULES["dumb_box"] = new_module2;
   }
 
   /**
@@ -579,20 +581,32 @@ class App extends React.Component {
           </div>*/}
 
           <div id="component">
-            {this.state.COMP.map( component =>
-              <div style={{position: "absolute", left: 0, bottom: "auto", top: 0, right: "auto"}}>
-                <component.app
-                updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
+            {this.state.COMP.map( (component, index) =>
+              <Draggable
 
-                {...this.state.ui_props[component.id].properties}
-                />
-                {DEV_IDS
-                  ? <div className="debug tangible">
-                      <p className="tangible">{component.id}</p>
-                      <p className="tangible">{this.state.ui_props[component.id].id_module}</p>
-                    </div>
-                  : null}
-              </div>
+                // onDrag work in concert to separate drag and click conditions
+                handle=".unlocked_handle"// Do not respond if child buttons are dragged
+                onDrag={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();//
+                }}
+                onStop={(e) => {e.stopPropagation()}}
+              >
+                <div className={DEV_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: 10*(1+index), bottom: "auto", top: 10*(1+index), right: "auto"}}>
+                  <component.app
+                    disabled={!DEV_unlocked}
+                    updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
+
+                    {...this.state.ui_props[component.id].properties}
+                  />
+                  {DEV_IDS
+                    ? <div className="debug tangible">
+                        <p className="tangible">{component.id}</p>
+                        <p className="tangible">{this.state.ui_props[component.id].id_module}</p>
+                      </div>
+                    : null}
+                </div>
+              </Draggable>
             )}
           </div>
 
@@ -738,12 +752,23 @@ class App extends React.Component {
             }}
           >
             <div id="addrem" className="notepad tangible">
-              <button
-                className="non-drag tangible"
-                onClick={() =>
-                  this.loadNewApplet("dummy_applet_id")
-                }
-              >Add MenuButton</button>
+              <p className="tangible" style={{"margin-bottom":0}}>
+                Add Things:
+              </p>
+              <div>
+                <button
+                  className="non-drag tangible"
+                  onClick={() =>
+                    this.loadNewApplet("dummy_applet_id")
+                  }
+                >Add MenuButton</button>
+                <button
+                  className="non-drag tangible"
+                  onClick={() =>
+                    this.loadNewApplet("dumb_box")
+                  }
+                >Add Static Box</button>
+              </div>
               <p className="tangible" style={{"margin-bottom":0}}>
                 Remove following id:
               </p>
