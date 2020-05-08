@@ -25,10 +25,14 @@ let db_applets = new Datastore({
   filename : 'ui_applets',
   autoload : true //
 });
+let db_layout = new Datastore({
+  filename : 'layout_data',
+  autoload : true //
+});
 
 // TESTING
 const DEV_ALERT_HASHES = false;
-const DEV_IDS = false;
+const DEV_IDS = true;
 var DEV_unlocked = false;
 
 // -------------------------------------------------------
@@ -237,19 +241,29 @@ class App extends React.Component {
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
-      flyOutRadius: 120,
-      seperationAngle: 40,
-      mainButtonDiam: 90,
-      childButtonDiam: 50,
-      numElements: Object.keys(ELEMENTS).length,
-      stiffness: 320,
-      damping: 17,
-      rotation: 0,
-      mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-      mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-      mainButtonIconSize: 0.7,
-      childButtonIconSize: 0.7,
-      to_remove: "",
+      // flyOutRadius: 120,
+      // seperationAngle: 40,
+      // mainButtonDiam: 90,
+      // childButtonDiam: 50,
+      // numElements: Object.keys(ELEMENTS).length,
+      // stiffness: 320,
+      // damping: 17,
+      // rotation: 0,
+      // mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+      // mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+      // mainButtonIconSize: 0.7,
+      // childButtonIconSize: 0.7,
+      // to_remove: "",
+      location_props: {
+        jXoSuXvBgNfpUWua : {
+          x : 50,
+          y : 50
+        },
+        NUtGo3d4skI2ZVXh : {
+          x : 500,
+          y : 500
+        }
+      },
 
       COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
       temp_all_unlocked : false
@@ -447,9 +461,11 @@ class App extends React.Component {
     // Currently HARDCODED. TODO: Make dynamic
     let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
     let new_module2 = require('./applet_modules/TestStaticBox.js');
+    let new_module3 = require('./applet_modules/TestSpringBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
     MODULES["dumb_box"] = new_module2;
+    MODULES["spring_box"] = new_module3;
   }
 
   /**
@@ -470,7 +486,20 @@ class App extends React.Component {
           return applet;
         }));
       });
-    });//
+    });
+
+    // Promise to return an array of layout of the loaded applets
+    // let promise_layout = (id_array) => new Promise((resolve, reject) => {
+    //   dbFindAll(db_layout, { _id : { $in : id_array}}).then(layout => {
+    //
+    //     resolve(applets.map(applet => {
+    //       // Allow remapping through Module function, if desired/available
+    //       if ("propsMap" in MODULES[applet.id_module]){
+    //         MODULES[applet.id_module].propsMap(applet.properties);}
+    //       return applet;
+    //     }));
+    //   });
+    // });
 
     // Get array of loaded state trees then write each tree to state.ui_props
     promise.then(applet_state => {
@@ -481,19 +510,28 @@ class App extends React.Component {
         return map;//
       }, {});
 
-      // Write each stored state tree into the state.ui_props object
-      this.setState(prevState => ({
-        ui_props : state_tree
-      }));
-    }).then(() => {
-      // Add loaded applets to array for dynamic component loading
-      this.setState(prevState => ({
-        COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-          app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
-          id : id_instance
-        }))
-      }));
-    });
+      dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
+        let layout_tree = layouts.reduce((map, obj) => {
+          let { _id, ..._layout } = obj;
+          map[_id] = _layout;
+          return map;
+        }, {})
+
+        // Write each stored state tree into the state.ui_props object
+        this.setState(prevState => ({
+          ui_props : state_tree,
+          location_props : layout_tree
+        }));
+      }).then(() => {
+        // Add loaded applets to array for dynamic component loading
+        this.setState(prevState => ({
+          COMP : Object.keys(prevState.ui_props).map(id_instance => ({
+            app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+            id : id_instance
+          }))
+        }));
+      });
+    })
   }
 
   /**
@@ -511,6 +549,13 @@ class App extends React.Component {
       load_on_start : true,
       properties : MODULES[id_module].defaultProps()
     }).then(db_entry => {
+      // Insert the default location into the datastore
+      dbInsert(db_layout, {
+        _id : db_entry._id,
+        position : {x : 500, y : 500},
+        unlocked : false
+      })
+
       // Insert the default state tree into state.ui_props and load the component
       this.setState(prevState => ({
         ui_props : {...prevState.ui_props, ...{
@@ -518,6 +563,12 @@ class App extends React.Component {
             id_module : id_module,
             load_on_start : true,
             properties : MODULES[id_module].defaultProps()
+          }
+        }},
+        location_props : {...prevState.location_props, ...{
+          [db_entry._id] : {
+            position : {x : 500, y : 500},
+            unlocked : false
           }
         }},
         COMP : [...prevState.COMP, {
@@ -586,16 +637,34 @@ class App extends React.Component {
           <div id="component">
             {this.state.COMP.map( (component, index) =>
               <Draggable
-
                 // onDrag work in concert to separate drag and click conditions
                 handle=".unlocked_handle"// Do not respond if child buttons are dragged
                 onDrag={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();//
                 }}
-                onStop={(e) => {e.stopPropagation()}}
+                onStop={(e) => {
+                  let {x, y, ...pork}= document.getElementById(component.id).getBoundingClientRect()
+                  //let y = document.getElementById(component.id).getBoundingClientRect().y
+                  //alert(this.state.location_props[component.id].position.x)//
+                  //alert(y)
+
+                  // this.setState(prevState => ({
+                  //   location_props : {...prevState.location_props,
+                  //     [component.id] : {
+                  //       ...prevState.location_props[component.id],
+                  //       position : {x : x, y : y}
+                  //     }
+                  //   }
+                  // }));
+
+                  let a = {...this.state.location_props[component.id], position : {x : x, y : y}}
+
+                  // UD DB
+                  db_layout.update({_id : component.id}, a, {});
+                }}
               >
-                <div className={this.state.temp_all_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: 10*(1+index), bottom: "auto", top: 10*(1+index), right: "auto", zIndex:(4-index)}}>
+                <div id={component.id} className={this.state.temp_all_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position.x, bottom: "auto", top: this.state.location_props[component.id].position.y, right: "auto", zIndex:(4-index)}}>
                   <component.app
                     updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
 
@@ -774,6 +843,12 @@ class App extends React.Component {
                     this.loadNewApplet("dumb_box")
                   }
                 >Add Static Box</button>
+                <button
+                  className="non-drag tangible"
+                  onClick={() =>
+                    this.loadNewApplet("spring_box")
+                  }
+                >Add Spring Box</button>
               </div>
               <p className="tangible" style={{"margin-bottom":0}}>
                 Remove following id:
@@ -789,6 +864,17 @@ class App extends React.Component {
                 <input
                   className="non-drag tangible" {...this.getRemoveApplet()}
                 />
+              </div>
+              <p className="tangible" style={{"margin-bottom":0}}>
+                Get all positions:
+              </p>
+              <div>
+                <button
+                  className="non-drag tangible"
+                  onClick={() => {
+                    this.state.COMP.forEach((a)=>{alert(document.getElementById(a.id).getBoundingClientRect().x)});
+                  }}
+                >GET</button>
               </div>
             </div>
           </Draggable>
