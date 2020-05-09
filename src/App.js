@@ -280,7 +280,7 @@ class App extends React.Component {
     this.loadAppletsOnStart();
 
     //this.firstLoad();
-    this.updateLoad();
+    //this.updateLoad();
 
 
     // this.dummyLoad3();
@@ -348,58 +348,6 @@ class App extends React.Component {
   //   let new_applet = await import(applet_module);
   //   MODULES["dummy_applet_id"] = new_applet;
   // }
-
-  firstLoad() {
-    db_applets.insert({
-      id_module : "dummy_applet_id",
-      load_on_start : true,
-      properties : {
-        elements : ELEMENTS,
-        flyOutRadius: 120,
-        seperationAngle: 40,
-        mainButtonDiam: 90,
-        childButtonDiam: 50,
-        numElements: 4,
-        stiffness: 320,
-        damping: 17,
-        rotation: 0,
-        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-        mainButtonIconSize: 0.7,
-        childButtonIconSize: 0.7
-      }});
-  }
-
-  updateLoad() {
-    db_applets.update({_id : "FC4jXzlQZwxLaPd2"},{
-      id_module : "dummy_applet_id",
-      load_on_start : true,
-      properties : {
-        elements : ELEMENTS,
-        flyOutRadius: 240,
-        seperationAngle: 40,
-        mainButtonDiam: 90,
-        childButtonDiam: 25,
-        numElements: 4,
-        stiffness: 320,
-        damping: 17,
-        rotation: 0,
-        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-        mainButtonIconSize: 0.7,
-        childButtonIconSize: 0.7
-      }}, {});
-  }
-
-
-
-
-
-
-
-
-
-  //
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -487,19 +435,6 @@ class App extends React.Component {
         }));
       });
     });
-
-    // Promise to return an array of layout of the loaded applets
-    // let promise_layout = (id_array) => new Promise((resolve, reject) => {
-    //   dbFindAll(db_layout, { _id : { $in : id_array}}).then(layout => {
-    //
-    //     resolve(applets.map(applet => {
-    //       // Allow remapping through Module function, if desired/available
-    //       if ("propsMap" in MODULES[applet.id_module]){
-    //         MODULES[applet.id_module].propsMap(applet.properties);}
-    //       return applet;
-    //     }));
-    //   });
-    // });
 
     // Get array of loaded state trees then write each tree to state.ui_props
     promise.then(applet_state => {
@@ -642,7 +577,34 @@ class App extends React.Component {
               x : from_props.x+destination.x-current.x,
               y : from_props.y+destination.y-current.y
       }}}}
-  })}
+    })
+    this.updatePositionMemoryById(id_applet)
+  }//
+
+
+  /**
+   * Toggle the locked vs unlocked state of an applet and update the datastore
+   *     and state tree, based on the id_applet provided
+   * @param {string} id_applet The applet id for which to update
+   * @state Updates unlocked state of the state tree entry for id_applet
+   * @nedb Updates unlocked state of the datastore entry with a _id of id_applet
+   */
+  toggleUnlockById(id_applet) {
+    // Get the opposite fo the current locked/unlocked state
+    let toggled = !this.state.location_props[id_applet].unlocked
+
+    // Update unlocked state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {unlocked : toggled}}, {});//
+
+    // Update unlocked state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          unlocked : toggled
+    }}}))
+  }
+
+
 
 //
 
@@ -682,7 +644,7 @@ class App extends React.Component {
                   this.updatePositionMemoryById(component.id);
                 }}
               >
-                <div id={component.id} className={this.state.temp_all_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position.x, bottom: "auto", top: this.state.location_props[component.id].position.y, right: "auto", zIndex:(4-index)}}>
+                <div id={component.id} className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position.x, bottom: "auto", top: this.state.location_props[component.id].position.y, right: "auto", zIndex:(4-index)}}>
                   <component.app
                     updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
 
@@ -717,7 +679,8 @@ class App extends React.Component {
               <Toggle
                 defaultChecked={this.state.temp_all_unlocked}//
                 icons={false}
-                onChange={() => {this.setState(prevState => ({temp_all_unlocked : !prevState.temp_all_unlocked}))}} />
+                onChange={() => {this.setState(prevState => ({temp_all_unlocked : !prevState.temp_all_unlocked}))}}
+              />
               <p className="tangible" style={{"margin-bottom":0}}>
                 Add Things:
               </p>
@@ -768,6 +731,7 @@ class App extends React.Component {
                     // alert(this.state.location_props["kImCUqTaUPttETkf"].position.x);
 
                     this.moveToPositionById(this.state.to_remove, {x:50, y:50})
+                    //this.updatePositionMemoryById(this.state.to_remove)
                   }}
                 >GET</button>
               </div>
@@ -790,7 +754,22 @@ class App extends React.Component {
           >
             <div id="addrem" className="notepad tangible">
               {this.state.COMP.map( (component, index) =>
-                <p>{component.id}</p>
+                <div className="inlin">
+                  <p>{component.id}</p>
+                  <Toggle
+                    defaultChecked={this.state.location_props[component.id].unlocked}//
+                    icons={false}
+                    onChange={() => {
+                      this.toggleUnlockById(component.id)//
+                    //   this.setState(prevState => ({
+                    //     location_props : {...prevState.location_props,
+                    //       [component.id] : {...prevState.location_props[component.id],
+                    //         unlocked : !prevState.location_props[component.id].unlocked
+                    //   }}}
+                    // ))
+                    }}
+                  />
+                </div>
               )}
             </div>
           </Draggable>
