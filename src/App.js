@@ -612,6 +612,41 @@ class App extends React.Component {
   }
 
   /**
+   * Update the properties stored in the datastore to match the properties
+   *     stored in the current state, based on the id_module provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates the datastore entry with a _id of id_applet
+   */
+  updatePositionMemoryById(id_applet) {
+    let position_update = {...this.state.location_props[id_applet],
+      position : this.getPositionById(id_applet)
+    }
+
+    db_layout.update({_id : id_applet}, position_update, {});
+  }
+
+
+  getPositionById(id_applet) {
+    return (({ x, y }) => ({ x, y }))(document.getElementById(id_applet).getBoundingClientRect());
+  }
+
+  moveToPositionById(id_applet, destination) {
+    let current = this.getPositionById(id_applet)
+    this.setState(prevState => {
+      let from_props = prevState.location_props[id_applet].position
+
+      return {
+        location_props : {...prevState.location_props,
+          [id_applet] : {...prevState.location_props[id_applet],
+            position : {
+              x : from_props.x+destination.x-current.x,
+              y : from_props.y+destination.y-current.y
+      }}}}
+  })}
+
+//
+
+  /**
    * Render Application
    */
 
@@ -644,24 +679,7 @@ class App extends React.Component {
                   e.stopPropagation();//
                 }}
                 onStop={(e) => {
-                  let {x, y, ...pork}= document.getElementById(component.id).getBoundingClientRect()
-                  //let y = document.getElementById(component.id).getBoundingClientRect().y
-                  //alert(this.state.location_props[component.id].position.x)//
-                  //alert(y)
-
-                  // this.setState(prevState => ({
-                  //   location_props : {...prevState.location_props,
-                  //     [component.id] : {
-                  //       ...prevState.location_props[component.id],
-                  //       position : {x : x, y : y}
-                  //     }
-                  //   }
-                  // }));
-
-                  let a = {...this.state.location_props[component.id], position : {x : x, y : y}}
-
-                  // UD DB
-                  db_layout.update({_id : component.id}, a, {});
+                  this.updatePositionMemoryById(component.id);
                 }}
               >
                 <div id={component.id} className={this.state.temp_all_unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position.x, bottom: "auto", top: this.state.location_props[component.id].position.y, right: "auto", zIndex:(4-index)}}>
@@ -681,133 +699,6 @@ class App extends React.Component {
             )}
           </div>
 
-          {/*<div id="component">
-            <appPass.MenuButton
-              {...this.state} //.ui_props["dummy_id"].properties
-              setMainIcon={this.setMainIcon}
-              addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].properties.elements}
-            />
-          </div>*/}
-
-
-          {/*<Draggable
-            // onDrag work in concert to separate drag and click conditions
-            cancel=".non-drag" // Do not respond if child buttons are dragged
-            onDrag={() => this.isDragging = true}
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={() => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-            }}
-          >
-            <div id="config">
-              <h2>Application Properties</h2>
-              <ul>
-                <li>Add element: drag a file from your computer onto the center icon.</li>
-                <li>Remove element: Ctrl-Click on element to delete.</li>
-              </ul>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>fly out radius:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "flyOutRadius")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>seperation angle:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "seperationAngle")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "mainButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "childButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>stiffness:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "stiffness")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>damping:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "damping")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>rotation:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "rotation")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIcon")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() =>
-                          this.setState(prevState => ({
-                            ...prevState,
-                            ui_props: {
-                              ...prevState.ui_props,
-                              dummy_id: {
-                                ...prevState.ui_props.dummy_id,
-                                properties: {
-                                  ...prevState.ui_props.dummy_id.properties,
-                                  mainButtonDiam: 5 }}}}))
-                        }
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon size:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIconSize")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x notereallt")}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button icon size:</td>
-                    <td>
-                      <input
-                        className="non-drag" {...this.getInputProps(TEX, "childButtonIconSize")}
-                      />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Draggable>*/}
           <Draggable
             onDrag={() => this.isDragging = true}
             cancel=".non-drag"
@@ -870,12 +761,37 @@ class App extends React.Component {
               </p>
               <div>
                 <button
-                  className="non-drag tangible"
+                  className="non-drag tangible"//
                   onClick={() => {
-                    this.state.COMP.forEach((a)=>{alert(document.getElementById(a.id).getBoundingClientRect().x)});
+                    // alert(document.getElementById("kImCUqTaUPttETkf").getBoundingClientRect().x);
+                    // alert(document.getElementById("kImCUqTaUPttETkf").style.left);
+                    // alert(this.state.location_props["kImCUqTaUPttETkf"].position.x);
+
+                    this.moveToPositionById(this.state.to_remove, {x:50, y:50})
                   }}
                 >GET</button>
               </div>
+            </div>
+          </Draggable>
+
+          <Draggable
+            onDrag={() => this.isDragging = true}
+            cancel=".non-drag"
+            onClick={() => {
+              this.toggleMenu();
+            }}
+            onStop={() => {
+              if (!this.isDragging) {
+                return;
+              }
+
+              this.isDragging = false;
+            }}
+          >
+            <div id="addrem" className="notepad tangible">
+              {this.state.COMP.map( (component, index) =>
+                <p>{component.id}</p>
+              )}
             </div>
           </Draggable>
         </div>
