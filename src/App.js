@@ -449,6 +449,7 @@ class App extends React.Component {
         let layout_tree = layouts.reduce((map, obj) => {
           let { _id, ..._layout } = obj;
           map[_id] = _layout;
+          map[_id].position_current = map[_id].position_load;
           return map;
         }, {})
 
@@ -487,7 +488,7 @@ class App extends React.Component {
       // Insert the default location into the datastore
       dbInsert(db_layout, {
         _id : db_entry._id,
-        position : {x : 500, y : 500},
+        position_load : {x : 500, y : 500},
         unlocked : false
       })
 
@@ -502,7 +503,8 @@ class App extends React.Component {
         }},
         location_props : {...prevState.location_props, ...{
           [db_entry._id] : {
-            position : {x : 500, y : 500},
+            position_load : {x : 500, y : 500},
+            position_current : {x : 500, y : 500},
             unlocked : false
           }
         }},
@@ -546,6 +548,26 @@ class App extends React.Component {
     db_applets.remove({ _id : id_applet }, {})
   }
 
+
+  /**
+   * Update the state and the properties stored in the datastore to match a
+   *     position update due to dragging an applet, based on the id provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates through a call to updatePositionMemoryById()
+   */
+  updatePositionDraggedById(id_applet) {
+    // Update state to reflect the current position applet was dragget to
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          position_current : this.getPositionById(id_applet)
+    }}}),
+
+    // Update position memory after state is updated
+    () => this.updatePositionMemoryById(id_applet)
+  )}
+
+
   /**
    * Update the properties stored in the datastore to match the properties
    *     stored in the current state, based on the id_module provided
@@ -553,11 +575,11 @@ class App extends React.Component {
    * @nedb Updates the datastore entry with a _id of id_applet
    */
   updatePositionMemoryById(id_applet) {
-    let position_update = {...this.state.location_props[id_applet],
-      position : this.getPositionById(id_applet)
-    }
+    // let position_update = {...this.state.location_props[id_applet],
+    //   position : force_position ? force_position : this.getPositionById(id_applet)
+    // }
 
-    db_layout.update({_id : id_applet}, position_update, {});
+    db_layout.update({_id : id_applet}, { $set: {position_load : this.state.location_props[id_applet].position_current}}, {});
   }
 
 
@@ -566,20 +588,47 @@ class App extends React.Component {
   }
 
   moveToPositionById(id_applet, destination) {
-    let current = this.getPositionById(id_applet)
+    let new_x = "x" in destination
+    let new_y = "y" in destination
+
     this.setState(prevState => {
-      let from_props = prevState.location_props[id_applet].position
+      let from_props = prevState.location_props[id_applet].position_load
+      let current = prevState.location_props[id_applet].position_current
 
       return {
         location_props : {...prevState.location_props,
           [id_applet] : {...prevState.location_props[id_applet],
-            position : {
-              x : from_props.x+destination.x-current.x,
-              y : from_props.y+destination.y-current.y
-      }}}}
-    })
-    this.updatePositionMemoryById(id_applet)
-  }//
+            position_load : {
+              x : from_props.x + (new_x ? (destination.x-current.x) : 0),
+              y : from_props.y + (new_y ? (destination.y-current.y) : 0)},
+            position_current : {
+              x : (new_x ? destination.x : current.x),
+              y : (new_y ? destination.y : current.y)}
+      }}}
+    }, () => this.updatePositionMemoryById(id_applet))
+
+
+  }
+
+
+
+  getPosX(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_current.x,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
+    }};
+  }
+
+  getPosY(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_current.y,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {y:parseInt(target_value || 0, 10)})
+    }};
+  }
 
 
   /**
@@ -605,7 +654,7 @@ class App extends React.Component {
   }
 
 
-
+//
 //
 
   /**
@@ -641,10 +690,11 @@ class App extends React.Component {
                   e.stopPropagation();//
                 }}
                 onStop={(e) => {
-                  this.updatePositionMemoryById(component.id);
+                  this.updatePositionDraggedById(component.id);//
                 }}
               >
-                <div id={component.id} className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position.x, bottom: "auto", top: this.state.location_props[component.id].position.y, right: "auto", zIndex:(4-index)}}>
+                <div id={component.id} className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position_load.x, bottom: "auto", top: this.state.location_props[component.id].position_load.y, right: "auto", zIndex:(4-index)}}>
+                  <div className={this.state.location_props[component.id].unlocked ? "overlay" : ""}></div>
                   <component.app
                     updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
 
@@ -730,7 +780,7 @@ class App extends React.Component {
                     // alert(document.getElementById("kImCUqTaUPttETkf").style.left);
                     // alert(this.state.location_props["kImCUqTaUPttETkf"].position.x);
 
-                    this.moveToPositionById(this.state.to_remove, {x:50, y:50})
+                    this.moveToPositionById(this.state.to_remove, {y:50})
                     //this.updatePositionMemoryById(this.state.to_remove)
                   }}
                 >GET</button>
@@ -769,6 +819,8 @@ class App extends React.Component {
                     // ))
                     }}
                   />
+                  <input className="non-drag" {...this.getPosX(component.id)} />
+                  <input className="non-drag" {...this.getPosY(component.id)} />
                 </div>
               )}
             </div>

@@ -65,9 +65,17 @@ h2 {
   display:inline-block;
 }
 
-.unlocked_handle {
+/* .unlocked_handle {
   border: 2px solid red;
-  margin:-2px;
+} */
+
+.overlay {
+  position:absolute;
+  background-color:red;
+  opacity:0.4;
+  height:100%;
+  width:100%;
+  z-index:1;
 }
 
 #config {
