@@ -87,33 +87,6 @@ async function dbFindAll(datastore, token) {
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
 let MODULES = {};
-let COMP = [];//[<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>];
-let ELEMENTS = [
-  {
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    symlink: 'https://www.wikipedia.org/',
-    onClick: () => {
-      shell.openItem('https://www.wikipedia.org/')
-    }
-  },
-  {
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png",
-    symlink: 'https://www.google.com/',
-    onClick: () => {
-      shell.openItem('https://www.google.com/')
-    }
-  },
-  {
-    icon: "https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-512.png",
-    symlink: 'https://reactjs.org/',
-    onClick: () => { shell.openItem('https://reactjs.org/') }
-  },
-  {
-    icon: "https://intentionallt_errored_search",
-    symlink: 'https://en.wikipedia.org/wiki/Kitten',
-    onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
-  }
-];
 
 
 // UTILITY FUNCTIONS
@@ -241,113 +214,16 @@ class App extends React.Component {
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
-      // flyOutRadius: 120,
-      // seperationAngle: 40,
-      // mainButtonDiam: 90,
-      // childButtonDiam: 50,
-      // numElements: Object.keys(ELEMENTS).length,
-      // stiffness: 320,
-      // damping: 17,
-      // rotation: 0,
-      // mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-      // mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-      // mainButtonIconSize: 0.7,
-      // childButtonIconSize: 0.7,
-      // to_remove: "",
-      location_props: {
-        jXoSuXvBgNfpUWua : {
-          x : 50,
-          y : 50
-        },
-        NUtGo3d4skI2ZVXh : {
-          x : 500,
-          y : 500
-        }
-      },
-
-      COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
+      loaded_applets : [],
       temp_all_unlocked : false
 
-      // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
-      // ONLY REQUIRED BECAUSE THE HARDCODED PROPS MENU!!!!
-      //ui_props: {"dummy_id" : {properties : {elements: []}}}
     };
 
     // Load available Applets' modules
-    this.loadAppletModules();
-
-    // Load applet instance state from last run of program
+    this.loadAppletModules(); //.then???
     this.loadAppletsOnStart();
-
-    //this.firstLoad();
-    //this.updateLoad();
-
-
-    // this.dummyLoad3();
-    // this.state.ui_props = {elements: [
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
-    //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   },
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
-    //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   }
-    // ]};
   }
 
-  componentDidMount() {
-    //this.loadAppletsOnStart();
-
-    //alert(this.state.ui_props["dummy_id"].properties.elements);
-    // First load MODULES that are acceptable by applet id
-    //MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
-
-    //const applets_to_load = ["MenuButton.js"]//["D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\MenuButton.js"];
-    // applets_to_load.forEach( applet_module => {
-    //   //this.loads(applet_module);
-    //   //MODULES["dummy_applet_id"] = require("./applet_modules/" + applet_module);
-    //   // if (isDev) {
-    //   //   MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
-    //   // } else {
-    //   //   MODULES["dummy_applet_id"] = require("D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\applet_modules\\" + applet_module);
-    //   // }
-    //
-    //   //MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
-    // //   alert(applet_module);
-    // //   let new_applet = await import(applet_module).then( m => {
-    // //     MODULES["dummy_applet_id"] = m;
-    // //   });
-    // });
-
-    //this.dummyLoad3();
-  }
-
-  // async loads(applet_module) {
-  //   alert(applet_module);
-  //   let new_applet = await import(applet_module);
-  //   MODULES["dummy_applet_id"] = new_applet;
-  // }
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -385,6 +261,38 @@ class App extends React.Component {
     }};
   }
 
+  /**
+   * Provide the props required to implement functionality of state-editing
+   *     input boxes for applet x-positions. Populate input box with current
+   *     position, and move applet to new position if value is updated
+   * @param {string} id_applet The applet id to reference for position adjustment
+   * @return {Object} Returns object containing necessary props
+   */
+  getInputPropsPositionX(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_current.x,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
+    }};
+  }
+
+  /**
+   * Provide the props required to implement functionality of state-editing
+   *     input boxes for applet y-positions. Populate input box with current
+   *     position, and move applet to new position if value is updated
+   * @param {string} id_applet The applet id to reference for position adjustment
+   * @return {Object} Returns object containing necessary props
+   */
+  getInputPropsPositionY(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_current.y,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {y:parseInt(target_value || 0, 10)})
+    }};
+  }
+
   getRemoveApplet() {
     return {
       value: this.state.to_remove,
@@ -396,10 +304,6 @@ class App extends React.Component {
     }};
   }
 
-
-  /**
-   * Applet and Module - Load, Unload, and Update Functions
-   */
 
   /**
    * Load the array of Applet Modules to be available to the user and to the
@@ -449,7 +353,7 @@ class App extends React.Component {
         let layout_tree = layouts.reduce((map, obj) => {
           let { _id, ..._layout } = obj;
           map[_id] = _layout;
-          map[_id].position_current = map[_id].position_load;
+          map[_id].position_current = map[_id].position_root;
           return map;
         }, {})
 
@@ -461,7 +365,7 @@ class App extends React.Component {
       }).then(() => {
         // Add loaded applets to array for dynamic component loading
         this.setState(prevState => ({
-          COMP : Object.keys(prevState.ui_props).map(id_instance => ({
+          loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
             app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
             id : id_instance
           }))
@@ -488,27 +392,25 @@ class App extends React.Component {
       // Insert the default location into the datastore
       dbInsert(db_layout, {
         _id : db_entry._id,
-        position_load : {x : 500, y : 500},
+        position_root : {x : 500, y : 500},
         unlocked : false
       })
 
-      // Insert the default state tree into state.ui_props and load the component
+      // Insert the default state tree into state and load the component
       this.setState(prevState => ({
         ui_props : {...prevState.ui_props, ...{
           [db_entry._id] : {
             id_module : id_module,
             load_on_start : true,
             properties : MODULES[id_module].defaultProps()
-          }
-        }},
+        }}},
         location_props : {...prevState.location_props, ...{
           [db_entry._id] : {
-            position_load : {x : 500, y : 500},
+            position_root : {x : 500, y : 500},
             position_current : {x : 500, y : 500},
             unlocked : false
-          }
-        }},
-        COMP : [...prevState.COMP, {
+        }}},
+        loaded_applets : [...prevState.loaded_applets, {
           app : MODULES[id_module].AppletMain,
           id : db_entry._id
         }]
@@ -528,19 +430,21 @@ class App extends React.Component {
 
   /**
    * Remove an Applet by its id. Unload the component and remove its props from
-   *     the datastore and state tree.
+   *     the datastore and state.
    * @param {string} id_applet The applet id to be removed
-   * @state Removes id_applet from the keys within the state.ui_props object
+   * @state Removes id_applet from the keys within the state tree
    * @nedb Removes the datastore entry with a _id of id_applet
    */
   removeAppletById(id_applet) {
     // Remove Applet props from state and unload component
     this.setState(prevState => {
-      let {[id_applet]:omit, ...new_ui_props} = prevState.ui_props;
+      let {[id_applet]:omit1, ...new_ui_props} = prevState.ui_props;
+      let {[id_applet]:omit2, ...new_location_props} = prevState.location_props;
 
       return {
         ui_props : new_ui_props,
-        COMP: prevState.COMP.filter(component => component.id !== id_applet)
+        location_props : new_location_props,
+        loaded_applets: prevState.loaded_applets.filter(component => component.id !== id_applet)
       }
     });
 
@@ -553,9 +457,10 @@ class App extends React.Component {
    * Update the state and the properties stored in the datastore to match a
    *     position update due to dragging an applet, based on the id provided
    * @param {string} id_applet The applet id for which to update memory
+   * @state Updates position of the applet in the state tree entry for id_applet
    * @nedb Updates through a call to updatePositionMemoryById()
    */
-  updatePositionDraggedById(id_applet) {
+  updateDraggedById(id_applet) {
     // Update state to reflect the current position applet was dragget to
     this.setState(prevState => ({
       location_props : {...prevState.location_props,
@@ -567,67 +472,64 @@ class App extends React.Component {
     () => this.updatePositionMemoryById(id_applet)
   )}
 
-
   /**
-   * Update the properties stored in the datastore to match the properties
-   *     stored in the current state, based on the id_module provided
+   * Update the properties stored in the datastore so the applet's new load
+   *     position is the applet's current position, based on the id provided
    * @param {string} id_applet The applet id for which to update memory
    * @nedb Updates the datastore entry with a _id of id_applet
    */
   updatePositionMemoryById(id_applet) {
-    // let position_update = {...this.state.location_props[id_applet],
-    //   position : force_position ? force_position : this.getPositionById(id_applet)
-    // }
-
-    db_layout.update({_id : id_applet}, { $set: {position_load : this.state.location_props[id_applet].position_current}}, {});
+    // Update the datastore so the future root position is the current position
+    db_layout.update({_id : id_applet}, { $set: {position_root : this.state.location_props[id_applet].position_current}}, {});
   }
 
-
+  /**
+   * Get the current (actual) position of an applet, based on the id specified.
+   *     This method calls for the actual position on screen, which may differ
+   *     from state.location_props[id_applet].position_current depending on
+   *     when it is called.
+   * @param {string} id_applet The applet id for which to update
+   * @return {Object} Returns the x,y coordinate of the applet.
+   *     Example { 'x': 50, 'y': 500 }
+   */
   getPositionById(id_applet) {
     return (({ x, y }) => ({ x, y }))(document.getElementById(id_applet).getBoundingClientRect());
   }
 
-  moveToPositionById(id_applet, destination) {
-    let new_x = "x" in destination
-    let new_y = "y" in destination
+  /**
+   * Move an applet to a specific coordinate provided, based on the id specified
+   * @param {string} id_applet The applet id for which to update
+   * @param {Object} destination The location to move the applet to. Object
+   *     should contain x or y (or both) coordinates of destination. Garbage
+   *     keys will be ignored. Example: { 'x': 50, 'y': 500 }
+   * @state Updates position of the applet in the state tree entry for id_applet
+   * @nedb Updates through a call to updatePositionMemoryById()
+   */
+  moveToPositionById(id_applet, destination={}) {
+    // Has a new position x or y been provided?
+    let new_x = destination.hasOwnProperty('x')
+    let new_y = destination.hasOwnProperty('y')
 
-    this.setState(prevState => {
-      let from_props = prevState.location_props[id_applet].position_load
-      let current = prevState.location_props[id_applet].position_current
+    // If a new position is provided, update unlocked position state
+    if (new_x || new_y) {
+      this.setState(prevState => {
+        let root = prevState.location_props[id_applet].position_root
+        let current = prevState.location_props[id_applet].position_current
 
-      return {
-        location_props : {...prevState.location_props,
-          [id_applet] : {...prevState.location_props[id_applet],
-            position_load : {
-              x : from_props.x + (new_x ? (destination.x-current.x) : 0),
-              y : from_props.y + (new_y ? (destination.y-current.y) : 0)},
-            position_current : {
-              x : (new_x ? destination.x : current.x),
-              y : (new_y ? destination.y : current.y)}
-      }}}
-    }, () => this.updatePositionMemoryById(id_applet))
+        return {
+          location_props : {...prevState.location_props,
+            [id_applet] : {...prevState.location_props[id_applet],
+              position_root : {
+                x : root.x + (new_x ? (destination.x-current.x) : 0),
+                y : root.y + (new_y ? (destination.y-current.y) : 0)},
+              position_current : {
+                x : (new_x ? destination.x : current.x),
+                y : (new_y ? destination.y : current.y)}
+      }}}},
 
-
-  }
-
-
-
-  getPosX(applet_id) {
-    return {
-      value: this.state.location_props[applet_id].position_current.x,
-      onChange: e => {
-        let target_value = e.target.value;
-        this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
-    }};
-  }
-
-  getPosY(applet_id) {
-    return {
-      value: this.state.location_props[applet_id].position_current.y,
-      onChange: e => {
-        let target_value = e.target.value;
-        this.moveToPositionById(applet_id, {y:parseInt(target_value || 0, 10)})
-    }};
+      // Then call updatePositionMemoryById() to update the datastore
+      () => this.updatePositionMemoryById(id_applet)
+    )}
   }
 
 
@@ -643,7 +545,7 @@ class App extends React.Component {
     let toggled = !this.state.location_props[id_applet].unlocked
 
     // Update unlocked state in the datastore
-    db_layout.update({_id : id_applet}, { $set: {unlocked : toggled}}, {});//
+    db_layout.update({_id : id_applet}, { $set: {unlocked : toggled}}, {});
 
     // Update unlocked state in the location props state tree
     this.setState(prevState => ({
@@ -653,9 +555,6 @@ class App extends React.Component {
     }}}))
   }
 
-
-//
-//
 
   /**
    * Render Application
@@ -675,13 +574,8 @@ class App extends React.Component {
     return (
       <div id="app">
         <div id="content">
-
-          {/*<div id="component">
-            {this.state.COMP.map( component => component )}
-          </div>*/}
-
           <div id="component">
-            {this.state.COMP.map( (component, index) =>
+            {this.state.loaded_applets.map( (component, index) =>
               <Draggable
                 // onDrag work in concert to separate drag and click conditions
                 handle=".unlocked_handle"// Do not respond if child buttons are dragged
@@ -690,10 +584,20 @@ class App extends React.Component {
                   e.stopPropagation();//
                 }}
                 onStop={(e) => {
-                  this.updatePositionDraggedById(component.id);//
+                  this.updateDraggedById(component.id);//
                 }}
               >
-                <div id={component.id} className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""} style={{position: "absolute", left: this.state.location_props[component.id].position_load.x, bottom: "auto", top: this.state.location_props[component.id].position_load.y, right: "auto", zIndex:(4-index)}}>
+                <div
+                  id={component.id}
+                  className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""}
+                  style={{
+                    position: "absolute",
+                    left: this.state.location_props[component.id].position_root.x,
+                    bottom: "auto",
+                    top: this.state.location_props[component.id].position_root.y,
+                    right: "auto",
+                    zIndex:(4-index)
+                }}>
                   <div className={this.state.location_props[component.id].unlocked ? "overlay" : ""}></div>
                   <component.app
                     updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
@@ -780,7 +684,7 @@ class App extends React.Component {
                     // alert(document.getElementById("kImCUqTaUPttETkf").style.left);
                     // alert(this.state.location_props["kImCUqTaUPttETkf"].position.x);
 
-                    this.moveToPositionById(this.state.to_remove, {y:50})
+                    this.moveToPositionById(this.state.to_remove)
                     //this.updatePositionMemoryById(this.state.to_remove)
                   }}
                 >GET</button>
@@ -803,7 +707,7 @@ class App extends React.Component {
             }}
           >
             <div id="addrem" className="notepad tangible">
-              {this.state.COMP.map( (component, index) =>
+              {this.state.loaded_applets.map( (component, index) =>
                 <div className="inlin">
                   <p>{component.id}</p>
                   <Toggle
@@ -819,8 +723,8 @@ class App extends React.Component {
                     // ))
                     }}
                   />
-                  <input className="non-drag" {...this.getPosX(component.id)} />
-                  <input className="non-drag" {...this.getPosY(component.id)} />
+                  <input className="non-drag" {...this.getInputPropsPositionX(component.id)} />
+                  <input className="non-drag" {...this.getInputPropsPositionY(component.id)} />
                 </div>
               )}
             </div>
