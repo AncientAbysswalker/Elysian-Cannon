@@ -69,10 +69,22 @@ h2 {
   border: 2px solid red;
 } */
 
-.overlay {
+.highlight {
   position:absolute;
+  pointer-events: none;
   background-color:red;
-  opacity:0.4;
+  opacity:0.3;
+  height:100%;
+  width:100%;
+  z-index:1;
+}
+
+.outline {
+  position:absolute;
+  pointer-events: none;
+  left: -5px;
+  top: -5px;
+  border: 5px solid red;
   height:100%;
   width:100%;
   z-index:1;

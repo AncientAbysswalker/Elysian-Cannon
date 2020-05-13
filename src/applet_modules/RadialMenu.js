@@ -477,10 +477,8 @@ class AppletMain extends React.Component {
     let isDragging = false;
 
     return (
-      <Draggable
-
-        // onDrag work in concert to separate drag and click conditions
-        cancel=".button-child" // Do not respond if child buttons are dragged
+      <div className="button-container tangible" 
+        // style={{position: "absolute", left: 100, bottom: "auto", top: 100, right: "auto"}}
         onDrag={() => this.isDragging = true}
         onClick={() => {
           this.toggleMenu();
@@ -492,20 +490,16 @@ class AppletMain extends React.Component {
 
           this.isDragging = false;
         }}
-      >
-        <div className="button-container tangible"
-        // style={{position: "absolute", left: 100, bottom: "auto", top: 100, right: "auto"}}
         onDrop={e => this.handleDrop(e)}
         onDragOver={e => this.handleDragOver(e)}
         onDragEnter={e => this.handleDragEnter(e)}
         onDragLeave={e => this.handleDragLeave(e)}
-        >
-          {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
-          <div {...cp.mainButtonProps()}> {/* Button element */}
-            <img {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
-          </div>
+      >
+        {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
+        <div {...cp.mainButtonProps()}> {/* Button element */}
+          <img {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
         </div>
-      </Draggable>
+      </div>
     );
   }
 }
@@ -562,4 +556,4 @@ function defaultProps() {
   }
 }
 
-export {ELEMENTS, AppletMain, defaultProps, propsMap, test}
+export {AppletMain, defaultProps, propsMap}

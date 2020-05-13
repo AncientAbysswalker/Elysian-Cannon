@@ -311,7 +311,7 @@ class App extends React.Component {
    */
   loadAppletModules() {
     // Currently HARDCODED. TODO: Make dynamic
-    let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
+    let new_module = require('./applet_modules/RadialMenu.js');//{MenuButton : MenuButton2};
     let new_module2 = require('./applet_modules/TestStaticBox.js');
     let new_module3 = require('./applet_modules/TestSpringBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
@@ -366,7 +366,7 @@ class App extends React.Component {
         // Add loaded applets to array for dynamic component loading
         this.setState(prevState => ({
           loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
-            app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+            main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
             id : id_instance
           }))
         }));
@@ -393,7 +393,8 @@ class App extends React.Component {
       dbInsert(db_layout, {
         _id : db_entry._id,
         position_root : {x : 500, y : 500},
-        unlocked : false
+        unlocked : false,
+        highlighted : false
       })
 
       // Insert the default state tree into state and load the component
@@ -408,10 +409,11 @@ class App extends React.Component {
           [db_entry._id] : {
             position_root : {x : 500, y : 500},
             position_current : {x : 500, y : 500},
-            unlocked : false
+            unlocked : false,
+            highlighted : false
         }}},
         loaded_applets : [...prevState.loaded_applets, {
-          app : MODULES[id_module].AppletMain,
+          main : MODULES[id_module].AppletMain,
           id : db_entry._id
         }]
       }));
@@ -444,7 +446,7 @@ class App extends React.Component {
       return {
         ui_props : new_ui_props,
         location_props : new_location_props,
-        loaded_applets: prevState.loaded_applets.filter(component => component.id !== id_applet)
+        loaded_applets: prevState.loaded_applets.filter(applet => applet.id !== id_applet)
       }
     });
 
@@ -541,7 +543,7 @@ class App extends React.Component {
    * @nedb Updates unlocked state of the datastore entry with a _id of id_applet
    */
   toggleUnlockById(id_applet) {
-    // Get the opposite fo the current locked/unlocked state
+    // Get the opposite of the current locked/unlocked state
     let toggled = !this.state.location_props[id_applet].unlocked
 
     // Update unlocked state in the datastore
@@ -555,6 +557,20 @@ class App extends React.Component {
     }}}))
   }
 
+  toggleHighlightById(id_applet) {
+    // Get the opposite of the current highlighted state
+    let toggled = !this.state.location_props[id_applet].highlighted
+
+    // Update highlighted state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {highlighted : toggled}}, {});
+
+    // Update highlighted state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          highlighted : toggled
+    }}}))
+  }
 
   /**
    * Render Application
@@ -575,39 +591,40 @@ class App extends React.Component {
       <div id="app">
         <div id="content">
           <div id="component">
-            {this.state.loaded_applets.map( (component, index) =>
-              <Draggable
-                // onDrag work in concert to separate drag and click conditions
-                handle=".unlocked_handle"// Do not respond if child buttons are dragged
-                onDrag={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();//
-                }}
-                onStop={(e) => {
-                  this.updateDraggedById(component.id);//
-                }}
+            {this.state.loaded_applets.map( (applet, index) =>
+              <Draggable // Enable dragability of the contained elements
+                handle=".unlocked_handle" // Classname to act as drag handle
+                onClick={(e) => e.stopPropagation()}
+                onClickCapture={(e) => e.stopPropagation()}
+                onStop={(e) => this.updateDraggedById(applet.id)} // Update memory and state if dragged
               >
-                <div
-                  id={component.id}
-                  className={this.state.location_props[component.id].unlocked ? "unlocked_handle" : ""}
+                <div // Controls the position through ID and acts as drag handle
+                  id={applet.id}
+                  className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
                   style={{
                     position: "absolute",
-                    left: this.state.location_props[component.id].position_root.x,
-                    bottom: "auto",
-                    top: this.state.location_props[component.id].position_root.y,
-                    right: "auto",
-                    zIndex:(4-index)
-                }}>
-                  <div className={this.state.location_props[component.id].unlocked ? "overlay" : ""}></div>
-                  <component.app
-                    updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
+                    left: this.state.location_props[applet.id].position_root.x,
+                    top: this.state.location_props[applet.id].position_root.y,
+                    zIndex:(4-index) // Allow settable depth!//
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div // Acts as outline when selected
+                    className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
+                  />
+                  <div // Acts as highlight when selected
+                    className={this.state.location_props[applet.id].highlighted ? "highlight" : ""}
+                  />
+                  <applet.main // The actual loaded applet
+                    {...this.state.ui_props[applet.id].properties} // Import props from state
 
-                    {...this.state.ui_props[component.id].properties}
+                    // Pass methods from controller to applet
+                    updateAppletMemory={() => (this.updateAppletMemoryById(applet.id))}
                   />
                   {DEV_IDS
                     ? <div className="debug tangible">
-                        <p className="tangible">{component.id}</p>
-                        <p className="tangible">{this.state.ui_props[component.id].id_module}</p>
+                        <p className="tangible">{applet.id}</p>
+                        <p className="tangible">{this.state.ui_props[applet.id].id_module}</p>
                       </div>
                     : null}
                 </div>
@@ -621,12 +638,13 @@ class App extends React.Component {
             onClick={() => {
               this.toggleMenu();
             }}
-            onStop={() => {
+            onStop={(e) => {
               if (!this.isDragging) {
                 return;
               }
 
               this.isDragging = false;
+              e.preventDefault()
             }}
           >
             <div id="addrem" className="notepad tangible">
@@ -693,38 +711,28 @@ class App extends React.Component {
           </Draggable>
 
           <Draggable
-            onDrag={() => this.isDragging = true}
             cancel=".non-drag"
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={() => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-            }}
           >
             <div id="addrem" className="notepad tangible">
-              {this.state.loaded_applets.map( (component, index) =>
+              {this.state.loaded_applets.map( (applet, index) =>
                 <div className="inlin">
-                  <p>{component.id}</p>
+                  <p>{applet.id}</p>
                   <Toggle
-                    defaultChecked={this.state.location_props[component.id].unlocked}//
+                    className="non-drag"
+                    defaultChecked={this.state.location_props[applet.id].unlocked}
                     icons={false}
-                    onChange={() => {
-                      this.toggleUnlockById(component.id)//
-                    //   this.setState(prevState => ({
-                    //     location_props : {...prevState.location_props,
-                    //       [component.id] : {...prevState.location_props[component.id],
-                    //         unlocked : !prevState.location_props[component.id].unlocked
-                    //   }}}
-                    // ))
-                    }}
+                    onChange={() => this.toggleUnlockById(applet.id)}
                   />
-                  <input className="non-drag" {...this.getInputPropsPositionX(component.id)} />
-                  <input className="non-drag" {...this.getInputPropsPositionY(component.id)} />
+                  <Toggle
+                    className="non-drag"
+                    defaultChecked={this.state.location_props[applet.id].highlighted}
+                    icons={false}
+                    onChange={() => this.toggleHighlightById(applet.id)}
+                  />
+                  <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
+                  <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
+                  <input className="non-drag" value={this.state.location_props[applet.id].position_root.x} />
+                  <input className="non-drag" value={this.state.location_props[applet.id].position_root.y} />
                 </div>
               )}
             </div>
