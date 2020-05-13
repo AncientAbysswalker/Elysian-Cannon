@@ -270,7 +270,7 @@ class App extends React.Component {
    */
   getInputPropsPositionX(applet_id) {
     return {
-      value: this.state.location_props[applet_id].position_current.x,
+      value: this.state.location_props[applet_id].position_root.x,
       onChange: e => {
         let target_value = e.target.value;
         this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
@@ -286,7 +286,7 @@ class App extends React.Component {
    */
   getInputPropsPositionY(applet_id) {
     return {
-      value: this.state.location_props[applet_id].position_current.y,
+      value: this.state.location_props[applet_id].position_root.y,
       onChange: e => {
         let target_value = e.target.value;
         this.moveToPositionById(applet_id, {y:parseInt(target_value || 0, 10)})
@@ -462,12 +462,14 @@ class App extends React.Component {
    * @state Updates position of the applet in the state tree entry for id_applet
    * @nedb Updates through a call to updatePositionMemoryById()
    */
-  updateDraggedById(id_applet) {
-    // Update state to reflect the current position applet was dragget to
+  updateDraggedById(e, new_position, id_applet) {
+    //Update state to reflect the current position applet was dragged to
+    const {x, y} = new_position
+
     this.setState(prevState => ({
       location_props : {...prevState.location_props,
         [id_applet] : {...prevState.location_props[id_applet],
-          position_current : this.getPositionById(id_applet)
+          position_root : {x, y}
     }}}),
 
     // Update position memory after state is updated
@@ -482,7 +484,8 @@ class App extends React.Component {
    */
   updatePositionMemoryById(id_applet) {
     // Update the datastore so the future root position is the current position
-    db_layout.update({_id : id_applet}, { $set: {position_root : this.state.location_props[id_applet].position_current}}, {});
+
+    db_layout.update({_id : id_applet}, { $set: {position_root : this.state.location_props[id_applet].position_root}}, {});
   }
 
   /**
@@ -522,12 +525,13 @@ class App extends React.Component {
           location_props : {...prevState.location_props,
             [id_applet] : {...prevState.location_props[id_applet],
               position_root : {
-                x : root.x + (new_x ? (destination.x-current.x) : 0),
-                y : root.y + (new_y ? (destination.y-current.y) : 0)},
+                x : new_x ? destination.x : root.x,
+                y : new_y ? destination.y : root.y},
               position_current : {
                 x : (new_x ? destination.x : current.x),
                 y : (new_y ? destination.y : current.y)}
-      }}}},
+        }}}
+      },
 
       // Then call updatePositionMemoryById() to update the datastore
       () => this.updatePositionMemoryById(id_applet)
@@ -592,43 +596,42 @@ class App extends React.Component {
         <div id="content">
           <div id="component">
             {this.state.loaded_applets.map( (applet, index) =>
-              <Draggable // Enable dragability of the contained elements
-                handle=".unlocked_handle" // Classname to act as drag handle
-                onClick={(e) => e.stopPropagation()}
-                onClickCapture={(e) => e.stopPropagation()}
-                onStop={(e) => this.updateDraggedById(applet.id)} // Update memory and state if dragged
+              <div // Force all applets to call (0,0) home (relative to browser)
+                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].position_root.x}}
               >
-                <div // Controls the position through ID and acts as drag handle
-                  id={applet.id}
-                  className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
-                  style={{
-                    position: "absolute",
-                    left: this.state.location_props[applet.id].position_root.x,
-                    top: this.state.location_props[applet.id].position_root.y,
-                    zIndex:(4-index) // Allow settable depth!//
-                  }}
-                  onClick={e => e.stopPropagation()}
+                <Draggable // Enable dragability of the contained elements
+                  handle=".unlocked_handle" // Classname to act as drag handle
+                  onStop={(e, new_pos) => this.updateDraggedById(e, new_pos, applet.id)}
+                  position={this.state.location_props[applet.id].position_root}
                 >
-                  <div // Acts as outline when selected
-                    className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
-                  />
-                  <div // Acts as highlight when selected
-                    className={this.state.location_props[applet.id].highlighted ? "highlight" : ""}
-                  />
-                  <applet.main // The actual loaded applet
-                    {...this.state.ui_props[applet.id].properties} // Import props from state
+                  <div // Acts as drag handle
+                    id={applet.id}
+                    className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
+                    style={{
+                      zIndex:(4-index) // Allow settable depth!//
+                    }}
+                  >
+                    <div // Acts as outline when selected
+                      className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
+                    />
+                    <div // Acts as highlight when selected
+                      className={this.state.location_props[applet.id].highlighted ? "highlight" : ""}
+                    />
+                    <applet.main // The actual loaded applet
+                      {...this.state.ui_props[applet.id].properties} // Import props from state
 
-                    // Pass methods from controller to applet
-                    updateAppletMemory={() => (this.updateAppletMemoryById(applet.id))}
-                  />
-                  {DEV_IDS
-                    ? <div className="debug tangible">
-                        <p className="tangible">{applet.id}</p>
-                        <p className="tangible">{this.state.ui_props[applet.id].id_module}</p>
-                      </div>
-                    : null}
-                </div>
-              </Draggable>
+                      // Pass methods from controller to applet
+                      updateAppletMemory={() => (this.updateAppletMemoryById(applet.id))}
+                    />
+                    {DEV_IDS
+                      ? <div className="debug tangible">
+                          <p className="tangible">{applet.id}</p>
+                          <p className="tangible">{this.state.ui_props[applet.id].id_module}</p>
+                        </div>
+                      : null}
+                  </div>
+                </Draggable>
+              </div>
             )}
           </div>
 
