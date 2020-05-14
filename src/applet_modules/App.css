@@ -38,71 +38,7 @@ h2 {
   flex-direction: column;
 }
 
-.inline div {
-  display: inline-block;
-}
-
-.debug {
-  padding: 5px;
-  background-color: white;
-  border: 1px solid #efefef;
-}
-
-.debug > p {
-  margin: 0px;
-  font-size: 11px;
-}
-
-.inlin {
-  border: 2px solid red;
-  padding: 0;
-  margin: 0;
-}
-
-.inlin > * {
-  padding: 0;
-  margin: 5;
-  display:inline-block;
-}
-
-/* .unlocked_handle {
-  border: 2px solid red;
-} */
-
-.highlight {
-  position:absolute;
-  pointer-events: none;
-  background-color:red;
-  opacity:0.3;
-  height:100%;
-  width:100%;
-  z-index:1;
-}
-
-.outline {
-  position:absolute;
-  pointer-events: none;
-  left: -5px;
-  top: -5px;
-  border: 5px solid red;
-  height:100%;
-  width:100%;
-  z-index:1;
-}
-
 #config {
-  background-color: white;
-  border: 1px solid #efefef;
-  box-shadow:
-  /* The top layer shadow */ 0 1px 1px rgba(0, 0, 0, 0.15),
-    /* The second layer */ 0 10px 0 -5px #eee,
-    /* The second layer shadow */ 0 10px 1px -4px rgba(0, 0, 0, 0.15),
-    /* The third layer */ 0 20px 0 -10px #eee,
-    /* The third layer shadow */ 0 20px 1px -9px rgba(0, 0, 0, 0.15);
-  padding: 30px;
-}
-
-.notepad {
   background-color: white;
   border: 1px solid #efefef;
   box-shadow:

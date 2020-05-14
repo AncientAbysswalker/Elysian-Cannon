@@ -1,8 +1,10 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
+import Toggle from 'react-toggle'
 
 import './App.css';
+import './react-toggle.css'
 
 // Development build or production?
 const isDev = window.require('electron-is-dev');
@@ -23,11 +25,15 @@ let db_applets = new Datastore({
   filename : 'ui_applets',
   autoload : true //
 });
+let db_layout = new Datastore({
+  filename : 'layout_data',
+  autoload : true //
+});
 
 // TESTING
-const DEV_ALERT_HASHES = false; //
+const DEV_ALERT_HASHES = false;
 const DEV_IDS = true;
-
+var DEV_unlocked = false;
 
 // -------------------------------------------------------
 // ---------------  DATABASE FUNCTIONS   -----------------
@@ -81,33 +87,6 @@ async function dbFindAll(datastore, token) {
 // CONSTANTS
 const DEG_TO_RAD = 0.0174533;
 let MODULES = {};
-let COMP = [];//[<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>];
-let ELEMENTS = [
-  {
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    symlink: 'https://www.wikipedia.org/',
-    onClick: () => {
-      shell.openItem('https://www.wikipedia.org/')
-    }
-  },
-  {
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png",
-    symlink: 'https://www.google.com/',
-    onClick: () => {
-      shell.openItem('https://www.google.com/')
-    }
-  },
-  {
-    icon: "https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-512.png",
-    symlink: 'https://reactjs.org/',
-    onClick: () => { shell.openItem('https://reactjs.org/') }
-  },
-  {
-    icon: "https://intentionallt_errored_search",
-    symlink: 'https://en.wikipedia.org/wiki/Kitten',
-    onClick: () => { shell.openItem('https://en.wikipedia.org/wiki/Kitten') }
-  }
-];
 
 
 // UTILITY FUNCTIONS
@@ -235,154 +214,14 @@ class App extends React.Component {
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
-      flyOutRadius: 120,
-      seperationAngle: 40,
-      mainButtonDiam: 90,
-      childButtonDiam: 50,
-      numElements: Object.keys(ELEMENTS).length,
-      stiffness: 320,
-      damping: 17,
-      rotation: 0,
-      mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-      mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-      mainButtonIconSize: 0.7,
-      childButtonIconSize: 0.7,
-      to_remove: "",
-
-      COMP : [], //<p>REACTIVE DYNAMICS</p>, <div><p>DESTRUCTIVE DYNAMICS</p><p>DESTRUCTIVE DYNAMICS</p></div>
-
-      // Apparently this is EXTREMELY IMPORTANT - Need to fix that...
-      // ONLY REQUIRED BECAUSE THE HARDCODED PROPS MENU!!!!
-      //ui_props: {"dummy_id" : {properties : {elements: []}}}
+      loaded_applets : [],
     };
 
     // Load available Applets' modules
-    this.loadAppletModules();
-
-    // Load applet instance state from last run of program
+    this.loadAppletModules(); //.then???
     this.loadAppletsOnStart();
-
-    //this.firstLoad();
-    this.updateLoad();
-
-
-    // this.dummyLoad3();
-    // this.state.ui_props = {elements: [
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
-    //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   },
-    //   {
-    //     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/800px-Wikipedia-logo-v2.svg.png",
-    //     symlink: 'https://www.wikipedia.org/',
-    //     onClick: () => {
-    //       shell.openItem('https://www.wikipedia.org/')
-    //
-    //       // var Datastore = require('nedb'), db = new Datastore({filename : 'guitars'});
-    //       // db.loadDatabase();
-    //
-    //       // alert(9);
-    //       // db.insert({name : "fender jazz bass", year:1977});
-    //       //db.update({year : 1977}, {name : "gibson thunderbird", year: 1990}, {});
-    //     }
-    //   }
-    // ]};
   }
 
-  componentDidMount() {
-    //this.loadAppletsOnStart();
-
-    //alert(this.state.ui_props["dummy_id"].properties.elements);
-    // First load MODULES that are acceptable by applet id
-    //MODULES["dummy_applet_id"] = require('./applet_modules/MenuButton');
-
-    //const applets_to_load = ["MenuButton.js"]//["D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\MenuButton.js"];
-    // applets_to_load.forEach( applet_module => {
-    //   //this.loads(applet_module);
-    //   //MODULES["dummy_applet_id"] = require("./applet_modules/" + applet_module);
-    //   // if (isDev) {
-    //   //   MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
-    //   // } else {
-    //   //   MODULES["dummy_applet_id"] = require("D:\\SoftwareProjects\\Javascript\\Elysian Cannon\\src\\applet_modules\\" + applet_module);
-    //   // }
-    //
-    //   //MODULES["dummy_applet_id"] = require("D:/SoftwareProjects/Javascript/Elysian Cannon/src/applet_modules/" + applet_module);
-    // //   alert(applet_module);
-    // //   let new_applet = await import(applet_module).then( m => {
-    // //     MODULES["dummy_applet_id"] = m;
-    // //   });
-    // });
-
-    //this.dummyLoad3();
-  }
-
-  // async loads(applet_module) {
-  //   alert(applet_module);
-  //   let new_applet = await import(applet_module);
-  //   MODULES["dummy_applet_id"] = new_applet;
-  // }
-
-  firstLoad() {
-    db_applets.insert({
-      id_module : "dummy_applet_id",
-      load_on_start : true,
-      properties : {
-        elements : ELEMENTS,
-        flyOutRadius: 120,
-        seperationAngle: 40,
-        mainButtonDiam: 90,
-        childButtonDiam: 50,
-        numElements: 4,
-        stiffness: 320,
-        damping: 17,
-        rotation: 0,
-        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-        mainButtonIconSize: 0.7,
-        childButtonIconSize: 0.7
-      }});
-  }
-
-  updateLoad() {
-    db_applets.update({_id : "FC4jXzlQZwxLaPd2"},{
-      id_module : "dummy_applet_id",
-      load_on_start : true,
-      properties : {
-        elements : ELEMENTS,
-        flyOutRadius: 240,
-        seperationAngle: 40,
-        mainButtonDiam: 90,
-        childButtonDiam: 25,
-        numElements: 4,
-        stiffness: 320,
-        damping: 17,
-        rotation: 0,
-        mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-        mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-        mainButtonIconSize: 0.7,
-        childButtonIconSize: 0.7
-      }}, {});
-  }
-
-
-
-
-
-
-
-
-
-  //
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -420,6 +259,38 @@ class App extends React.Component {
     }};
   }
 
+  /**
+   * Provide the props required to implement functionality of state-editing
+   *     input boxes for applet x-positions. Populate input box with current
+   *     position, and move applet to new position if value is updated
+   * @param {string} id_applet The applet id to reference for position adjustment
+   * @return {Object} Returns object containing necessary props
+   */
+  getInputPropsPositionX(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_root.x,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
+    }};
+  }
+
+  /**
+   * Provide the props required to implement functionality of state-editing
+   *     input boxes for applet y-positions. Populate input box with current
+   *     position, and move applet to new position if value is updated
+   * @param {string} id_applet The applet id to reference for position adjustment
+   * @return {Object} Returns object containing necessary props
+   */
+  getInputPropsPositionY(applet_id) {
+    return {
+      value: this.state.location_props[applet_id].position_root.y,
+      onChange: e => {
+        let target_value = e.target.value;
+        this.moveToPositionById(applet_id, {y:parseInt(target_value || 0, 10)})
+    }};
+  }
+
   getRemoveApplet() {
     return {
       value: this.state.to_remove,
@@ -433,18 +304,16 @@ class App extends React.Component {
 
 
   /**
-   * Applet and Module - Load, Unload, and Update Functions
-   */
-
-  /**
    * Load the array of Applet Modules to be available to the user and to the
    *     application as a whole.
    */
   loadAppletModules() {
     // Currently HARDCODED. TODO: Make dynamic
-    let new_module = require('./applet_modules/MenuButton.js');//{MenuButton : MenuButton2};
+    let new_module = require('./applet_modules/RadialMenu.js');//{MenuButton : MenuButton2};
+    let new_module2 = require('./applet_modules/TestStaticBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
+    MODULES["dumb_box"] = new_module2;
   }
 
   /**
@@ -465,7 +334,7 @@ class App extends React.Component {
           return applet;
         }));
       });
-    });//
+    });
 
     // Get array of loaded state trees then write each tree to state.ui_props
     promise.then(applet_state => {
@@ -476,19 +345,28 @@ class App extends React.Component {
         return map;//
       }, {});
 
-      // Write each stored state tree into the state.ui_props object
-      this.setState(prevState => ({
-        ui_props : state_tree
-      }));
-    }).then(() => {
-      // Add loaded applets to array for dynamic component loading
-      this.setState(prevState => ({
-        COMP : Object.keys(prevState.ui_props).map(id_instance => ({
-          app : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
-          id : id_instance
-        }))
-      }));
-    });
+      dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
+        let layout_tree = layouts.reduce((map, obj) => {
+          let { _id, ..._layout } = obj;
+          map[_id] = _layout;
+          return map;
+        }, {})
+
+        // Write each stored state tree into the state.ui_props object
+        this.setState(prevState => ({
+          ui_props : state_tree,
+          location_props : layout_tree
+        }));
+      }).then(() => {
+        // Add loaded applets to array for dynamic component loading
+        this.setState(prevState => ({
+          loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
+            main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+            id : id_instance
+          }))
+        }));
+      });
+    })
   }
 
   /**
@@ -506,17 +384,32 @@ class App extends React.Component {
       load_on_start : true,
       properties : MODULES[id_module].defaultProps()
     }).then(db_entry => {
-      // Insert the default state tree into state.ui_props and load the component
+      // Insert the default location into the datastore
+      dbInsert(db_layout, {
+        _id : db_entry._id,
+        position_root : {x : 500, y : 500},
+        depth : 0,
+        unlocked : false,
+        highlighted : false
+      })
+
+      // Insert the default state tree into state and load the component
       this.setState(prevState => ({
         ui_props : {...prevState.ui_props, ...{
           [db_entry._id] : {
             id_module : id_module,
             load_on_start : true,
             properties : MODULES[id_module].defaultProps()
-          }
-        }},
-        COMP : [...prevState.COMP, {
-          app : MODULES[id_module].AppletMain,
+        }}},
+        location_props : {...prevState.location_props, ...{
+          [db_entry._id] : {
+            position_root : {x : 500, y : 500},
+            depth : 0,
+            unlocked : false,
+            highlighted : false
+        }}},
+        loaded_applets : [...prevState.loaded_applets, {
+          main : MODULES[id_module].AppletMain,
           id : db_entry._id
         }]
       }));
@@ -535,19 +428,21 @@ class App extends React.Component {
 
   /**
    * Remove an Applet by its id. Unload the component and remove its props from
-   *     the datastore and state tree.
+   *     the datastore and state.
    * @param {string} id_applet The applet id to be removed
-   * @state Removes id_applet from the keys within the state.ui_props object
+   * @state Removes id_applet from the keys within the state tree
    * @nedb Removes the datastore entry with a _id of id_applet
    */
   removeAppletById(id_applet) {
     // Remove Applet props from state and unload component
     this.setState(prevState => {
-      let {[id_applet]:omit, ...new_ui_props} = prevState.ui_props;
+      let {[id_applet]:omit1, ...new_ui_props} = prevState.ui_props;
+      let {[id_applet]:omit2, ...new_location_props} = prevState.location_props;
 
       return {
         ui_props : new_ui_props,
-        COMP: prevState.COMP.filter(component => component.id !== id_applet)
+        location_props : new_location_props,
+        loaded_applets: prevState.loaded_applets.filter(applet => applet.id !== id_applet)
       }
     });
 
@@ -555,194 +450,194 @@ class App extends React.Component {
     db_applets.remove({ _id : id_applet }, {})
   }
 
+
+  /**
+   * Update the state and the properties stored in the datastore to match a
+   *     position update due to dragging an applet, based on the id provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @state Updates position of the applet in the state tree entry for id_applet
+   * @nedb Updates through a call to updatePositionMemoryById()
+   */
+  updateDraggedById(e, new_position, id_applet) {
+    //Update state to reflect the current position applet was dragged to
+    const {x, y} = new_position
+
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          position_root : {x, y}
+    }}}),
+
+    // Update position memory after state is updated
+    () => this.updatePositionMemoryById(id_applet)
+  )}
+
+  /**
+   * Update the properties stored in the datastore so the applet's new load
+   *     position is the applet's current position, based on the id provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates the datastore entry with a _id of id_applet
+   */
+  updatePositionMemoryById(id_applet) {
+    // Update the datastore to reflect the current position
+    db_layout.update({_id : id_applet}, { $set: {position_root : this.state.location_props[id_applet].position_root}}, {});
+  }
+
+  /**
+   * Move an applet to a specific coordinate provided, based on the id specified
+   * @param {string} id_applet The applet id for which to update
+   * @param {Object} destination The location to move the applet to. Object
+   *     should contain x or y (or both) coordinates of destination. Garbage
+   *     keys will be ignored. Example: { 'x': 50, 'y': 500 }
+   * @state Updates position of the applet in the state tree entry for id_applet
+   * @nedb Updates through a call to updatePositionMemoryById()
+   */
+  moveToPositionById(id_applet, destination={}) {
+    // Has a new position x or y been provided?
+    let new_x = destination.hasOwnProperty('x')
+    let new_y = destination.hasOwnProperty('y')
+
+    // If a new position is provided, update unlocked position state
+    if (new_x || new_y) {
+      this.setState(prevState => {
+        let root = prevState.location_props[id_applet].position_root
+
+        return {
+          location_props : {...prevState.location_props,
+            [id_applet] : {...prevState.location_props[id_applet],
+              position_root : {
+                x : new_x ? destination.x : root.x,
+                y : new_y ? destination.y : root.y
+        }}}}
+      },
+
+      // Then call updatePositionMemoryById() to update the datastore
+      () => this.updatePositionMemoryById(id_applet)
+    )}
+  }
+
+
+  /**
+   * Toggle the locked vs unlocked state of an applet and update the datastore
+   *     and state tree, based on the id_applet provided
+   * @param {string} id_applet The applet id for which to update
+   * @state Updates unlocked state of the state tree entry for id_applet
+   * @nedb Updates unlocked state of the datastore entry with a _id of id_applet
+   */
+  toggleUnlockById(id_applet) {
+    // Get the opposite of the current locked/unlocked state
+    let toggled = !this.state.location_props[id_applet].unlocked
+
+    // Update unlocked state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {unlocked : toggled}}, {});
+
+    // Update unlocked state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          unlocked : toggled
+    }}}))
+  }
+
+  toggleHighlightById(id_applet) {
+    // Get the opposite of the current highlighted state
+    let toggled = !this.state.location_props[id_applet].highlighted
+
+    // Update highlighted state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {highlighted : toggled}}, {});
+
+    // Update highlighted state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          highlighted : toggled
+    }}}))
+  }
+
   /**
    * Render Application
    */
 
   render() {
-    const NUM = "number";
-    const TEX = "text";
-    //let new_applet = require("./applet_modules/MenuButton.js");
 
-    const appPass = MODULES["dummy_applet_id"];
-    //alert(9);
-    //alert(this.state.ui_props["dummy_id"].properties.elements);
-    // alert(JSON.stringify(this.state.ui_props["dummy_id"]));
-    // let applet_module1 = MODULES[this.state.ui_props["dummy_id"].id_applet];
 
     return (
-      <div id="app">
-        <div id="content">
+      <div id="app" className="intangible">
+        <div id="content" className="intangible">
+          <div id="component" className="intangible">
+            {this.state.loaded_applets.map( (applet, index) =>
+              <div // Force all applets to call (0,0) home (relative to browser)
+                className="intangible"
+                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
+              >
+                <Draggable // Enable dragability of the contained elements
 
-          {/*<div id="component">
-            {this.state.COMP.map( component => component )}
-          </div>*/}
+                  handle=".unlocked_handle" // Classname to act as drag handle
+                  onStop={(e, new_pos) => this.updateDraggedById(e, new_pos, applet.id)}
+                  position={this.state.location_props[applet.id].position_root}
+                >
+                  <div // Acts as drag handle
+                    id={applet.id}
+                    className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
+                  >
+                    <div // Acts as outline when selected
+                      className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
+                    />
+                    <div // Acts as highlight when selected
+                      className={this.state.location_props[applet.id].highlighted ? "highlight" : ""}
+                    />
+                    <applet.main // The actual loaded applet
+                      {...this.state.ui_props[applet.id].properties} // Import props from state
 
-          <div id="component">
-            {this.state.COMP.map( component =>
-              <div>
-                <component.app
-                updateAppletMemory={() => (this.updateAppletMemoryById(component.id))}
-                {...this.state.ui_props[component.id].properties}
-                />
-                {DEV_IDS
-                  ? <div className="debug tangible">
-                      <p className="tangible">{component.id}</p>
-                      <p className="tangible">{this.state.ui_props[component.id].id_module}</p>
-                    </div>
-                  : null}
+                      // Pass methods from controller to applet
+                      updateAppletMemory={() => (this.updateAppletMemoryById(applet.id))}
+                    />
+                    {DEV_IDS
+                      ? <div className="debug tangible">
+                          <p className="tangible">{applet.id}</p>
+                          <p className="tangible">{this.state.ui_props[applet.id].id_module}</p>
+                        </div>
+                      : null}
+                  </div>
+                </Draggable>
               </div>
             )}
           </div>
 
-          {/*<div id="component">
-            <appPass.MenuButton
-              {...this.state} //.ui_props["dummy_id"].properties
-              setMainIcon={this.setMainIcon}
-              addElement={this.addElement}
-              elements={this.state.ui_props["dummy_id"].properties.elements}
-            />
-          </div>*/}
-
-
-          {/*<Draggable
-            // onDrag work in concert to separate drag and click conditions
-            cancel=".non-drag" // Do not respond if child buttons are dragged
-            onDrag={() => this.isDragging = true}
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={() => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-            }}
-          >
-            <div id="config">
-              <h2>Application Properties</h2>
-              <ul>
-                <li>Add element: drag a file from your computer onto the center icon.</li>
-                <li>Remove element: Ctrl-Click on element to delete.</li>
-              </ul>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>fly out radius:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "flyOutRadius")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>seperation angle:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "seperationAngle")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "mainButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button diam:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "childButtonDiam")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>stiffness:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "stiffness")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>damping:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "damping")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>rotation:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(NUM, "rotation")} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIcon")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() =>
-                          this.setState(prevState => ({
-                            ...prevState,
-                            ui_props: {
-                              ...prevState.ui_props,
-                              dummy_id: {
-                                ...prevState.ui_props.dummy_id,
-                                properties: {
-                                  ...prevState.ui_props.dummy_id.properties,
-                                  mainButtonDiam: 5 }}}}))
-                        }
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>main button icon size:</td>
-                    <td>
-                      <input className="non-drag" {...this.getInputProps(TEX, "mainButtonIconSize")} />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x notereallt")}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>child button icon size:</td>
-                    <td>
-                      <input
-                        className="non-drag" {...this.getInputProps(TEX, "childButtonIconSize")}
-                      />
-                    </td>
-                    <td>
-                      <i
-                        className="fa fa-info"
-                        onClick={() => alert("none | lg | 2x | 3x | 4x | 5x")}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Draggable>*/}
           <Draggable
+
             onDrag={() => this.isDragging = true}
             cancel=".non-drag"
             onClick={() => {
               this.toggleMenu();
             }}
-            onStop={() => {
+            onStop={(e) => {
               if (!this.isDragging) {
                 return;
               }
 
               this.isDragging = false;
+              e.preventDefault()
             }}
           >
             <div id="addrem" className="notepad tangible">
-              <button
-                className="non-drag tangible"
-                onClick={() =>
-                  this.loadNewApplet("dummy_applet_id")
-                }
-              >Add MenuButton</button>
+              <p className="tangible" style={{"margin-bottom":0}}>
+                Add Things:
+              </p>
+              <div>
+                <button
+                  className="non-drag tangible"
+                  onClick={() =>
+                    this.loadNewApplet("dummy_applet_id")
+                  }
+                >Add MenuButton</button>
+                <button
+                  className="non-drag tangible"
+                  onClick={() =>
+                    this.loadNewApplet("dumb_box")
+                  }
+                >Add Static Box</button>
+              </div>
               <p className="tangible" style={{"margin-bottom":0}}>
                 Remove following id:
               </p>
@@ -758,6 +653,34 @@ class App extends React.Component {
                   className="non-drag tangible" {...this.getRemoveApplet()}
                 />
               </div>
+            </div>
+          </Draggable>
+
+          <Draggable
+
+            cancel=".non-drag"
+          >
+            <div id="addrem" className="notepad tangible">
+              {this.state.loaded_applets.map( (applet, index) =>
+                <div className="inlin tangible">
+                  <p className="tangible">{applet.id}</p>
+                  <Toggle
+                    className="non-drag tangible"
+                    defaultChecked={this.state.location_props[applet.id].unlocked}
+                    icons={false}
+                    onChange={() => this.toggleUnlockById(applet.id)}
+                  />
+                  <Toggle
+                    className="non-drag tangible"
+                    defaultChecked={this.state.location_props[applet.id].highlighted}
+                    icons={false}
+                    onChange={() => this.toggleHighlightById(applet.id)}
+                  />
+                  <input className="non-drag tangible" {...this.getInputPropsPositionX(applet.id)} />
+                  <input className="non-drag tangible" {...this.getInputPropsPositionY(applet.id)} />
+                  <input className="non-drag tangible" value={this.state.location_props[applet.id].depth} />
+                </div>
+              )}
             </div>
           </Draggable>
         </div>
