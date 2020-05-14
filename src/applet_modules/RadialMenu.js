@@ -476,30 +476,22 @@ class AppletMain extends React.Component {
     let { elements, mainButtonIcon } = this.props;
     let isDragging = false;
 
-    return (
-      <div className="button-container tangible" 
-        // style={{position: "absolute", left: 100, bottom: "auto", top: 100, right: "auto"}}
-        onDrag={() => this.isDragging = true}
-        onClick={() => {
-          this.toggleMenu();
-        }}
-        onStop={() => {
-          if (!this.isDragging) {
-            this.toggleMenu()
-          }
 
-          this.isDragging = false;
-        }}
-        onDrop={e => this.handleDrop(e)}
-        onDragOver={e => this.handleDragOver(e)}
-        onDragEnter={e => this.handleDragEnter(e)}
-        onDragLeave={e => this.handleDragLeave(e)}
-      >
-        {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
-        <div {...cp.mainButtonProps()}> {/* Button element */}
+
+    return (
+        <div // Button Element
+          {...cp.mainButtonProps()} // Import props
+
+          // Methods
+          onClick={() => {this.toggleMenu()}}
+          onDrop={e => this.handleDrop(e)}
+          onDragOver={e => this.handleDragOver(e)}
+          onDragEnter={e => this.handleDragEnter(e)}
+          onDragLeave={e => this.handleDragLeave(e)}
+        >
+          {elements.map((item, i) => this.renderChildButton(item, i))} {/* Child element buttons */}
           <img {...cp.mainButtonIconProps(mainButtonIcon)} /> {/* Icon element */}
         </div>
-      </div>
     );
   }
 }

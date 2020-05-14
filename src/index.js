@@ -15,15 +15,18 @@ ReactDOM.render(<App />, document.getElementById('root'));
 // window.addEventListener('drop', event => window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false));
 
 // Handle application click-through functionality
-if (!isDev) {
+// if (!isDev) {
   window.addEventListener('mousemove', event => {
-    if (!event.target.classList.contains('tangible')) {
-      window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
+    alert(event.target.classList)
+    if (event.target.classList.contains('intangible') ) { //|| !event.target.hasOwnProperty('classList')
+      //window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
     } else {
+      //alert(event.target.classList.length)
+      //alert(event.target.text)
       window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(false)
     }
   })
-}
+// }
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

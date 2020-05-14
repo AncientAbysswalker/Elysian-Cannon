@@ -215,8 +215,6 @@ class App extends React.Component {
 
     this.state = {
       loaded_applets : [],
-      temp_all_unlocked : false
-
     };
 
     // Load available Applets' modules
@@ -313,11 +311,9 @@ class App extends React.Component {
     // Currently HARDCODED. TODO: Make dynamic
     let new_module = require('./applet_modules/RadialMenu.js');//{MenuButton : MenuButton2};
     let new_module2 = require('./applet_modules/TestStaticBox.js');
-    let new_module3 = require('./applet_modules/TestSpringBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
     MODULES["dumb_box"] = new_module2;
-    MODULES["spring_box"] = new_module3;
   }
 
   /**
@@ -353,7 +349,6 @@ class App extends React.Component {
         let layout_tree = layouts.reduce((map, obj) => {
           let { _id, ..._layout } = obj;
           map[_id] = _layout;
-          map[_id].position_current = map[_id].position_root;
           return map;
         }, {})
 
@@ -393,6 +388,7 @@ class App extends React.Component {
       dbInsert(db_layout, {
         _id : db_entry._id,
         position_root : {x : 500, y : 500},
+        depth : 0,
         unlocked : false,
         highlighted : false
       })
@@ -408,7 +404,7 @@ class App extends React.Component {
         location_props : {...prevState.location_props, ...{
           [db_entry._id] : {
             position_root : {x : 500, y : 500},
-            position_current : {x : 500, y : 500},
+            depth : 0,
             unlocked : false,
             highlighted : false
         }}},
@@ -483,22 +479,8 @@ class App extends React.Component {
    * @nedb Updates the datastore entry with a _id of id_applet
    */
   updatePositionMemoryById(id_applet) {
-    // Update the datastore so the future root position is the current position
-
+    // Update the datastore to reflect the current position
     db_layout.update({_id : id_applet}, { $set: {position_root : this.state.location_props[id_applet].position_root}}, {});
-  }
-
-  /**
-   * Get the current (actual) position of an applet, based on the id specified.
-   *     This method calls for the actual position on screen, which may differ
-   *     from state.location_props[id_applet].position_current depending on
-   *     when it is called.
-   * @param {string} id_applet The applet id for which to update
-   * @return {Object} Returns the x,y coordinate of the applet.
-   *     Example { 'x': 50, 'y': 500 }
-   */
-  getPositionById(id_applet) {
-    return (({ x, y }) => ({ x, y }))(document.getElementById(id_applet).getBoundingClientRect());
   }
 
   /**
@@ -519,18 +501,14 @@ class App extends React.Component {
     if (new_x || new_y) {
       this.setState(prevState => {
         let root = prevState.location_props[id_applet].position_root
-        let current = prevState.location_props[id_applet].position_current
 
         return {
           location_props : {...prevState.location_props,
             [id_applet] : {...prevState.location_props[id_applet],
               position_root : {
                 x : new_x ? destination.x : root.x,
-                y : new_y ? destination.y : root.y},
-              position_current : {
-                x : (new_x ? destination.x : current.x),
-                y : (new_y ? destination.y : current.y)}
-        }}}
+                y : new_y ? destination.y : root.y
+        }}}}
       },
 
       // Then call updatePositionMemoryById() to update the datastore
@@ -581,25 +559,19 @@ class App extends React.Component {
    */
 
   render() {
-    const NUM = "number";
-    const TEX = "text";
-    //let new_applet = require("./applet_modules/MenuButton.js");
 
-    const appPass = MODULES["dummy_applet_id"];
-    //alert(9);
-    //alert(this.state.ui_props["dummy_id"].properties.elements);
-    // alert(JSON.stringify(this.state.ui_props["dummy_id"]));
-    // let applet_module1 = MODULES[this.state.ui_props["dummy_id"].id_applet];
 
     return (
-      <div id="app">
-        <div id="content">
-          <div id="component">
+      <div id="app" className="intangible">
+        <div id="content" className="intangible">
+          <div id="component" className="intangible">
             {this.state.loaded_applets.map( (applet, index) =>
               <div // Force all applets to call (0,0) home (relative to browser)
-                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].position_root.x}}
+                className="intangible"
+                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
               >
                 <Draggable // Enable dragability of the contained elements
+
                   handle=".unlocked_handle" // Classname to act as drag handle
                   onStop={(e, new_pos) => this.updateDraggedById(e, new_pos, applet.id)}
                   position={this.state.location_props[applet.id].position_root}
@@ -607,9 +579,6 @@ class App extends React.Component {
                   <div // Acts as drag handle
                     id={applet.id}
                     className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
-                    style={{
-                      zIndex:(4-index) // Allow settable depth!//
-                    }}
                   >
                     <div // Acts as outline when selected
                       className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
@@ -636,6 +605,7 @@ class App extends React.Component {
           </div>
 
           <Draggable
+
             onDrag={() => this.isDragging = true}
             cancel=".non-drag"
             onClick={() => {
@@ -651,11 +621,6 @@ class App extends React.Component {
             }}
           >
             <div id="addrem" className="notepad tangible">
-              <Toggle
-                defaultChecked={this.state.temp_all_unlocked}//
-                icons={false}
-                onChange={() => {this.setState(prevState => ({temp_all_unlocked : !prevState.temp_all_unlocked}))}}
-              />
               <p className="tangible" style={{"margin-bottom":0}}>
                 Add Things:
               </p>
@@ -672,12 +637,6 @@ class App extends React.Component {
                     this.loadNewApplet("dumb_box")
                   }
                 >Add Static Box</button>
-                <button
-                  className="non-drag tangible"
-                  onClick={() =>
-                    this.loadNewApplet("spring_box")
-                  }
-                >Add Spring Box</button>
               </div>
               <p className="tangible" style={{"margin-bottom":0}}>
                 Remove following id:
@@ -694,48 +653,32 @@ class App extends React.Component {
                   className="non-drag tangible" {...this.getRemoveApplet()}
                 />
               </div>
-              <p className="tangible" style={{"margin-bottom":0}}>
-                Get all positions:
-              </p>
-              <div>
-                <button
-                  className="non-drag tangible"//
-                  onClick={() => {
-                    // alert(document.getElementById("kImCUqTaUPttETkf").getBoundingClientRect().x);
-                    // alert(document.getElementById("kImCUqTaUPttETkf").style.left);
-                    // alert(this.state.location_props["kImCUqTaUPttETkf"].position.x);
-
-                    this.moveToPositionById(this.state.to_remove)
-                    //this.updatePositionMemoryById(this.state.to_remove)
-                  }}
-                >GET</button>
-              </div>
             </div>
           </Draggable>
 
           <Draggable
+
             cancel=".non-drag"
           >
             <div id="addrem" className="notepad tangible">
               {this.state.loaded_applets.map( (applet, index) =>
-                <div className="inlin">
-                  <p>{applet.id}</p>
+                <div className="inlin tangible">
+                  <p className="tangible">{applet.id}</p>
                   <Toggle
-                    className="non-drag"
+                    className="non-drag tangible"
                     defaultChecked={this.state.location_props[applet.id].unlocked}
                     icons={false}
                     onChange={() => this.toggleUnlockById(applet.id)}
                   />
                   <Toggle
-                    className="non-drag"
+                    className="non-drag tangible"
                     defaultChecked={this.state.location_props[applet.id].highlighted}
                     icons={false}
                     onChange={() => this.toggleHighlightById(applet.id)}
                   />
-                  <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
-                  <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
-                  <input className="non-drag" value={this.state.location_props[applet.id].position_root.x} />
-                  <input className="non-drag" value={this.state.location_props[applet.id].position_root.y} />
+                  <input className="non-drag tangible" {...this.getInputPropsPositionX(applet.id)} />
+                  <input className="non-drag tangible" {...this.getInputPropsPositionY(applet.id)} />
+                  <input className="non-drag tangible" value={this.state.location_props[applet.id].depth} />
                 </div>
               )}
             </div>
