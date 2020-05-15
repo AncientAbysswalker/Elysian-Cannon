@@ -307,7 +307,7 @@ class AppletMain extends React.Component {
    * @param {number} index The index in ELEMENTS array to remove
    */
   removeElement(index) {
-    ELEMENTS.splice(index, 1);
+    this.props.elements.splice(index, 1);
     this.setState({});
   }
 
@@ -442,7 +442,7 @@ class AppletMain extends React.Component {
           width: this.props.mainButtonDiam * this.props.mainButtonIconSize,
           height: this.props.mainButtonDiam * this.props.mainButtonIconSize,
           "pointer-events": "none", // So that handleDragLeave() does not trigger on entering icon
-          "user-select": "none" // So that icon cannot be highlighted
+          "userSelect": "none" // So that icon cannot be highlighted
         }
       })
     };
@@ -479,7 +479,7 @@ class AppletMain extends React.Component {
 
 
     return (
-        <div // Button Element
+        <div // Main Button Element
           {...cp.mainButtonProps()} // Import props
 
           // Methods
@@ -496,33 +496,6 @@ class AppletMain extends React.Component {
   }
 }
 
-class test extends React.Component {
-  constructor(props) {
-    super(props);
-
-    // // Component Bindings
-    // this.toggleMenu.bind(this)
-    // this.handleDragEnter.bind(this)
-    // this.handleDragLeave.bind(this)
-    // this.handleDragOver.bind(this)
-    // this.handleDrop.bind(this)
-    //
-    // // Initial State
-    // this.state = {
-    //   isOpen: false,
-    //   isAddingItem: false
-    // };
-  }
-
-  render() {
-    return (
-      <div>
-        <p>TESTING COMPONENT</p>
-      </div>
-    );
-  }
-}
-
 function propsMap(properties) {
   properties.elements = properties.elements.map(element => {
     element.onClick = () => { shell.openItem(element.symlink) };
@@ -530,22 +503,26 @@ function propsMap(properties) {
   })
 }
 
-function defaultProps() {
-  return {
-    elements : [],
-    flyOutRadius: 120,
-    seperationAngle: 40,
-    mainButtonDiam: 90,
-    childButtonDiam: 50,
-    numElements: 4,
-    stiffness: 320,
-    damping: 17,
-    rotation: 0,
-    mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
-    mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
-    mainButtonIconSize: 0.7,
-    childButtonIconSize: 0.7
-  }
+const default_props = {
+  elements : [],
+  flyOutRadius: 120,
+  seperationAngle: 40,
+  mainButtonDiam: 90,
+  childButtonDiam: 50,
+  numElements: 4,
+  stiffness: 320,
+  damping: 17,
+  rotation: 0,
+  mainButtonIcon: "https://cdn.iconscout.com/icon/free/png-256/react-2-458175.png",
+  mainButtonIconActive: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png",
+  mainButtonIconSize: 0.7,
+  childButtonIconSize: 0.7
 }
 
-export {AppletMain, defaultProps, propsMap}
+const name = "Radial Menu Mk0.1"
+
+const description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+
+
+export {AppletMain, default_props, propsMap}
