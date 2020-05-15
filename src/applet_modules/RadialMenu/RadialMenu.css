@@ -1,0 +1,34 @@
+.button-container {
+  position: relative;
+  display: flex;
+  border-radius: 1000px; /*Button container (click events) must be round*/
+}
+
+.button-menu {
+  background: #72b0ec;
+  border-radius: 1000px;
+  box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.button-child {
+  position: absolute;
+  background: white;
+  border-radius: 1000px;
+  box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.child-button-icon {
+  color: grey;
+}
+
+.main-button-icon {
+  color: white;
+}

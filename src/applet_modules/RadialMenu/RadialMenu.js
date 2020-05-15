@@ -2,7 +2,7 @@ import React from 'react';
 import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 
-import './App.css';
+import './RadialMenu.css';
 
 // Development build or production?
 const isDev = window.require('electron-is-dev');

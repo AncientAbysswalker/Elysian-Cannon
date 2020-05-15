@@ -3,6 +3,8 @@ import {Motion, spring} from 'react-motion';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import Toggle from 'react-toggle'
 
+import TestTable from './applet_modules/TestTable.js'
+
 import './App.css';
 import './react-toggle.css'
 
@@ -309,7 +311,7 @@ class App extends React.Component {
    */
   loadAppletModules() {
     // Currently HARDCODED. TODO: Make dynamic
-    let new_module = require('./applet_modules/RadialMenu.js');//{MenuButton : MenuButton2};
+    let new_module = require('./applet_modules/RadialMenu/RadialMenu.js');//{MenuButton : MenuButton2};
     let new_module2 = require('./applet_modules/TestStaticBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
@@ -382,7 +384,7 @@ class App extends React.Component {
     dbInsert(db_applets, {
       id_module : id_module,
       load_on_start : true,
-      properties : MODULES[id_module].defaultProps()
+      properties : MODULES[id_module].default_props
     }).then(db_entry => {
       // Insert the default location into the datastore
       dbInsert(db_layout, {
@@ -399,7 +401,7 @@ class App extends React.Component {
           [db_entry._id] : {
             id_module : id_module,
             load_on_start : true,
-            properties : MODULES[id_module].defaultProps()
+            properties : MODULES[id_module].default_props
         }}},
         location_props : {...prevState.location_props, ...{
           [db_entry._id] : {
