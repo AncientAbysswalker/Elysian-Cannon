@@ -595,9 +595,9 @@ class App extends React.Component {
                       updateAppletMemory={() => (this.updateAppletMemoryById(applet.id))}
                     />
                     {DEV_IDS
-                      ? <div className="debug tangible">
-                          <p className="tangible">{applet.id}</p>
-                          <p className="tangible">{this.state.ui_props[applet.id].id_module}</p>
+                      ? <div className="debug">
+                          <p>{applet.id}</p>
+                          <p>{this.state.ui_props[applet.id].id_module}</p>
                         </div>
                       : null}
                   </div>
@@ -622,37 +622,37 @@ class App extends React.Component {
               e.preventDefault()
             }}
           >
-            <div id="addrem" className="notepad tangible">
-              <p className="tangible" style={{"margin-bottom":0}}>
+            <div id="addrem" className="notepad">
+              <p style={{"margin-bottom":0}}>
                 Add Things:
               </p>
               <div>
                 <button
-                  className="non-drag tangible"
+                  className="non-drag"
                   onClick={() =>
                     this.loadNewApplet("dummy_applet_id")
                   }
                 >Add MenuButton</button>
                 <button
-                  className="non-drag tangible"
+                  className="non-drag"
                   onClick={() =>
                     this.loadNewApplet("dumb_box")
                   }
                 >Add Static Box</button>
               </div>
-              <p className="tangible" style={{"margin-bottom":0}}>
+              <p style={{"margin-bottom":0}}>
                 Remove following id:
               </p>
               <div>
                 <button
-                  className="non-drag tangible"
+                  className="non-drag"
                   onClick={() => {
                     this.removeAppletById(this.state.to_remove);
                     this.setState({to_remove : ""})
                   }}
                 >Remove MenuButton</button>
                 <input
-                  className="non-drag tangible" {...this.getRemoveApplet()}
+                  className="non-drag" {...this.getRemoveApplet()}
                 />
               </div>
             </div>
@@ -662,29 +662,33 @@ class App extends React.Component {
 
             cancel=".non-drag"
           >
-            <div id="addrem" className="notepad tangible">
+            <div id="addrem" className="notepad">
               {this.state.loaded_applets.map( (applet, index) =>
-                <div className="inlin tangible">
-                  <p className="tangible">{applet.id}</p>
+                <div className="inlin">
+                  <p>{applet.id}</p>
                   <Toggle
-                    className="non-drag tangible"
+                    className="non-drag"
                     defaultChecked={this.state.location_props[applet.id].unlocked}
                     icons={false}
                     onChange={() => this.toggleUnlockById(applet.id)}
                   />
                   <Toggle
-                    className="non-drag tangible"
+                    className="non-drag"
                     defaultChecked={this.state.location_props[applet.id].highlighted}
                     icons={false}
                     onChange={() => this.toggleHighlightById(applet.id)}
                   />
-                  <input className="non-drag tangible" {...this.getInputPropsPositionX(applet.id)} />
-                  <input className="non-drag tangible" {...this.getInputPropsPositionY(applet.id)} />
-                  <input className="non-drag tangible" value={this.state.location_props[applet.id].depth} />
+                  <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
+                  <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
+                  <input className="non-drag" value={this.state.location_props[applet.id].depth} />
                 </div>
               )}
             </div>
           </Draggable>
+
+          <div>
+            <TestTable />
+          </div>
         </div>
       </div>
     );
