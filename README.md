@@ -17,18 +17,27 @@ The following are standard requirements for the project:
 
 ## Implementation
 
-The implementation at the moment is an implementation of React on top of the Electron Application.
+The implementation at the moment is an implementation of React running on top of an Electron Application.
 
 The current build is still very early in development, but the standard requirements above are able to be met.
 
+Most recent progress has been made in the implementation of loading an unspecified number of applets along with their states.
+
 The following are points of current active testing and development:
 
-* Persistent memory integration for states of loaded UI components using nedb
-* Implement loading methods to inject intended state into components
 * Dynamically load components depending on user preferences
 * Dynamically load modules containing methods for each component definition
+* Implement settings dialog table to control applets
+
+## Status
+
+This is an active development project for me, and I will be continually updating this.
 
 The following are videos showing example functionality as development progresses:
 
--
--
+* [Video 1](https://github.com/AncientAbysswalker/Elysian-Cannon/blob/master/md/react-electron-menu.mp4)
+* [Video 2](https://github.com/AncientAbysswalker/Elysian-Cannon/blob/master/md/2020-04-19.mkv)
+
+The most recent build appears as follows:
+
+![](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/2020-05-14.png)
