@@ -687,7 +687,7 @@ class App extends React.Component {
           </Draggable>
 
           <div>
-            <TestTable />
+            <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} funcP={(a) => this.getInputPropsPositionX(a)}/>
           </div>
         </div>
       </div>
