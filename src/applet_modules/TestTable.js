@@ -16,8 +16,12 @@ const TestTable = (props) => {
         accessor: 'id_module',
       },
       {
-        Header: 'load_on_start',
-        accessor: 'load_on_start',
+        Header: '🔒 ⇄ 🔓',
+        accessor: 'unlocked',
+      },
+      {
+        Header: '💡',
+        accessor: 'highlighted',
       },
       {
         Header: 'x',
@@ -38,10 +42,14 @@ const TestTable = (props) => {
   const frank = (ui_props, location_props) => {
     return Object.keys(ui_props).map( id_applet => {
       const {properties:omit1, ...standard_ui_props} = ui_props[id_applet];
+      const {position_root:omit2, ...standard_location_props} = location_props[id_applet];
+      //alert(JSON.stringify(standard_location_props))
       return {
         id_applet: id_applet,
         ...standard_ui_props,
+        ...standard_location_props,
         ...location_props[id_applet].position_root
+
       }
     })
   }
@@ -87,7 +95,7 @@ const TestTable = (props) => {
           // setData={setData}
           updateMyData={updateMyData}
           skipPageReset={skipPageReset}
-          funcP={(a)=>props.funcP(a)}
+          state_functions={props.state_functions}
         />
       </ CssBaseline>
     </div>

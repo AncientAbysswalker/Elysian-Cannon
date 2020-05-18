@@ -261,6 +261,15 @@ class App extends React.Component {
     }};
   }
 
+  // settingsPropsUnlocked(applet_id) {
+  //   return {
+  //     value: this.state.location_props[applet_id].position_root.x,
+  //     onChange: e => {
+  //       let target_value = e.target.value;
+  //       this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
+  //   }};
+  // }
+
   /**
    * Provide the props required to implement functionality of state-editing
    *     input boxes for applet x-positions. Populate input box with current
@@ -556,6 +565,21 @@ class App extends React.Component {
     }}}))
   }
 
+  stateFunctions() {
+    return {
+      x: (id) => this.getInputPropsPositionX(id),
+      y: (id) => this.getInputPropsPositionY(id),
+      unlocked: (id) => ({
+        checked: this.state.location_props[id].unlocked,
+        onChange: (e) => this.toggleUnlockById(id)
+      }),
+      highlighted: (id) => ({
+        checked: this.state.location_props[id].highlighted,
+        onChange: (e) => this.toggleHighlightById(id)
+      })
+  }}
+
+
   /**
    * Render Application
    */
@@ -658,36 +682,54 @@ class App extends React.Component {
             </div>
           </Draggable>
 
-          <Draggable
-
-            cancel=".non-drag"
+          <div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0}}
           >
-            <div id="addrem" className="notepad">
-              {this.state.loaded_applets.map( (applet, index) =>
-                <div className="inlin">
-                  <p>{applet.id}</p>
-                  <Toggle
-                    className="non-drag"
-                    defaultChecked={this.state.location_props[applet.id].unlocked}
-                    icons={false}
-                    onChange={() => this.toggleUnlockById(applet.id)}
-                  />
-                  <Toggle
-                    className="non-drag"
-                    defaultChecked={this.state.location_props[applet.id].highlighted}
-                    icons={false}
-                    onChange={() => this.toggleHighlightById(applet.id)}
-                  />
-                  <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
-                  <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
-                  <input className="non-drag" value={this.state.location_props[applet.id].depth} />
-                </div>
-              )}
-            </div>
-          </Draggable>
+            <Draggable
+              defaultPosition={{x: 200, y: 150}}
+              cancel=".non-drag"
+            >
+              <div id="addrem" className="notepad">
+                {this.state.loaded_applets.map( (applet, index) =>
+                  <div className="inlin">
+                    <p>{applet.id}</p>
+                    <Toggle
+                      className="non-drag"
+                      defaultChecked={this.state.location_props[applet.id].unlocked}
+                      icons={false}
+                      onChange={() => this.toggleUnlockById(applet.id)}
+                    />
+                    <Toggle
+                      className="non-drag"
+                      defaultChecked={this.state.location_props[applet.id].highlighted}
+                      icons={false}
+                      onChange={() => this.toggleHighlightById(applet.id)}
+                    />
+                    <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
+                    <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
+                    <input className="non-drag" value={this.state.location_props[applet.id].depth} />
+                  </div>
+                )}
+              </div>
+            </Draggable>
+          </div>
 
-          <div>
-            <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} funcP={(a) => this.getInputPropsPositionX(a)}/>
+          <div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0}}
+          >
+            <Draggable // Enable dragability of the contained elements
+              cancel=".non-drag"
+              //handle=".unlocked_handle" // Classname to act as drag handle
+              defaultPosition={{x: 500, y: 250}}
+            >
+              <div // Acts as drag handle
+                className="unlocked_handle"
+              >
+                <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} state_functions={this.stateFunctions()} />
+              </div>
+            </Draggable>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Checkbox from '@material-ui/core/Checkbox'
+import Switch from '@material-ui/core/Switch';
 import MaUTable from '@material-ui/core/Table'
 import PropTypes from 'prop-types'
 import TableBody from '@material-ui/core/TableBody'
@@ -45,15 +46,6 @@ const inputStyle = {
   background: 'transparent',
 }
 
-function getInputPropsPositionX(applet_id) {
-  return {
-    value: this.state.location_props[applet_id].position_root.x,
-    onChange: e => {
-      let target_value = e.target.value;
-      this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
-  }};
-}
-
 // Create an editable cell renderer
 const EditableCell = ({
   value: initialValue,
@@ -61,10 +53,10 @@ const EditableCell = ({
   column: { id },
   data,
   updateMyData, // This is a custom function that we supplied to our table instance
-  funcP,
+  state_functions,
 }) => {
   // We need to keep and update the state of the cell normally
-  const [value, setValue] = React.useState(initialValue)
+  //const [value, setValue] = React.useState(initialValue)
 
   const onChange = e => {
     // alert(index)
@@ -74,22 +66,28 @@ const EditableCell = ({
   }
 
   // We'll only update the external data when the input is blurred
-  const onBlur = () => {
-    updateMyData(index, id, value)
-  }
+  // const onBlur = () => {
+  //   updateMyData(index, id, value)
+  // }
 
   // If the initialValue is changed externall, sync it up with our state
-  React.useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
+  // React.useEffect(() => {
+  //   setValue(initialValue)
+  // }, [initialValue])
 
   return (
-    <input {...funcP(data[index].id_applet)}
-      // style={inputStyle}
-      // value={value==="dumb_box" ? "fuck" : initialValue} //Change a thing here
+    (state_functions.hasOwnProperty(id))
+    ? (typeof initialValue === "boolean")
+      ? <Switch size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
+      : <input {...state_functions[id](data[index].id_applet)} className="non-drag" />
+      //style={inputStyle}
+      //value={initialValue==="dumb_box" ? "fuck" : initialValue} //Change a thing here
       // onChange={onChange}
-      // onBlur={onBlur}
-    />
+      //onBlur={onBlur}
+    : (typeof initialValue === "boolean")
+      ? <Switch size="small" checked={initialValue} disabled={true}/>
+      : <p>{initialValue}</p>
+
   )
 }
 
@@ -117,7 +115,7 @@ const EnhancedTable = ({
   setData,
   updateMyData,
   skipPageReset,
-  funcP,
+  state_functions,
 }) => {
   const {
     getTableProps,
@@ -141,7 +139,7 @@ const EnhancedTable = ({
       // That way we can call this function from our
       // cell renderer!
       updateMyData,
-      funcP,
+      state_functions,
     },
     useGlobalFilter,
     useSortBy,
