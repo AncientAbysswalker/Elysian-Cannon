@@ -519,10 +519,57 @@ const default_props = {
   childButtonIconSize: 0.7
 }
 
+const settings_props = [{
+  key : "mainButtonDiam",
+  name : "Menu Diameter",
+  description : "Size of the menu button",
+},
+{
+  key : "seperationAngle",
+  name : "Separation Angle",
+  description : "Angle between shortcuts when menu is opened",
+},
+{
+  key : "flyOutRadius",
+  name : "Opened Diameter",
+  description : "How far to extend the shortcuts when opened",
+},
+{
+  key : "childButtonDiam",
+  name : "Shortcut Diameter",
+  description : "Size of the shortcut buttons",
+},
+{
+  key : "flyOutRadius",
+  name : "Fly out rad",
+  description : "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
+},
+{
+  key : "seperationAngle",
+  name : "Sep Ang",
+  description : "Yay menuuu",
+},
+{
+  key : "flyOutRadius",
+  name : "Fly out rad",
+  description : "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
+},
+{
+  key : "seperationAngle",
+  name : "Sep Ang",
+  description : "Yay menuuu",
+},
+{
+  key : "flyOutRadius",
+  name : "Fly out rad",
+  description : "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
+},
+]
+
 const name = "Radial Menu Mk0.1"
 
 const description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 
 
-export {AppletMain, default_props, propsMap}
+export {AppletMain, default_props, propsMap, settings_props, name, description}

@@ -2,11 +2,11 @@ import React from 'react'
 
 import CssBaseline from '@material-ui/core/ScopedCssBaseline'
 import EnhancedTable from './components/EnhancedTable'
-import makeData from './makeData'
 
 const TestTable = (props) => {
   const columns = React.useMemo(
     () => [
+      // I don't need to be transparent about these
       {
         Header: 'id_applet',
         accessor: 'id_applet',
@@ -15,6 +15,8 @@ const TestTable = (props) => {
         Header: 'id_module',
         accessor: 'id_module',
       },
+      // -----------------------------------
+
       {
         Header: '🔒 ⇄ 🔓',
         accessor: 'unlocked',

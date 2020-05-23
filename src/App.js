@@ -4,9 +4,11 @@ import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same ti
 import Toggle from 'react-toggle'
 
 import TestTable from './applet_modules/TestTable.js'
+import AppletSettings from './AppletSettingsDialog.js'
 
 import './App.css';
-import './react-toggle.css'
+//import './AppletSettingsDialog.css'
+//import './react-toggle.css'
 
 // Development build or production?
 const isDev = window.require('electron-is-dev');
@@ -213,10 +215,12 @@ class App extends React.Component {
 
     // this.addElement = this.addElement.bind(this);
     this.setMainIcon = this.setMainIcon.bind(this)
+    this.getInputProps = this.getInputProps.bind(this)
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
       loaded_applets : [],
+      settings_applets : [],
     };
 
     // Load available Applets' modules
@@ -231,10 +235,10 @@ class App extends React.Component {
     }));
   }
 
-  getInputProps(type, title) {
+  getInputProps(type, applet_id, title) {
     return {
       type: type,
-      value: this.state.ui_props["FC4jXzlQZwxLaPd2"].properties[title],
+      value: this.state.ui_props[applet_id].properties[title],
       onChange: e => {
         let target_value = e.target.value;
         type === "number"
@@ -244,19 +248,19 @@ class App extends React.Component {
             ...prevState,
             ui_props: {
               ...prevState.ui_props,
-              dummy_id: {
-                ...prevState.ui_props.dummy_id,
+              [applet_id]: {
+                ...prevState.ui_props[applet_id],
                 properties: {
-                  ...prevState.ui_props.dummy_id.properties,
+                  ...prevState.ui_props[applet_id].properties,
                   [title]: parseInt(target_value || 0, 10) }}}}))
           : this.setState(prevState => ({
             ...prevState,
             ui_props: {
               ...prevState.ui_props,
-              dummy_id: {
-                ...prevState.ui_props.dummy_id,
+              [applet_id]: {
+                ...prevState.ui_props[applet_id],
                 properties: {
-                  ...prevState.ui_props.dummy_id.properties,
+                  ...prevState.ui_props[applet_id].properties,
                   [title]: target_value }}}}))
     }};
   }
@@ -630,6 +634,33 @@ class App extends React.Component {
             )}
           </div>
 
+          {/* Settings*/}
+          <div id="component" className="intangible">
+            {this.state.settings_applets.map( (applet, index) =>
+              <div // Force all applets to call (0,0) home (relative to browser)
+                className="intangible"
+                style={{position: 'absolute', top:0, left:0, zIndex:100}}
+              >
+                <Draggable // Enable dragability of the contained elements
+                  cancel=".non-drag"
+                  //handle=".unlocked_handle" // Classname to act as drag handle
+                  defaultPosition={{x:250, y:250}}
+                >
+                  <div // Acts as drag handle
+                    //id={applet.id}
+                    //className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
+                  >
+                    <AppletSettings
+                      getInputProps={this.getInputProps}
+                      id_applet={applet}
+                      settings={MODULES[this.state.ui_props[applet].id_module].settings_props}
+                    />
+                  </div>
+                </Draggable>
+              </div>
+            )}
+          </div>
+
           <Draggable
 
             onDrag={() => this.isDragging = true}
@@ -662,7 +693,14 @@ class App extends React.Component {
                   onClick={() =>
                     this.loadNewApplet("dumb_box")
                   }
-                >Add Static Box</button>
+                >Add Static Box</button>//
+                <button
+                  className="non-drag"
+                  onClick={() =>
+                    this.setState(prevState => ({
+                      settings_applets: [...prevState.settings_applets, 'ZSlRG9MkBkDG9Bk4']
+                  }))}
+                >Add Settings</button>
               </div>
               <p style={{"margin-bottom":0}}>
                 Remove following id:
@@ -684,7 +722,7 @@ class App extends React.Component {
 
           <div // Force all applets to call (0,0) home (relative to browser)
             className="intangible"
-            style={{position: 'absolute', top:0, left:0}}
+            style={{position: 'absolute', top:0, left:0, zIndex: 7}}
           >
             <Draggable
               defaultPosition={{x: 200, y: 150}}
@@ -708,6 +746,7 @@ class App extends React.Component {
                     />
                     <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
                     <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
+                    <input className="non-drag" {...this.getInputProps('number', 'ZSlRG9MkBkDG9Bk4', "mainButtonDiam")} />
                     <input className="non-drag" value={this.state.location_props[applet.id].depth} />
                   </div>
                 )}
@@ -721,7 +760,7 @@ class App extends React.Component {
           >
             <Draggable // Enable dragability of the contained elements
               cancel=".non-drag"
-              //handle=".unlocked_handle" // Classname to act as drag handle
+              handle=".unlocked_handle" // Classname to act as drag handle
               defaultPosition={{x: 500, y: 250}}
             >
               <div // Acts as drag handle
@@ -737,5 +776,31 @@ class App extends React.Component {
   }
 }
 
+//
+// const AppletSettings = (props) => {
+//   return (
+//     <div className="notepad">
+//       <table className="AppletSettings">
+//         <thead>
+//           <tr>
+//            <td>Name</td>
+//            <td>Description</td>
+//            <td></td>
+//           </tr>
+//         </thead>
+//         <tbody>
+//         {props.settings.map( (setting) =>
+//
+//             <tr>
+//               <td><p>{setting.name || "No Name Given"}</p></td>
+//               <td><p>{setting.description || "No Description Given"}</p></td>
+//               <td><input className="non-drag" {...props.getInputProps('number', props.id_applet, setting.key)} /></td>
+//             </tr>
+//         )}
+//         </tbody>
+//       </table>
+//     </div>
+//   )
+// }
 
 export default App

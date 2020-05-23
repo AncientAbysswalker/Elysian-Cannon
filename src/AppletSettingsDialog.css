@@ -1,0 +1,126 @@
+
+.porkchop td,
+.porkchop th {
+  border: 1px solid black;
+}
+
+table.porkchop {
+  margin: 15px 0;
+  border: 1px solid black;
+  border-spacing: 0;
+  table-layout: fixed; /* To force scrollbar to correct position */
+  width: 39vw; /* must have this set */
+  font-size: 0.7vw;
+}
+
+table.porkchop tbody,
+table.porkchop thead { display: block; }
+
+.porkchop tbody {
+    overflow-y: auto; /* Scrollbar */
+    overflow-x: hidden;
+    height: 10em;
+}
+
+.porkchop tr {
+    /* margin: 0px;
+    padding: 0px;
+    height: 10px; */
+    border: 1px solid blue;
+}
+
+.porkchop tr > * {
+    margin: 0px;
+    padding: 5px;
+    height: 10px;
+    border: 1px solid red;
+}
+
+.porkchop tr > * > * {
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid green;
+}
+
+
+
+.porkchop thead th:nth-child(1),
+.porkchop tbody td:nth-child(1) * {
+  width: 8vw;
+}
+
+.porkchop thead th:nth-child(2),
+.porkchop tbody td:nth-child(2) * {
+  width: 22vw;
+}
+
+/* .porkchop thead th:nth-child(3),
+.porkchop tbody td:nth-child(3) * {
+  width: 5rem;
+} */
+
+.porkchop thead th:nth-child(3) {
+  width: 7vw;
+}
+
+.porkchop tbody td:nth-child(3) {
+  width: 6vw;
+}
+
+/* .porkchop tbody td:nth-child(3) input {
+  width: 1rem;
+} */
+
+.porkchop input {
+  width: 5rem;
+}
+
+
+.porkchop td:nth-child(1) *,
+.porkchop td:nth-child(2) *{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* .porkchop th:nth-child(2) {
+  width: 25%;
+}
+.porkchop td:nth-child(2) span {
+  display: block;
+
+} */
+
+tbody td:last-child, thead th:last-child {
+    border-right: none;
+}
+
+
+.text-example {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn_settings {
+  background-color: #e7e7e7;
+  color: black;
+  border: 2px solid #e7e7e7;
+
+  width: 250px;
+  border-radius: 4px;
+  padding: 15px 32px;
+  margin-left: 15px;
+  margin-right: 15px;
+
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+
+  transition-duration: 0.4s;
+}
+
+.btn_settings:hover {
+  background-color: white;
+  color: black;
+  border: 2px solid #e7e7e7
+}
