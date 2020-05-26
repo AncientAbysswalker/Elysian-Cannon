@@ -221,13 +221,17 @@ class App extends React.Component {
     this.state = {
       loaded_applets : [],
       settings_applets : [],
+      //temp: {'first': null},
     };
 
     // Load available Applets' modules
+
+  }
+
+  componentDidMount() {
     this.loadAppletModules(); //.then???
     this.loadAppletsOnStart();
   }
-
 
   setMainIcon(icon) {
     this.setState(prevState => ({
@@ -306,6 +310,7 @@ class App extends React.Component {
     }};
   }
 
+  // Dummy until later
   getRemoveApplet() {
     return {
       value: this.state.to_remove,
@@ -329,6 +334,12 @@ class App extends React.Component {
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
     MODULES["dumb_box"] = new_module2;
+    this.setState({
+      temp: {
+        "dummy_applet_id" : new_module,
+        "dumb_box" : new_module2
+      }
+    })
   }
 
   /**
@@ -439,6 +450,57 @@ class App extends React.Component {
    */
   updateAppletMemoryById(id_applet) {
     db_applets.update({_id : id_applet}, this.state.ui_props[id_applet], {});
+  }
+
+  /**
+   * Update the properties stored in the datastore to match the properties
+   *     stored in the current state, based on the id_module provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates the datastore entry with a _id of id_applet
+   */
+  revertAppletMemoryById(id_applet) {
+    let promise = new Promise((resolve, reject) => {
+      dbFindOne(db_applets, {_id : id_applet}).then(applet => {
+        if ("propsMap" in MODULES[applet.id_module]){
+          MODULES[applet.id_module].propsMap(applet.properties)}
+
+        resolve(applet)
+      });
+    });
+
+    promise.then(applet_state => alert(JSON.stringify(applet_state)))
+
+    // Get array of loaded state trees then write each tree to state.ui_props
+    // promise.then(applet_state => {
+    //   let state_tree = applet_state.reduce((map, obj) => {
+    //     let { _id, ..._state } = obj;
+    //     if (DEV_ALERT_HASHES) alert(_id);
+    //     map[_id] = _state;
+    //     return map;//
+    //   }, {});
+    //
+    //   dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
+    //     let layout_tree = layouts.reduce((map, obj) => {
+    //       let { _id, ..._layout } = obj;
+    //       map[_id] = _layout;
+    //       return map;
+    //     }, {})
+    //
+    //     // Write each stored state tree into the state.ui_props object
+    //     this.setState(prevState => ({
+    //       ui_props : state_tree,
+    //       location_props : layout_tree
+    //     }));
+    //   }).then(() => {
+    //     // Add loaded applets to array for dynamic component loading
+    //     this.setState(prevState => ({
+    //       loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
+    //         main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+    //         id : id_instance
+    //       }))
+    //     }));
+    //   });
+    // })
   }
 
   /**
@@ -584,6 +646,41 @@ class App extends React.Component {
   }}
 
 
+
+  openSettingsById(id_open) {
+    if (!this.state.settings_applets.includes(id_open)) {
+      this.setState(prevState => ({
+        settings_applets: [...prevState.settings_applets, id_open]
+      }))
+    }
+  }
+
+  /**
+   * Close the settings dialog associated with a given applet id
+   * @param {string} id_close The applet id for which to close the settings
+   * @state Remove the entry from settings_applets if applicable
+   */
+  closeSettingsById(id_close) {
+    this.setState(prevState => ({
+      settings_applets: prevState.settings_applets.filter(id_applet => id_applet !== id_close)
+    }))
+  }
+
+
+  /**
+   * Close the settings dialog associated with a given applet id
+   * @param {string} id_close The applet id for which to close the settings
+   * @state Remove the entry from settings_applets if applicable
+   */
+  closeSettingsById(id_close) {
+    this.setState(prevState => ({
+      settings_applets: prevState.settings_applets.filter(id_applet => id_applet !== id_close)
+    }))
+  }
+
+
+
+
   /**
    * Render Application
    */
@@ -651,6 +748,9 @@ class App extends React.Component {
                     //className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
                   >
                     <AppletSettings
+                      saveSettings={() => this.updateAppletMemoryById(applet)}
+                      revertSettings={() => this.revertAppletMemoryById(applet)}
+                      closeSettings={() => this.closeSettingsById(applet)}
                       getInputProps={this.getInputProps}
                       id_applet={applet}
                       settings={MODULES[this.state.ui_props[applet].id_module].settings_props}
@@ -693,7 +793,7 @@ class App extends React.Component {
                   onClick={() =>
                     this.loadNewApplet("dumb_box")
                   }
-                >Add Static Box</button>//
+                >Add Static Box</button>
                 <button
                   className="non-drag"
                   onClick={() =>
@@ -701,6 +801,12 @@ class App extends React.Component {
                       settings_applets: [...prevState.settings_applets, 'ZSlRG9MkBkDG9Bk4']
                   }))}
                 >Add Settings</button>
+                <button
+                  className="non-drag"
+                  onClick={() =>
+                      MODULES["freanmasf"] = 5
+                    }
+                >AdModule</button>
               </div>
               <p style={{"margin-bottom":0}}>
                 Remove following id:
@@ -713,6 +819,12 @@ class App extends React.Component {
                     this.setState({to_remove : ""})
                   }}
                 >Remove MenuButton</button>
+                <button
+                  className="non-drag"
+                  onClick={() => {
+                    alert(JSON.stringify(this.state.temp))
+                  }}
+                >TEMP</button>
                 <input
                   className="non-drag" {...this.getRemoveApplet()}
                 />
@@ -766,7 +878,7 @@ class App extends React.Component {
               <div // Acts as drag handle
                 className="unlocked_handle"
               >
-                <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} state_functions={this.stateFunctions()} />
+                <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} state_functions={this.stateFunctions()} openSettingsById={(id) => this.openSettingsById(id)} modules={MODULES}/>
               </div>
             </Draggable>
           </div>

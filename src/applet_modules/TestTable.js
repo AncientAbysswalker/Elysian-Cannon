@@ -37,6 +37,10 @@ const TestTable = (props) => {
         Header: 'Profile Progress',
         accessor: 'progress',
       },
+      {
+        Header: <img src={require("./components/gear1.png")} alt="Girl in a jacket" width="15" height="15" />,
+        accessor: 'settings',
+      },
     ],
     []
   )
@@ -45,9 +49,18 @@ const TestTable = (props) => {
     return Object.keys(ui_props).map( id_applet => {
       const {properties:omit1, ...standard_ui_props} = ui_props[id_applet];
       const {position_root:omit2, ...standard_location_props} = location_props[id_applet];
-      //alert(JSON.stringify(standard_location_props))
+
       return {
         id_applet: id_applet,
+        settings: {
+          open: () => props.openSettingsById(id_applet),
+          available: (props.modules[ui_props[id_applet].id_module].hasOwnProperty('settings_props')) // May need more careful checks
+
+          //() => {return props.modules[id_applet].hasOwnProperty('settings_props')}
+          // (typeof props.modules[ui_props[id_applet].id_module] !== "undefined")
+          //            ? props.modules[id_applet].hasOwnProperty('settings_props')
+          //            : false
+        },
         ...standard_ui_props,
         ...standard_location_props,
         ...location_props[id_applet].position_root
@@ -90,6 +103,12 @@ const TestTable = (props) => {
 
   return (
     <div>
+      <button
+        className="non-drag"
+        onClick={() =>
+            alert(Object.keys(props.modules))
+          }
+      >AdModule</button>
       <CssBaseline>
         <EnhancedTable
           columns={columns}
@@ -98,6 +117,7 @@ const TestTable = (props) => {
           updateMyData={updateMyData}
           skipPageReset={skipPageReset}
           state_functions={props.state_functions}
+          openSettingsById={props.openSettingsById}
         />
       </ CssBaseline>
     </div>

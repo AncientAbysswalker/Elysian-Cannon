@@ -3,6 +3,9 @@ import React from 'react';
 import './AppletSettingsDialog.css'
 
 const AppletSettings = (props) => {
+
+
+
   return (
     <div className="notepad">
       <table className="porkchop">
@@ -27,15 +30,21 @@ const AppletSettings = (props) => {
         <button
           className="non-drag btn_settings"
           onClick={() =>
-            alert("pert")
+            props.saveSettings()
           }
         >Commit Changes</button>
         <button
           className="non-drag btn_settings"
           onClick={() =>
-            alert("pert")
+            props.revertSettings()
           }
         >Revert Changes</button>
+        <button
+          className="non-drag btn_settings"
+          onClick={() =>
+            props.closeSettings()
+          }
+        >Revert and Close</button>
       </div>
     </div>
   )

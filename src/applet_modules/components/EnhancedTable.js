@@ -14,6 +14,11 @@ import TablePaginationActions from './TablePaginationActions'
 import TableRow from '@material-ui/core/TableRow'
 import TableSortLabel from '@material-ui/core/TableSortLabel'
 import TableToolbar from './TableToolbar'
+
+import SettingsIcon from '@material-ui/icons/Settings';
+
+import './EnhancedTable.css'
+
 import {
   useGlobalFilter,
   usePagination,
@@ -76,17 +81,22 @@ const EditableCell = ({
   // }, [initialValue])
 
   return (
-    (state_functions.hasOwnProperty(id))
-    ? (typeof initialValue === "boolean")
-      ? <Switch size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
-      : <input {...state_functions[id](data[index].id_applet)} className="non-drag" />
-      //style={inputStyle}
-      //value={initialValue==="dumb_box" ? "fuck" : initialValue} //Change a thing here
-      // onChange={onChange}
-      //onBlur={onBlur}
-    : (typeof initialValue === "boolean")
-      ? <Switch size="small" checked={initialValue} disabled={true}/>
-      : <p>{initialValue}</p>
+    (id === "settings")
+    ? (initialValue.available)
+      //?<div className="en"><SettingsIcon className="pork" fontSize="large" onClick={initialValue.open}/></div>
+      ?<img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" onClick={initialValue.open} />//<div className="en"><img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" /></div>
+      :<div className="dis"><img src={require("./gear2.png")} alt="Girl in a jacket" width="25" height="25" /></div>//<SettingsIcon className="dis"/>
+    : (state_functions.hasOwnProperty(id))
+      ? (typeof initialValue === "boolean")
+        ? <Switch size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
+        : <input {...state_functions[id](data[index].id_applet)} className="non-drag" style={inputStyle} />
+        //style={inputStyle}
+        //value={initialValue==="dumb_box" ? "fuck" : initialValue} //Change a thing here
+        // onChange={onChange}
+        //onBlur={onBlur}
+      : (typeof initialValue === "boolean")
+        ? <Switch size="small" checked={initialValue} disabled={true}/>
+        : <p>{initialValue}</p>
 
   )
 }
