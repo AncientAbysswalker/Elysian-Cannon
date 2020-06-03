@@ -34,8 +34,8 @@ const TestTable = (props) => {
         accessor: 'y',
       },
       {
-        Header: <p>Profile Progress</p>,
-        accessor: 'progress',
+        Header: <p>Hidden</p>,
+        accessor: 'hidden',
       },
       {
         Header: <img src={require("./components/gear1.png")} alt="Girl in a jacket" width="15" height="15" />,

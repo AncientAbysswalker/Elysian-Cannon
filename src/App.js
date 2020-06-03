@@ -416,7 +416,8 @@ class App extends React.Component {
         position_root : {x : 500, y : 500},
         depth : 0,
         unlocked : false,
-        highlighted : false
+        highlighted : false,
+        hidden : false
       })
 
       // Insert the default state tree into state and load the component
@@ -432,7 +433,8 @@ class App extends React.Component {
             position_root : {x : 500, y : 500},
             depth : 0,
             unlocked : false,
-            highlighted : false
+            highlighted : false,
+            hidden : false
         }}},
         loaded_applets : [...prevState.loaded_applets, {
           main : MODULES[id_module].AppletMain,
@@ -631,6 +633,21 @@ class App extends React.Component {
     }}}))
   }
 
+  toggleHiddenById(id_applet) {
+    // Get the opposite of the current hidden state
+    let toggled = !this.state.location_props[id_applet].hidden
+
+    // Update hidden state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {hidden : toggled}}, {});
+
+    // Update hidden state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          hidden : toggled
+    }}}))
+  }
+
   stateFunctions() {
     return {
       x: (id) => this.getInputPropsPositionX(id),
@@ -642,6 +659,10 @@ class App extends React.Component {
       highlighted: (id) => ({
         checked: this.state.location_props[id].highlighted,
         onChange: (e) => this.toggleHighlightById(id)
+      }),
+      hidden: (id) => ({
+        checked: this.state.location_props[id].hidden,
+        onChange: (e) => this.toggleHiddenById(id)
       })
   }}
 
@@ -697,7 +718,8 @@ class App extends React.Component {
                 className="intangible"
                 style={{position: 'absolute', backgroundColor: "#61dafb", top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
               >
-                <Draggable // Enable dragability of the contained elements
+              {!(this.state.location_props[applet.id].hidden)
+              ? <Draggable // Enable dragability of the contained elements
 
                   handle=".unlocked_handle" // Classname to act as drag handle
                   onStop={(e, new_pos) => this.updateDraggedById(e, new_pos, applet.id)}
@@ -727,6 +749,7 @@ class App extends React.Component {
                       : null}
                   </div>
                 </Draggable>
+              : null }
               </div>
             )}
           </div>
