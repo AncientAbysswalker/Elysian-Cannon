@@ -695,7 +695,7 @@ class App extends React.Component {
             {this.state.loaded_applets.map( (applet, index) =>
               <div // Force all applets to call (0,0) home (relative to browser)
                 className="intangible"
-                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
+                style={{position: 'absolute', backgroundColor: "#61dafb", top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
               >
                 <Draggable // Enable dragability of the contained elements
 
@@ -832,7 +832,7 @@ class App extends React.Component {
             </div>
           </Draggable>
 
-          <div // Force all applets to call (0,0) home (relative to browser)
+          {/*<div // Force all applets to call (0,0) home (relative to browser)
             className="intangible"
             style={{position: 'absolute', top:0, left:0, zIndex: 7}}
           >
@@ -864,23 +864,30 @@ class App extends React.Component {
                 )}
               </div>
             </Draggable>
-          </div>
-
+          </div>*/}
           <div // Force all applets to call (0,0) home (relative to browser)
             className="intangible"
-            style={{position: 'absolute', top:0, left:0}}
+            style={{position: 'absolute', top:0, left:0, borderWidth:4, borderColor:"#20232a"}}
           >
-            <Draggable // Enable dragability of the contained elements
-              cancel=".non-drag"
-              handle=".unlocked_handle" // Classname to act as drag handle
-              defaultPosition={{x: 500, y: 250}}
-            >
-              <div // Acts as drag handle
-                className="unlocked_handle"
+            {(this.state.to_remove !== "")
+            ? <Draggable // Enable dragability of the contained elements
+                cancel=".non-drag"
+                //handle=".unlocked_handle" // Classname to act as drag handle
+                defaultPosition={{x: 500, y: 250}}
               >
-                <TestTable ui_props={this.state.ui_props} location_props={this.state.location_props} state_functions={this.stateFunctions()} openSettingsById={(id) => this.openSettingsById(id)} modules={MODULES}/>
-              </div>
-            </Draggable>
+                <div // Acts as drag handle
+                  className="unlocked_handle"
+                >
+                  <TestTable
+                    ui_props={this.state.ui_props}
+                    location_props={this.state.location_props}
+                    state_functions={this.stateFunctions()}
+                    openSettingsById={(id) => this.openSettingsById(id)}
+                    removeAppletById={(id) => this.removeAppletById(id)}
+                    modules={MODULES}/>
+                </div>
+              </Draggable>
+            : null}
           </div>
         </div>
       </div>

@@ -34,7 +34,7 @@ const TestTable = (props) => {
         accessor: 'y',
       },
       {
-        Header: 'Profile Progress',
+        Header: <p>Profile Progress</p>,
         accessor: 'progress',
       },
       {
@@ -61,6 +61,8 @@ const TestTable = (props) => {
           //            ? props.modules[id_applet].hasOwnProperty('settings_props')
           //            : false
         },
+        remove: () => props.removeAppletById(id_applet),
+
         ...standard_ui_props,
         ...standard_location_props,
         ...location_props[id_applet].position_root
@@ -103,12 +105,6 @@ const TestTable = (props) => {
 
   return (
     <div>
-      <button
-        className="non-drag"
-        onClick={() =>
-            alert(Object.keys(props.modules))
-          }
-      >AdModule</button>
       <CssBaseline>
         <EnhancedTable
           columns={columns}

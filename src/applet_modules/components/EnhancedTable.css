@@ -1,3 +1,47 @@
+.react-table * {
+  font-size: 0.7vw;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.react-table tr > * {
+    margin: 0px;
+    padding: 5px;
+    height: 10px;
+    border: 1px solid red;
+}
+
+.fred {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.react-table tr > * > * {
+    margin: 0px;
+    border: 1px solid green;
+}
+
+.react-table tr > * > input {
+    width: 2vw;
+    border: 1px solid green;
+}
+
+.Checkbox {
+    height: 5px;
+    margin: -50px;
+    padding: -50px;
+    border: 1px solid orange;
+}
+
+.prerp * {
+  color: red;
+  background-color: #e7e7e7;
+}
+
 .en {
   /* background-color: #e7e7e7; */
   color: red;

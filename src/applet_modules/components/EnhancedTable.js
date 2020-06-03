@@ -38,7 +38,7 @@ const IndeterminateCheckbox = React.forwardRef(
 
     return (
       <>
-        <Checkbox ref={resolvedRef} {...rest} />
+        <Checkbox className="Checkbox" disableRipple ref={resolvedRef} {...rest} />
       </>
     )
   }
@@ -193,14 +193,20 @@ const EnhancedTable = ({
   }
 
   const removeByIndexs = (array, indexs) =>
-    array.filter((_, i) => !indexs.includes(i))
+    alert(indexs)
+    //array.filter((_, i) => !indexs.includes(i))
 
   const deleteUserHandler = event => {
-    const newData = removeByIndexs(
-      data,
-      Object.keys(selectedRowIds).map(x => parseInt(x, 10))
-    )
-    setData(newData)
+    for (var row of Object.keys(selectedRowIds).map(x => parseInt(x, 10))) {
+      data[row].remove()
+    }
+    //alert(data[0].remove)
+    //alert(Object.keys(selectedRowIds).map(x => parseInt(x, 10)))
+    // const newData = removeByIndexs(
+    //   data,
+    //   Object.keys(selectedRowIds).map(x => parseInt(x, 10))
+    // )
+    //setData(newData)
   }
 
   const addUserHandler = user => {
@@ -210,7 +216,7 @@ const EnhancedTable = ({
 
   // Render the UI for your table
   return (
-    <TableContainer>
+    <TableContainer className="react-table">
       <TableToolbar
         numSelected={Object.keys(selectedRowIds).length}
         deleteUserHandler={deleteUserHandler}
@@ -219,12 +225,12 @@ const EnhancedTable = ({
         setGlobalFilter={setGlobalFilter}
         globalFilter={globalFilter}
       />
-      <MaUTable {...getTableProps()}>
+      <MaUTable {...getTableProps()} className="">
         <TableHead>
           {headerGroups.map(headerGroup => (
             <TableRow {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <TableCell
+                <TableCell align='center'
                   {...(column.id === 'selection'
                     ? column.getHeaderProps()
                     : column.getHeaderProps(column.getSortByToggleProps()))}
@@ -246,10 +252,10 @@ const EnhancedTable = ({
           {page.map((row, i) => {
             prepareRow(row)
             return (
-              <TableRow {...row.getRowProps()}>
+              <TableRow className="fred" {...row.getRowProps()}>
                 {row.cells.map(cell => {
                   return (
-                    <TableCell {...cell.getCellProps()}>
+                    <TableCell className="fred" {...cell.getCellProps()} align='center'>
                       {cell.render('Cell')}
                     </TableCell>
                   )
