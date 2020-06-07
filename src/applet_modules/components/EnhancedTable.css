@@ -9,25 +9,35 @@
 
 .react-table tr > * {
     margin: 0px;
-    padding: 5px;
-    height: 10px;
-    border: 1px solid red;
+    padding: 0px;
+    /* height: 10px; */
+    /* border: 1px solid red; */
+}
+
+.rtrtr {
+  position:absolute;
+  pointer-events: none;
+  background-color:red;
+  opacity:0.3;
+  height:100%;
+  width:100%;
+  z-index:1;
 }
 
 .fred {
-    display: flex;
+    /* display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; */
 }
 
 .react-table tr > * > * {
     margin: 0px;
-    border: 1px solid green;
+    /* border: 1px solid green; */
 }
 
 .react-table tr > * > input {
     width: 2vw;
-    border: 1px solid green;
+    /* border: 1px solid green; */
 }
 
 .Checkbox {
@@ -42,43 +52,24 @@
   background-color: #e7e7e7;
 }
 
-.en {
-  /* background-color: #e7e7e7; */
-  color: red;
-  /* border: 1px solid #e7e7e7; */
-
-  display:inline-block;
-  vertical-align: middle;
-
-  border-radius: 1000px;
+.table_image {
   padding: 0;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  /* text-align: center;
-  text-decoration: none;
-  display: inline-block; */
+.table_image > * {
+  padding: 0;
+  margin: 0;
+}
 
-  /* transition-duration: 0.4s; */
-  /* -webkit-transition: all 1s ease-in-out;
-    -moz-transition: all 1s ease-in-out;
-    -o-transition: all 1s ease-in-out;
-    transition: all 1s ease-in-out; */
-
+.rot60 {
+  border-radius: 1000px;
   transition: all 0.25s ease-in;
 }
 
-.en:hover {
-  /* background-color: white; */
-  /* color: black; */
-  /* background-color: white;
-  color: black;
-  border: 2px solid #e7e7e7 */
-  transform: rotate(-60deg)
-}
-
-.pork {
-  border: 1px solid #e7e7e7;
+.rot60:hover {
+  transform: rotate(-60deg);
 }

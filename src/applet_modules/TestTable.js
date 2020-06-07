@@ -18,11 +18,11 @@ const TestTable = (props) => {
       // -----------------------------------
 
       {
-        Header: '🔒 ⇄ 🔓',
+        Header: <img src={require("./components/drag2.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'unlocked',
       },
       {
-        Header: '💡',
+        Header: <img src={require("./components/highlight.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'highlighted',
       },
       {
@@ -34,11 +34,11 @@ const TestTable = (props) => {
         accessor: 'y',
       },
       {
-        Header: <p>Hidden</p>,
+        Header: <img src={require("./components/ghost2.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'hidden',
       },
       {
-        Header: <img src={require("./components/gear1.png")} alt="Girl in a jacket" width="15" height="15" />,
+        Header: <img src={require("./components/gear1.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'settings',
       },
     ],

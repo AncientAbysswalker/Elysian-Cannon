@@ -84,8 +84,8 @@ const EditableCell = ({
     (id === "settings")
     ? (initialValue.available)
       //?<div className="en"><SettingsIcon className="pork" fontSize="large" onClick={initialValue.open}/></div>
-      ?<img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" onClick={initialValue.open} />//<div className="en"><img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" /></div>
-      :<div className="dis"><img src={require("./gear2.png")} alt="Girl in a jacket" width="25" height="25" /></div>//<SettingsIcon className="dis"/>
+      ? <div className="table_image"><img className="rot60" src={require("./gear1.png")} alt="Girl in a jacket" width="20" height="20" onClick={initialValue.open} /></div>//<div className="en"><img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" /></div>
+      : <div className="table_image"><img src={require("./gear2.png")} alt="Girl in a jacket" width="20" height="20" /></div>//<SettingsIcon className="dis"/>
     : (state_functions.hasOwnProperty(id))
       ? (typeof initialValue === "boolean")
         ? <Switch size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
@@ -239,6 +239,7 @@ const EnhancedTable = ({
                   {column.id !== 'selection' ? (
                     <TableSortLabel
                       active={column.isSorted}
+                      className="rtrtr"
                       // react-table has a unsorted state which is not treated here
                       direction={column.isSortedDesc ? 'desc' : 'asc'}
                     />

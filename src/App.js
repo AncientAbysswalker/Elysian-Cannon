@@ -454,56 +454,75 @@ class App extends React.Component {
     db_applets.update({_id : id_applet}, this.state.ui_props[id_applet], {});
   }
 
+  static objectSubMap(full_object, keys_list) {
+    const pick = (...props) => o => props.reduce((a, e) => ({ ...a, [e]: o[e] }), {})
+    return pick(...keys_list)(full_object)
+  }
+
+  snapshotAppletMemoryById(id_applet, keys_list) {
+    return App.objectSubMap(this.state.ui_props[id_applet].properties, keys_list)
+  }
+
+  revertAppletMemoryById(id_applet, revert_state) {
+    this.setState(prevState => ({
+      ui_props: {...prevState.ui_props, ...{
+        [id_applet]: {...prevState.ui_props[id_applet],
+          properties: {...prevState.ui_props[id_applet].properties,
+          ...revert_state
+      }}}}
+    }))
+  }
+
   /**
    * Update the properties stored in the datastore to match the properties
    *     stored in the current state, based on the id_module provided
    * @param {string} id_applet The applet id for which to update memory
    * @nedb Updates the datastore entry with a _id of id_applet
    */
-  revertAppletMemoryById(id_applet) {
-    let promise = new Promise((resolve, reject) => {
-      dbFindOne(db_applets, {_id : id_applet}).then(applet => {
-        if ("propsMap" in MODULES[applet.id_module]){
-          MODULES[applet.id_module].propsMap(applet.properties)}
-
-        resolve(applet)
-      });
-    });
-
-    promise.then(applet_state => alert(JSON.stringify(applet_state)))
-
-    // Get array of loaded state trees then write each tree to state.ui_props
-    // promise.then(applet_state => {
-    //   let state_tree = applet_state.reduce((map, obj) => {
-    //     let { _id, ..._state } = obj;
-    //     if (DEV_ALERT_HASHES) alert(_id);
-    //     map[_id] = _state;
-    //     return map;//
-    //   }, {});
-    //
-    //   dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
-    //     let layout_tree = layouts.reduce((map, obj) => {
-    //       let { _id, ..._layout } = obj;
-    //       map[_id] = _layout;
-    //       return map;
-    //     }, {})
-    //
-    //     // Write each stored state tree into the state.ui_props object
-    //     this.setState(prevState => ({
-    //       ui_props : state_tree,
-    //       location_props : layout_tree
-    //     }));
-    //   }).then(() => {
-    //     // Add loaded applets to array for dynamic component loading
-    //     this.setState(prevState => ({
-    //       loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
-    //         main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
-    //         id : id_instance
-    //       }))
-    //     }));
-    //   });
-    // })
-  }
+  // revertAppletMemoryById(id_applet) {
+  //   let promise = new Promise((resolve, reject) => {
+  //     dbFindOne(db_applets, {_id : id_applet}).then(applet => {
+  //       if ("propsMap" in MODULES[applet.id_module]){
+  //         MODULES[applet.id_module].propsMap(applet.properties)}
+  //
+  //       resolve(applet)
+  //     });
+  //   });
+  //
+  //   promise.then(applet_state => alert(JSON.stringify(applet_state)))
+  //
+  //   // Get array of loaded state trees then write each tree to state.ui_props
+  //   // promise.then(applet_state => {
+  //   //   let state_tree = applet_state.reduce((map, obj) => {
+  //   //     let { _id, ..._state } = obj;
+  //   //     if (DEV_ALERT_HASHES) alert(_id);
+  //   //     map[_id] = _state;
+  //   //     return map;//
+  //   //   }, {});
+  //   //
+  //   //   dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
+  //   //     let layout_tree = layouts.reduce((map, obj) => {
+  //   //       let { _id, ..._layout } = obj;
+  //   //       map[_id] = _layout;
+  //   //       return map;
+  //   //     }, {})
+  //   //
+  //   //     // Write each stored state tree into the state.ui_props object
+  //   //     this.setState(prevState => ({
+  //   //       ui_props : state_tree,
+  //   //       location_props : layout_tree
+  //   //     }));
+  //   //   }).then(() => {
+  //   //     // Add loaded applets to array for dynamic component loading
+  //   //     this.setState(prevState => ({
+  //   //       loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
+  //   //         main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+  //   //         id : id_instance
+  //   //       }))
+  //   //     }));
+  //   //   });
+  //   // })
+  // }
 
   /**
    * Remove an Applet by its id. Unload the component and remove its props from
@@ -772,7 +791,8 @@ class App extends React.Component {
                   >
                     <AppletSettings
                       saveSettings={() => this.updateAppletMemoryById(applet)}
-                      revertSettings={() => this.revertAppletMemoryById(applet)}
+                      snapshotSettings={() => this.snapshotAppletMemoryById(applet, MODULES[this.state.ui_props[applet].id_module].settings_props.map(setting => setting.key))} //Important to not override props that are not to be exposed to the settings dialog
+                      revertSettings={(revert_state) => this.revertAppletMemoryById(applet, revert_state)}
                       closeSettings={() => this.closeSettingsById(applet)}
                       getInputProps={this.getInputProps}
                       id_applet={applet}
