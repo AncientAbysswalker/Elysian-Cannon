@@ -10,42 +10,50 @@ const TestTable = (props) => {
       {
         Header: 'id_applet',
         accessor: 'id_applet',
+        header_title: "The id of the applet instance",
       },
       {
         Header: 'id_module',
         accessor: 'id_module',
+        header_title: "The id of the parent module",
       },
       // -----------------------------------
 
       {
         Header: <img src={require("./components/drag2.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'unlocked',
+        header_title: "Whether the applet can be dragged",
       },
       {
         Header: <img src={require("./components/highlight.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'highlighted',
+        header_title: "Whether the applet should be highlighted",
       },
       {
-        Header: 'x',
+        Header: <img src={require("./components/arr_x.png")} alt="x-axis" width="20" height="20" />,
         accessor: 'x',
+        header_title: "The x-position of the applet",
       },
       {
-        Header: 'y',
+        Header: <img src={require("./components/arr_y.png")} alt="x-axis" width="20" height="20" />,
         accessor: 'y',
+        header_title: "The y-position of the applet",
       },
       {
         Header: <img src={require("./components/ghost2.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'hidden',
+        header_title: "Whether the applet should be hidden (unloaded)",
       },
       {
         Header: <img src={require("./components/gear1.png")} alt="Girl in a jacket" width="20" height="20" />,
         accessor: 'settings',
+        header_title: "Open applet-specific settings, if available",
       },
     ],
     []
   )
 
-  const frank = (ui_props, location_props) => {
+  const mapProps = (ui_props, location_props) => {
     return Object.keys(ui_props).map( id_applet => {
       const {properties:omit1, ...standard_ui_props} = ui_props[id_applet];
       const {position_root:omit2, ...standard_location_props} = location_props[id_applet];
@@ -72,12 +80,12 @@ const TestTable = (props) => {
   }
 
   var fs = window.require('fs');
-  // fs.writeFileSync("D:\\Standard Windows Pins\\Documents\\port2.txt", JSON.stringify(frank(props.ui_props || {}, props.location_props || {})));
+  // fs.writeFileSync("D:\\Standard Windows Pins\\Documents\\port2.txt", JSON.stringify(mapProps(props.ui_props || {}, props.location_props || {})));
   // fs.writeFileSync("D:\\Standard Windows Pins\\Documents\\port3.txt", JSON.stringify(makeData(20)));
   //this.props.passedState.keys()
 
-  //frank(props.passedState || {})
-  const data = frank(props.ui_props || {}, props.location_props || {})//React.useState(React.useMemo(() => makeData(20), []))
+  //mapProps(props.passedState || {})
+  const data = mapProps(props.ui_props || {}, props.location_props || {})//React.useState(React.useMemo(() => makeData(20), []))
   //const [data, setData] = React.useState(React.useMemo(() => makeData(20), []))
   const [skipPageReset, setSkipPageReset] = React.useState(false)
 

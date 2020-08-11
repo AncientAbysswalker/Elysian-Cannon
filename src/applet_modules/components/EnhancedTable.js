@@ -88,7 +88,7 @@ const EditableCell = ({
       : <div className="table_image"><img src={require("./gear2.png")} alt="Girl in a jacket" width="20" height="20" /></div>//<SettingsIcon className="dis"/>
     : (state_functions.hasOwnProperty(id))
       ? (typeof initialValue === "boolean")
-        ? <Switch size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
+        ? <Switch value={state_functions[id](data[index].id_applet).checked.toString()} size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
         : <input {...state_functions[id](data[index].id_applet)} className="non-drag" style={inputStyle} />
         //style={inputStyle}
         //value={initialValue==="dumb_box" ? "fuck" : initialValue} //Change a thing here
@@ -214,10 +214,20 @@ const EnhancedTable = ({
     setData(newData)
   }
 
+  const getHeaderToolTip = (header, is_active, is_desc) => {
+    const title = header + "\n"
+                + (!is_active
+                  ? "<Click to Sort>"
+                  : (is_desc
+                    ? "<Currently Sorted Descending>"
+                    : "<Currently Sorted Ascending>"))
+    return title
+  }
+
   // Render the UI for your table
   return (
     <TableContainer className="react-table">
-      <TableToolbar
+      <TableToolbar className="react-table-toolbar"
         numSelected={Object.keys(selectedRowIds).length}
         deleteUserHandler={deleteUserHandler}
         addUserHandler={addUserHandler}
@@ -233,17 +243,19 @@ const EnhancedTable = ({
                 <TableCell align='center'
                   {...(column.id === 'selection'
                     ? column.getHeaderProps()
-                    : column.getHeaderProps(column.getSortByToggleProps()))}
+                    : column.getHeaderProps(column.getSortByToggleProps({
+                      title: getHeaderToolTip(column.header_title, column.isSorted, column.isSortedDesc)
+                    })))}
                 >
                   {column.render('Header')}
-                  {column.id !== 'selection' ? (
+                  {/*{column.id !== 'selection' ? (
                     <TableSortLabel
                       active={column.isSorted}
-                      className="rtrtr"
+                      className="react-table-header"
                       // react-table has a unsorted state which is not treated here
                       direction={column.isSortedDesc ? 'desc' : 'asc'}
                     />
-                  ) : null}
+                  ) : null}*/}
                 </TableCell>
               ))}
             </TableRow>
@@ -253,10 +265,10 @@ const EnhancedTable = ({
           {page.map((row, i) => {
             prepareRow(row)
             return (
-              <TableRow className="fred" {...row.getRowProps()}>
+              <TableRow {...row.getRowProps()}>
                 {row.cells.map(cell => {
                   return (
-                    <TableCell className="fred" {...cell.getCellProps()} align='center'>
+                    <TableCell {...cell.getCellProps()} align='center'>
                       {cell.render('Cell')}
                     </TableCell>
                   )
@@ -266,14 +278,13 @@ const EnhancedTable = ({
           })}
         </TableBody>
 
-        <TableFooter>
+        <TableFooter className="react-table-footer">
           <TableRow>
             <TablePagination
               rowsPerPageOptions={[
                 5,
                 10,
-                25,
-                { label: 'All', value: data.length },
+                // { label: 'All', value: data.length },
               ]}
               colSpan={3}
               count={data.length}

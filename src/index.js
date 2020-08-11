@@ -18,7 +18,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 if (!isDev) {
   window.addEventListener('mousemove', event => {
     if (event.target.classList.contains('intangible') ) { //|| !event.target.hasOwnProperty('classList')
-      //window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
+      window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
     } else {
       //alert(event.target.classList.length)
       //alert(event.target.text)
