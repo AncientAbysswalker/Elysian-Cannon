@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './AppletSettingsDialog.css'
+import './AppletSettingsDialog.css';
 
 class AppletSettings extends React.Component {
   constructor(props) {
@@ -12,8 +12,8 @@ class AppletSettings extends React.Component {
     // //this.addElement = this.addElement.bind(this)
     //
     this.state = {
-      settings_snapshot: this.props.snapshotSettings()
-    }
+      settings_snapshot: this.props.snapshotSettings(),
+    };
 
     // Load available Applets' modules
 
@@ -21,8 +21,8 @@ class AppletSettings extends React.Component {
 
   render() {
     return (
-      <div className="notepad">
-        <table className="porkchop">
+      <div className="das-dialog">
+        <table className="das-table non-drag">
           <thead>
             <tr>
              <th>Name</th>
@@ -31,49 +31,42 @@ class AppletSettings extends React.Component {
             </tr>
           </thead>
           <tbody>
-          {this.props.settings.map( (setting) =>
+          {this.props.settings.map((setting) =>
             <tr>
-              <td><p>{setting.name || "No Name Given"}</p></td>
-              <td><p>{setting.description || "No Description Given"}</p></td>
-              <td><input className="non-drag" {...this.props.getInputProps('number', this.props.id_applet, setting.key)} /></td>
+              <td><p>{setting.name || 'No Name Given'}</p></td>
+              <td><p>{setting.description || 'No Description Given'}</p></td>
+              <td><input {...this.props.getInputProps('number', this.props.id_applet, setting.key)} /></td>
             </tr>
           )}
           </tbody>
         </table>
-        <div className="text-example">
+        <div className="das-btn-container">
           <button
-            className="non-drag btn_settings"
+            className="non-drag das-btn"
             onClick={() => {
-              this.props.saveSettings()
+              this.props.saveSettings();
               this.setState(prevState => ({
-                settings_snapshot: this.props.snapshotSettings()
-              }))
+                settings_snapshot: this.props.snapshotSettings(),
+              }));
             }}
           >Commit Changes</button>
           <button
-            className="non-drag btn_settings"
+            className="non-drag das-btn"
             onClick={() => {
-              this.props.revertSettings(this.state.settings_snapshot)
-
-              // alert(JSON.stringify(this.state.temp))
-              // this.setState(prevState => ({
-              //   temp: this.props.snapshotSettings()
-              // }))
-              //this.setState(prevState => {temp: 5})
-              //this.props.revertSettings()
-              }
-            }
+              this.props.revertSettings(this.state.settings_snapshot);
+            }}
           >Revert Changes</button>
           <button
-            className="non-drag btn_settings"
-            onClick={() =>
-              this.props.closeSettings()
-            }
-          >Revert and Close</button>
+            className="non-drag das-btn"
+            onClick={() => {
+              this.props.saveSettings();
+              this.props.closeSettings();
+            }}
+          >Commit and Close</button>
         </div>
       </div>
-    )
+    );
   }
 }
 
-export default AppletSettings
+export default AppletSettings;

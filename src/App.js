@@ -763,7 +763,6 @@ class App extends React.Component {
                     />
                     <div // Acts as highlight when selected
                       className={this.state.location_props[applet.id].highlighted ? "highlight" : ""}
-                      style={{margin:"0 auto"}}
                     />
                     <applet.main // The actual loaded applet
                       {...this.state.ui_props[applet.id].properties} // Import props from state
@@ -789,7 +788,7 @@ class App extends React.Component {
             {this.state.settings_applets.map( (applet, index) =>
               <div // Force all applets to call (0,0) home (relative to browser)
                 className="intangible"
-                style={{position: 'absolute', top:0, left:0, zIndex:100}}
+                style={{position: 'absolute', top:0, left:0, width:0, zIndex:100}}
               >
                 <Draggable // Enable dragability of the contained elements
                   cancel=".non-drag"
@@ -797,6 +796,7 @@ class App extends React.Component {
                   defaultPosition={{x:250, y:250}}
                 >
                   <div // Acts as drag handle
+                    style={{display:"inline-block"}}
                     //id={applet.id}
                     //className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
                   >
@@ -816,65 +816,70 @@ class App extends React.Component {
           </div>
 
           {/* Draw Add/Remove Temp Settings*/}
-          {(this.state.show_addrem)
-          ? <Draggable
-
-            onDrag={() => this.isDragging = true}
-            cancel=".non-drag"
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={(e) => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-              e.preventDefault()
-            }}
+          <div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0, width:0}}
           >
-            <div id="addrem" className="notepad">
-              <p style={{"margin-bottom":0}}>
-                Add Things:
-              </p>
-              <div>
-                <button
-                  className="non-drag"
-                  onClick={() =>
-                    this.loadNewApplet("dummy_applet_id")
-                  }
-                >Add MenuButton</button>
-                <button
-                  className="non-drag"
-                  onClick={() =>
-                    this.loadNewApplet("dumb_box")
-                  }
-                >Add Static Box</button>
-                {/*<button
-                  className="non-drag"
-                  onClick={() =>
-                    this.loadNewApplet("or_box")
-                  }
-                >Add "Settings Hijacked" Box</button>*/}
+            {(this.state.show_addrem)
+            ? <Draggable
+              defaultPosition={{x:1100, y:250}}
+              onDrag={() => this.isDragging = true}
+              cancel=".non-drag"
+              onClick={() => {
+                this.toggleMenu();
+              }}
+              onStop={(e) => {
+                if (!this.isDragging) {
+                  return;
+                }
+
+                this.isDragging = false;
+                e.preventDefault()
+              }}
+            >
+              <div id="addrem" className="notepad" style={{display:"inline-block"}}>
+                <p style={{"margin-bottom":0}}>
+                  Add Things:
+                </p>
+                <div>
+                  <button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("dummy_applet_id")
+                    }
+                  >Add MenuButton</button>
+                  <button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("dumb_box")
+                    }
+                  >Add Static Box</button>
+                  {/*<button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("or_box")
+                    }
+                  >Add "Settings Hijacked" Box</button>*/}
+                </div>
+                <p style={{"margin-bottom":0}}>
+                  Remove following id:
+                </p>
+                <div>
+                  <button
+                    className="non-drag"
+                    onClick={() => {
+                      this.removeAppletById(this.state.to_remove);
+                      this.setState({to_remove : ""})
+                    }}
+                  >Remove MenuButton</button>
+                  <input
+                    className="non-drag" {...this.getRemoveApplet()}
+                  />
+                </div>
               </div>
-              <p style={{"margin-bottom":0}}>
-                Remove following id:
-              </p>
-              <div>
-                <button
-                  className="non-drag"
-                  onClick={() => {
-                    this.removeAppletById(this.state.to_remove);
-                    this.setState({to_remove : ""})
-                  }}
-                >Remove MenuButton</button>
-                <input
-                  className="non-drag" {...this.getRemoveApplet()}
-                />
-              </div>
-            </div>
-          </Draggable>
-          : null}
+            </Draggable>
+            : null}
+          </div>
 
           {/*<div // Force all applets to call (0,0) home (relative to browser)
             className="intangible"
@@ -914,7 +919,7 @@ class App extends React.Component {
           {/* Draw Main Settings Dialog */}
           <div // Force all applets to call (0,0) home (relative to browser)
             className="intangible"
-            style={{position: 'absolute', top:0, left:0, borderWidth:4, borderColor:"#20232a"}}
+            style={{position: 'absolute', top:0, left:0, width:0, borderWidth:4, borderColor:"#20232a"}}
           >
             {(this.state.show_settings)
             ? <Draggable // Enable dragability of the contained elements
@@ -924,6 +929,7 @@ class App extends React.Component {
               >
                 <div // Acts as drag handle
                   className="unlocked_handle"
+                  style={{display:"inline-block"}}
                 >
                   <TestTable
                     ui_props={this.state.ui_props}
