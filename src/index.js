@@ -17,9 +17,8 @@ ReactDOM.render(<App />, document.getElementById('root'));
 // Handle application click-through functionality
 if (!isDev) {
   window.addEventListener('mousemove', event => {
-    alert(event.target.classList)
     if (event.target.classList.contains('intangible') ) { //|| !event.target.hasOwnProperty('classList')
-      //window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
+      window.require('electron').remote.getCurrentWindow().setIgnoreMouseEvents(true, {forward: true})
     } else {
       //alert(event.target.classList.length)
       //alert(event.target.text)

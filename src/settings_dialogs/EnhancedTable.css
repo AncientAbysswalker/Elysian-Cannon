@@ -1,0 +1,90 @@
+/* Common Settings */
+.ms-table * {
+  font-size: 0.7vw;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Table Rows */
+.ms-table tr {
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Table Cells */
+.ms-table tr > * {
+    margin: 0px;
+    padding: 0.2vw;
+}
+
+/* Extra Padding at Start */
+.ms-table tr > *:first-child {
+    padding-left: 0.6vw;
+}
+
+/* Extra Padding at End */
+.ms-table tr > *:last-child {
+    padding-right: 0.6vw;
+}
+
+/* Header Settings */
+/* .ms-table-header {
+  position:absolute;
+  pointer-events: none;
+  background-color:red;
+  opacity:0.3;
+  height:100%;
+  width:100%;
+  z-index:1;
+} */
+
+/* Table Row Settings*/
+.ms-table tr > * > * {
+    margin-top: 0.2vw;
+    margin-bottom: 0.2vw;
+    text-align:center;
+}
+
+/* Input Box Settings */
+.ms-table tr > * > input {
+    width: 2vw;
+}
+
+.ms-checkbox {
+    height: 1.4vw;
+    width: 1.4vw;
+}
+
+/* Div container for images in Table */
+.ms-image {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Actual image settings */
+.ms-image > * {
+  padding: 0;
+  margin: 0;
+}
+
+.ms-footer * {
+  font-size: 0.7vw !important;
+
+}
+
+/* Settings for on-hover rotation */
+.ms-rot60 {
+  border-radius: 1000px;
+  transition: all 0.25s ease-in;
+}
+
+/* Settings for animation at end */
+.ms-rot60:hover {
+  transform: rotate(-60deg);
+}

@@ -1,12 +1,16 @@
 import React from 'react';
-import {Motion, spring} from 'react-motion';
-import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-import Toggle from 'react-toggle'
+import { Motion, spring } from 'react-motion';
+import Draggable, { DraggableCore } from 'react-draggable'; // Both at the same time
+import Toggle from 'react-toggle';
 
-import TestTable from './applet_modules/TestTable.js'
+import Switch from '@material-ui/core/Switch';
+
+import TestTable from './settings_dialogs/TestTable.js';
+import AppletSettings from './settings_dialogs/AppletSettingsDialog.js';
 
 import './App.css';
-import './react-toggle.css'
+//import './AppletSettingsDialog.css'
+//import './react-toggle.css'
 
 // Development build or production?
 const isDev = window.require('electron-is-dev');
@@ -24,12 +28,12 @@ const iconPromise = window.require('icon-promise');
 // Datastores
 const Datastore = require('nedb');
 let db_applets = new Datastore({
-  filename : 'ui_applets',
-  autoload : true //
+  filename: 'ui_applets',
+  autoload: true, //
 });
 let db_layout = new Datastore({
-  filename : 'layout_data',
-  autoload : true //
+  filename: 'layout_data',
+  autoload: true, //
 });
 
 // TESTING
@@ -66,7 +70,7 @@ async function dbInsert(datastore, object_insert) {
  */
 async function dbFindOne(datastore, token) {
   let promise = new Promise((resolve, reject) => {
-    datastore.findOne(token, (err,docs) => resolve(docs));
+    datastore.findOne(token, (err, docs) => resolve(docs));
   });
 
   return await promise;
@@ -80,7 +84,7 @@ async function dbFindOne(datastore, token) {
  */
 async function dbFindAll(datastore, token) {
   let promise = new Promise((resolve, reject) => {
-    datastore.find(token, (err,docs) => resolve(docs));
+    datastore.find(token, (err, docs) => resolve(docs));
   });
 
   return await promise;
@@ -113,8 +117,8 @@ async function getAbsPath(resourcePath) {
   let fileExtension = resourcePath.split('.').pop();
   if (fileExtension === 'url' ||
       fileExtension === 'lnk') {
-        return await symlink.getPath(resourcePath)
-        .catch(err => alert(err));
+    return await symlink.getPath(resourcePath)
+    .catch(err => alert(err));
   } else {
     return resourcePath;
   }
@@ -146,7 +150,7 @@ async function getSavedIcon(resourcePath) {
   try {
     iconData = (await iconPromise.getIcon256(resourcePath)).Base64ImageData;
     hashData = md5(iconData);
-  } catch(err) {
+  } catch (err) {
     alert(err);
   }
 
@@ -180,11 +184,11 @@ async function getSavedIcon(resourcePath) {
  * @param {string} fileName The string name of a file within the intended path
  * @return {string} The path of the applictaion resources directory or file
  */
-function getAppPath(fileName = "") {
+function getAppPath(fileName = '') {
   if (isDev) {
-  	return "./public/" + fileName;
+    return './public/' + fileName;
   } else {
-  	return path.join(app.getPath('userData'), fileName);
+    return path.join(app.getPath('userData'), fileName);
   }
 }
 
@@ -195,11 +199,11 @@ function getAppPath(fileName = "") {
  * @param {string} fileName The string path of the original file or link
  * @return {string} The path of the icon resources directory or file
  */
-function getIconPath(fileName = "") {
+function getIconPath(fileName = '') {
   if (isDev) {
-  	return './public/icon_storage/' + fileName;
+    return './public/icon_storage/' + fileName;
   } else {
-  	return path.join(app.getPath('userData'), 'icon_storage', fileName);
+    return path.join(app.getPath('userData'), 'icon_storage', fileName);
   }
 }
 
@@ -212,54 +216,71 @@ class App extends React.Component {
     super(props);
 
     // this.addElement = this.addElement.bind(this);
-    this.setMainIcon = this.setMainIcon.bind(this)
+    this.setMainIcon = this.setMainIcon.bind(this);
+    this.getInputProps = this.getInputProps.bind(this);
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
-      loaded_applets : [],
+      loaded_applets: [],
+      settings_applets: [],
+      show_settings: true,
+      show_addrem: true,
+      //temp: {'first': null},
     };
 
     // Load available Applets' modules
+
+  }
+
+  componentDidMount() {
     this.loadAppletModules(); //.then???
     this.loadAppletsOnStart();
   }
 
-
   setMainIcon(icon) {
     this.setState(prevState => ({
-      mainButtonIcon: icon
+      mainButtonIcon: icon,
     }));
   }
 
-  getInputProps(type, title) {
+  getInputProps(type, applet_id, title) {
     return {
       type: type,
-      value: this.state.ui_props["FC4jXzlQZwxLaPd2"].properties[title],
+      value: this.state.ui_props[applet_id].properties[title],
       onChange: e => {
         let target_value = e.target.value;
-        type === "number"
+        type === 'number'
           // ? this.setState({ [title]: parseInt(e.target.value || 0, 10) })
           // : this.setState({ [title]: e.target.value })
           ? this.setState(prevState => ({
             ...prevState,
             ui_props: {
               ...prevState.ui_props,
-              dummy_id: {
-                ...prevState.ui_props.dummy_id,
+              [applet_id]: {
+                ...prevState.ui_props[applet_id],
                 properties: {
-                  ...prevState.ui_props.dummy_id.properties,
-                  [title]: parseInt(target_value || 0, 10) }}}}))
+                  ...prevState.ui_props[applet_id].properties,
+                  [title]: parseInt(target_value || 0, 10), }, }, }, }))
           : this.setState(prevState => ({
             ...prevState,
             ui_props: {
               ...prevState.ui_props,
-              dummy_id: {
-                ...prevState.ui_props.dummy_id,
+              [applet_id]: {
+                ...prevState.ui_props[applet_id],
                 properties: {
-                  ...prevState.ui_props.dummy_id.properties,
-                  [title]: target_value }}}}))
+                  ...prevState.ui_props[applet_id].properties,
+                  [title]: target_value, }, }, }, }))
     }};
   }
+
+  // settingsPropsUnlocked(applet_id) {
+  //   return {
+  //     value: this.state.location_props[applet_id].position_root.x,
+  //     onChange: e => {
+  //       let target_value = e.target.value;
+  //       this.moveToPositionById(applet_id, {x:parseInt(target_value || 0, 10)})
+  //   }};
+  // }
 
   /**
    * Provide the props required to implement functionality of state-editing
@@ -293,6 +314,7 @@ class App extends React.Component {
     }};
   }
 
+  // Dummy until later
   getRemoveApplet() {
     return {
       value: this.state.to_remove,
@@ -313,9 +335,18 @@ class App extends React.Component {
     // Currently HARDCODED. TODO: Make dynamic
     let new_module = require('./applet_modules/RadialMenu/RadialMenu.js');//{MenuButton : MenuButton2};
     let new_module2 = require('./applet_modules/TestStaticBox.js');
+    let new_module3 = require('./applet_modules/ORStaticBox.js');
     if (DEV_ALERT_HASHES) alert(md5(new_module.AppletMain));
     MODULES["dummy_applet_id"] = new_module;
     MODULES["dumb_box"] = new_module2;
+    MODULES["or_box"] = new_module3;
+    this.setState({
+      temp: {
+        "dummy_applet_id" : new_module,
+        "dumb_box" : new_module2,
+        "or_box" : new_module3
+      }
+    })
   }
 
   /**
@@ -392,7 +423,8 @@ class App extends React.Component {
         position_root : {x : 500, y : 500},
         depth : 0,
         unlocked : false,
-        highlighted : false
+        highlighted : false,
+        hidden : false
       })
 
       // Insert the default state tree into state and load the component
@@ -408,7 +440,8 @@ class App extends React.Component {
             position_root : {x : 500, y : 500},
             depth : 0,
             unlocked : false,
-            highlighted : false
+            highlighted : false,
+            hidden : false
         }}},
         loaded_applets : [...prevState.loaded_applets, {
           main : MODULES[id_module].AppletMain,
@@ -427,6 +460,76 @@ class App extends React.Component {
   updateAppletMemoryById(id_applet) {
     db_applets.update({_id : id_applet}, this.state.ui_props[id_applet], {});
   }
+
+  static objectSubMap(full_object, keys_list) {
+    const pick = (...props) => o => props.reduce((a, e) => ({ ...a, [e]: o[e] }), {})
+    return pick(...keys_list)(full_object)
+  }
+
+  snapshotAppletMemoryById(id_applet, keys_list) {
+    return App.objectSubMap(this.state.ui_props[id_applet].properties, keys_list)
+  }
+
+  revertAppletMemoryById(id_applet, revert_state) {
+    this.setState(prevState => ({
+      ui_props: {...prevState.ui_props, ...{
+        [id_applet]: {...prevState.ui_props[id_applet],
+          properties: {...prevState.ui_props[id_applet].properties,
+          ...revert_state
+      }}}}
+    }))
+  }
+
+  /**
+   * Update the properties stored in the datastore to match the properties
+   *     stored in the current state, based on the id_module provided
+   * @param {string} id_applet The applet id for which to update memory
+   * @nedb Updates the datastore entry with a _id of id_applet
+   */
+  // revertAppletMemoryById(id_applet) {
+  //   let promise = new Promise((resolve, reject) => {
+  //     dbFindOne(db_applets, {_id : id_applet}).then(applet => {
+  //       if ("propsMap" in MODULES[applet.id_module]){
+  //         MODULES[applet.id_module].propsMap(applet.properties)}
+  //
+  //       resolve(applet)
+  //     });
+  //   });
+  //
+  //   promise.then(applet_state => alert(JSON.stringify(applet_state)))
+  //
+  //   // Get array of loaded state trees then write each tree to state.ui_props
+  //   // promise.then(applet_state => {
+  //   //   let state_tree = applet_state.reduce((map, obj) => {
+  //   //     let { _id, ..._state } = obj;
+  //   //     if (DEV_ALERT_HASHES) alert(_id);
+  //   //     map[_id] = _state;
+  //   //     return map;//
+  //   //   }, {});
+  //   //
+  //   //   dbFindAll(db_layout, { _id : { $in : Object.keys(state_tree)}}).then(layouts => {
+  //   //     let layout_tree = layouts.reduce((map, obj) => {
+  //   //       let { _id, ..._layout } = obj;
+  //   //       map[_id] = _layout;
+  //   //       return map;
+  //   //     }, {})
+  //   //
+  //   //     // Write each stored state tree into the state.ui_props object
+  //   //     this.setState(prevState => ({
+  //   //       ui_props : state_tree,
+  //   //       location_props : layout_tree
+  //   //     }));
+  //   //   }).then(() => {
+  //   //     // Add loaded applets to array for dynamic component loading
+  //   //     this.setState(prevState => ({
+  //   //       loaded_applets : Object.keys(prevState.ui_props).map(id_instance => ({
+  //   //         main : MODULES[prevState.ui_props[id_instance].id_module].AppletMain,
+  //   //         id : id_instance
+  //   //       }))
+  //   //     }));
+  //   //   });
+  //   // })
+  // }
 
   /**
    * Remove an Applet by its id. Unload the component and remove its props from
@@ -556,6 +659,75 @@ class App extends React.Component {
     }}}))
   }
 
+  toggleHiddenById(id_applet) {
+    // Get the opposite of the current hidden state
+    let toggled = !this.state.location_props[id_applet].hidden
+
+    // Update hidden state in the datastore
+    db_layout.update({_id : id_applet}, { $set: {hidden : toggled}}, {});
+
+    // Update hidden state in the location props state tree
+    this.setState(prevState => ({
+      location_props : {...prevState.location_props,
+        [id_applet] : {...prevState.location_props[id_applet],
+          hidden : toggled
+    }}}))
+  }
+
+  stateFunctions() {
+    return {
+      x: (id) => this.getInputPropsPositionX(id),
+      y: (id) => this.getInputPropsPositionY(id),
+      unlocked: (id) => ({
+        checked: this.state.location_props[id].unlocked,
+        onChange: (e) => this.toggleUnlockById(id)
+      }),
+      highlighted: (id) => ({
+        checked: this.state.location_props[id].highlighted,
+        onChange: (e) => this.toggleHighlightById(id)
+      }),
+      hidden: (id) => ({
+        checked: this.state.location_props[id].hidden,
+        onChange: (e) => this.toggleHiddenById(id)
+      })
+  }}
+
+
+
+  openSettingsById(id_open) {
+    if (!this.state.settings_applets.includes(id_open)) {
+      this.setState(prevState => ({
+        settings_applets: [...prevState.settings_applets, id_open]
+      }))
+    }
+  }
+
+  /**
+   * Close the settings dialog associated with a given applet id
+   * @param {string} id_close The applet id for which to close the settings
+   * @state Remove the entry from settings_applets if applicable
+   */
+  closeSettingsById(id_close) {
+    this.setState(prevState => ({
+      settings_applets: prevState.settings_applets.filter(id_applet => id_applet !== id_close)
+    }))
+  }
+
+
+  /**
+   * Close the settings dialog associated with a given applet id
+   * @param {string} id_close The applet id for which to close the settings
+   * @state Remove the entry from settings_applets if applicable
+   */
+  closeSettingsById(id_close) {
+    this.setState(prevState => ({
+      settings_applets: prevState.settings_applets.filter(id_applet => id_applet !== id_close)
+    }))
+  }
+
+
+
+
   /**
    * Render Application
    */
@@ -566,13 +738,16 @@ class App extends React.Component {
     return (
       <div id="app" className="intangible">
         <div id="content" className="intangible">
+
+          {/* Draw Applets*/}
           <div id="component" className="intangible">
             {this.state.loaded_applets.map( (applet, index) =>
               <div // Force all applets to call (0,0) home (relative to browser)
                 className="intangible"
-                style={{position: 'absolute', top:0, left:0, zIndex:this.state.location_props[applet.id].depth}}
+                style={{position: 'absolute', top:0, left:0, width:0, zIndex:this.state.location_props[applet.id].depth}} // Must set size to 0 or layering will nullify clicks!
               >
-                <Draggable // Enable dragability of the contained elements
+              {!(this.state.location_props[applet.id].hidden)
+              ? <Draggable // Enable dragability of the contained elements
 
                   handle=".unlocked_handle" // Classname to act as drag handle
                   onStop={(e, new_pos) => this.updateDraggedById(e, new_pos, applet.id)}
@@ -581,6 +756,7 @@ class App extends React.Component {
                   <div // Acts as drag handle
                     id={applet.id}
                     className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
+                    style={{display:"inline-block"}} // Must set inline-block or previous "0 size" will cause graphical bugs
                   >
                     <div // Acts as outline when selected
                       className={this.state.location_props[applet.id].highlighted ? "outline" : ""}
@@ -602,92 +778,199 @@ class App extends React.Component {
                       : null}
                   </div>
                 </Draggable>
+              : null }
               </div>
             )}
           </div>
 
-          <Draggable
-
-            onDrag={() => this.isDragging = true}
-            cancel=".non-drag"
-            onClick={() => {
-              this.toggleMenu();
-            }}
-            onStop={(e) => {
-              if (!this.isDragging) {
-                return;
-              }
-
-              this.isDragging = false;
-              e.preventDefault()
-            }}
-          >
-            <div id="addrem" className="notepad">
-              <p style={{"margin-bottom":0}}>
-                Add Things:
-              </p>
-              <div>
-                <button
-                  className="non-drag"
-                  onClick={() =>
-                    this.loadNewApplet("dummy_applet_id")
-                  }
-                >Add MenuButton</button>
-                <button
-                  className="non-drag"
-                  onClick={() =>
-                    this.loadNewApplet("dumb_box")
-                  }
-                >Add Static Box</button>
+          {/* Draw Applet Settings*/}
+          <div id="component" className="intangible">
+            {this.state.settings_applets.map( (applet, index) =>
+              <div // Force all applets to call (0,0) home (relative to browser)
+                className="intangible"
+                style={{position: 'absolute', top:0, left:0, width:0, zIndex:100}}
+              >
+                <Draggable // Enable dragability of the contained elements
+                  cancel=".non-drag"
+                  //handle=".unlocked_handle" // Classname to act as drag handle
+                  defaultPosition={{x:250, y:250}}
+                >
+                  <div // Acts as drag handle
+                    style={{display:"inline-block"}}
+                    //id={applet.id}
+                    //className={this.state.location_props[applet.id].unlocked ? "unlocked_handle" : ""}
+                  >
+                    <AppletSettings
+                      saveSettings={() => this.updateAppletMemoryById(applet)}
+                      snapshotSettings={() => this.snapshotAppletMemoryById(applet, MODULES[this.state.ui_props[applet].id_module].settings_props.map(setting => setting.key))} //Important to not override props that are not to be exposed to the settings dialog
+                      revertSettings={(revert_state) => this.revertAppletMemoryById(applet, revert_state)}
+                      closeSettings={() => this.closeSettingsById(applet)}
+                      getInputProps={this.getInputProps}
+                      id_applet={applet}
+                      settings={MODULES[this.state.ui_props[applet].id_module].settings_props}
+                    />
+                  </div>
+                </Draggable>
               </div>
-              <p style={{"margin-bottom":0}}>
-                Remove following id:
-              </p>
+            )}
+          </div>
+
+          {/* Draw Add/Remove Temp Settings*/}
+          <div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0, width:0}}
+          >
+            {(this.state.show_addrem)
+            ? <Draggable
+              defaultPosition={{x:1100, y:250}}
+              onDrag={() => this.isDragging = true}
+              cancel=".non-drag"
+              onClick={() => {
+                this.toggleMenu();
+              }}
+              onStop={(e) => {
+                if (!this.isDragging) {
+                  return;
+                }
+
+                this.isDragging = false;
+                e.preventDefault()
+              }}
+            >
+              <div id="addrem" className="notepad" style={{display:"inline-block"}}>
+                <p style={{"margin-bottom":0}}>
+                  Add Things:
+                </p>
+                <div>
+                  <button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("dummy_applet_id")
+                    }
+                  >Add MenuButton</button>
+                  <button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("dumb_box")
+                    }
+                  >Add Static Box</button>
+                  {/*<button
+                    className="non-drag"
+                    onClick={() =>
+                      this.loadNewApplet("or_box")
+                    }
+                  >Add "Settings Hijacked" Box</button>*/}
+                </div>
+                <p style={{"margin-bottom":0}}>
+                  Remove following id:
+                </p>
+                <div>
+                  <button
+                    className="non-drag"
+                    onClick={() => {
+                      this.removeAppletById(this.state.to_remove);
+                      this.setState({to_remove : ""})
+                    }}
+                  >Remove MenuButton</button>
+                  <input
+                    className="non-drag" {...this.getRemoveApplet()}
+                  />
+                </div>
+              </div>
+            </Draggable>
+            : null}
+          </div>
+
+          {/*<div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0, zIndex: 7}}
+          >
+            <Draggable
+              defaultPosition={{x: 200, y: 150}}
+              cancel=".non-drag"
+            >
+              <div id="addrem" className="notepad">
+                {this.state.loaded_applets.map( (applet, index) =>
+                  <div className="inlin">
+                    <p>{applet.id}</p>
+                    <Toggle
+                      className="non-drag"
+                      defaultChecked={this.state.location_props[applet.id].unlocked}
+                      icons={false}
+                      onChange={() => this.toggleUnlockById(applet.id)}
+                    />
+                    <Toggle
+                      className="non-drag"
+                      defaultChecked={this.state.location_props[applet.id].highlighted}
+                      icons={false}
+                      onChange={() => this.toggleHighlightById(applet.id)}
+                    />
+                    <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
+                    <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
+                    <input className="non-drag" {...this.getInputProps('number', 'ZSlRG9MkBkDG9Bk4', "mainButtonDiam")} />
+                    <input className="non-drag" value={this.state.location_props[applet.id].depth} />
+                  </div>
+                )}
+              </div>
+            </Draggable>
+          </div>*/}
+
+
+          {/* Draw Main Settings Dialog */}
+          <div // Force all applets to call (0,0) home (relative to browser)
+            className="intangible"
+            style={{position: 'absolute', top:0, left:0, width:0, borderWidth:4, borderColor:"#20232a"}}
+          >
+            {(this.state.show_settings)
+            ? <Draggable // Enable dragability of the contained elements
+                cancel=".non-drag"
+                //handle=".unlocked_handle" // Classname to act as drag handle
+                defaultPosition={{x: 500, y: 250}}
+              >
+                <div // Acts as drag handle
+                  className="unlocked_handle"
+                  style={{display:"inline-block"}}
+                >
+                  <TestTable
+                    ui_props={this.state.ui_props}
+                    location_props={this.state.location_props}
+                    state_functions={this.stateFunctions()}
+                    openSettingsById={(id) => this.openSettingsById(id)}
+                    removeAppletById={(id) => this.removeAppletById(id)}
+                    modules={MODULES}/>
+                </div>
+              </Draggable>
+            : null}
+          </div>
+
+          {/* Toggles for Settings and other Box*/}
+          <div id="component">
+            <div // Force all applets to call (0,0) home (relative to browser)
+              className="notepad"
+              style={{position: 'absolute', top:0, right:0}}
+            >
               <div>
-                <button
-                  className="non-drag"
-                  onClick={() => {
-                    this.removeAppletById(this.state.to_remove);
-                    this.setState({to_remove : ""})
-                  }}
-                >Remove MenuButton</button>
-                <input
-                  className="non-drag" {...this.getRemoveApplet()}
+                <span>Show Settings</span>
+                <Switch
+                  value={true}
+                  size="small"
+                  checked = {this.state.show_settings} //this.state.location_props[id].highlighted
+                  onChange = {() => this.setState(prevState => ({
+                    show_settings: !prevState.show_settings
+                  }))}
+                />
+              <div></div>
+                <span>Show Add/Remove (Temp) Settings</span>
+                <Switch
+                  value={true}
+                  size="small"
+                  checked = {this.state.show_addrem} //this.state.location_props[id].highlighted
+                  onChange = {() => this.setState(prevState => ({
+                    show_addrem: !prevState.show_addrem
+                  }))}
                 />
               </div>
             </div>
-          </Draggable>
-
-          <Draggable
-
-            cancel=".non-drag"
-          >
-            <div id="addrem" className="notepad">
-              {this.state.loaded_applets.map( (applet, index) =>
-                <div className="inlin">
-                  <p>{applet.id}</p>
-                  <Toggle
-                    className="non-drag"
-                    defaultChecked={this.state.location_props[applet.id].unlocked}
-                    icons={false}
-                    onChange={() => this.toggleUnlockById(applet.id)}
-                  />
-                  <Toggle
-                    className="non-drag"
-                    defaultChecked={this.state.location_props[applet.id].highlighted}
-                    icons={false}
-                    onChange={() => this.toggleHighlightById(applet.id)}
-                  />
-                  <input className="non-drag" {...this.getInputPropsPositionX(applet.id)} />
-                  <input className="non-drag" {...this.getInputPropsPositionY(applet.id)} />
-                  <input className="non-drag" value={this.state.location_props[applet.id].depth} />
-                </div>
-              )}
-            </div>
-          </Draggable>
-
-          <div>
-            <TestTable />
           </div>
         </div>
       </div>
@@ -695,5 +978,31 @@ class App extends React.Component {
   }
 }
 
+//
+// const AppletSettings = (props) => {
+//   return (
+//     <div className="notepad">
+//       <table className="AppletSettings">
+//         <thead>
+//           <tr>
+//            <td>Name</td>
+//            <td>Description</td>
+//            <td></td>
+//           </tr>
+//         </thead>
+//         <tbody>
+//         {props.settings.map( (setting) =>
+//
+//             <tr>
+//               <td><p>{setting.name || "No Name Given"}</p></td>
+//               <td><p>{setting.description || "No Description Given"}</p></td>
+//               <td><input className="non-drag" {...props.getInputProps('number', props.id_applet, setting.key)} /></td>
+//             </tr>
+//         )}
+//         </tbody>
+//       </table>
+//     </div>
+//   )
+// }
 
 export default App
