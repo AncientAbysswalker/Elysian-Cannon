@@ -1,12 +1,12 @@
 import React from 'react';
-import {Motion, spring} from 'react-motion';
-import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-import Toggle from 'react-toggle'
+import { Motion, spring } from 'react-motion';
+import Draggable, { DraggableCore } from 'react-draggable'; // Both at the same time
+import Toggle from 'react-toggle';
 
 import Switch from '@material-ui/core/Switch';
 
-import TestTable from './applet_modules/TestTable.js'
-import AppletSettings from './AppletSettingsDialog.js'
+import TestTable from './settings_dialogs/TestTable.js';
+import AppletSettings from './settings_dialogs/AppletSettingsDialog.js';
 
 import './App.css';
 //import './AppletSettingsDialog.css'
@@ -28,12 +28,12 @@ const iconPromise = window.require('icon-promise');
 // Datastores
 const Datastore = require('nedb');
 let db_applets = new Datastore({
-  filename : 'ui_applets',
-  autoload : true //
+  filename: 'ui_applets',
+  autoload: true, //
 });
 let db_layout = new Datastore({
-  filename : 'layout_data',
-  autoload : true //
+  filename: 'layout_data',
+  autoload: true, //
 });
 
 // TESTING
@@ -70,7 +70,7 @@ async function dbInsert(datastore, object_insert) {
  */
 async function dbFindOne(datastore, token) {
   let promise = new Promise((resolve, reject) => {
-    datastore.findOne(token, (err,docs) => resolve(docs));
+    datastore.findOne(token, (err, docs) => resolve(docs));
   });
 
   return await promise;
@@ -84,7 +84,7 @@ async function dbFindOne(datastore, token) {
  */
 async function dbFindAll(datastore, token) {
   let promise = new Promise((resolve, reject) => {
-    datastore.find(token, (err,docs) => resolve(docs));
+    datastore.find(token, (err, docs) => resolve(docs));
   });
 
   return await promise;
@@ -117,8 +117,8 @@ async function getAbsPath(resourcePath) {
   let fileExtension = resourcePath.split('.').pop();
   if (fileExtension === 'url' ||
       fileExtension === 'lnk') {
-        return await symlink.getPath(resourcePath)
-        .catch(err => alert(err));
+    return await symlink.getPath(resourcePath)
+    .catch(err => alert(err));
   } else {
     return resourcePath;
   }
@@ -150,7 +150,7 @@ async function getSavedIcon(resourcePath) {
   try {
     iconData = (await iconPromise.getIcon256(resourcePath)).Base64ImageData;
     hashData = md5(iconData);
-  } catch(err) {
+  } catch (err) {
     alert(err);
   }
 
@@ -184,11 +184,11 @@ async function getSavedIcon(resourcePath) {
  * @param {string} fileName The string name of a file within the intended path
  * @return {string} The path of the applictaion resources directory or file
  */
-function getAppPath(fileName = "") {
+function getAppPath(fileName = '') {
   if (isDev) {
-  	return "./public/" + fileName;
+    return './public/' + fileName;
   } else {
-  	return path.join(app.getPath('userData'), fileName);
+    return path.join(app.getPath('userData'), fileName);
   }
 }
 
@@ -199,11 +199,11 @@ function getAppPath(fileName = "") {
  * @param {string} fileName The string path of the original file or link
  * @return {string} The path of the icon resources directory or file
  */
-function getIconPath(fileName = "") {
+function getIconPath(fileName = '') {
   if (isDev) {
-  	return './public/icon_storage/' + fileName;
+    return './public/icon_storage/' + fileName;
   } else {
-  	return path.join(app.getPath('userData'), 'icon_storage', fileName);
+    return path.join(app.getPath('userData'), 'icon_storage', fileName);
   }
 }
 
@@ -216,15 +216,15 @@ class App extends React.Component {
     super(props);
 
     // this.addElement = this.addElement.bind(this);
-    this.setMainIcon = this.setMainIcon.bind(this)
-    this.getInputProps = this.getInputProps.bind(this)
+    this.setMainIcon = this.setMainIcon.bind(this);
+    this.getInputProps = this.getInputProps.bind(this);
     //this.addElement = this.addElement.bind(this)
 
     this.state = {
-      loaded_applets : [],
-      settings_applets : [],
-      show_settings : true,
-      show_addrem : true,
+      loaded_applets: [],
+      settings_applets: [],
+      show_settings: true,
+      show_addrem: true,
       //temp: {'first': null},
     };
 
@@ -239,7 +239,7 @@ class App extends React.Component {
 
   setMainIcon(icon) {
     this.setState(prevState => ({
-      mainButtonIcon: icon
+      mainButtonIcon: icon,
     }));
   }
 
@@ -249,7 +249,7 @@ class App extends React.Component {
       value: this.state.ui_props[applet_id].properties[title],
       onChange: e => {
         let target_value = e.target.value;
-        type === "number"
+        type === 'number'
           // ? this.setState({ [title]: parseInt(e.target.value || 0, 10) })
           // : this.setState({ [title]: e.target.value })
           ? this.setState(prevState => ({
@@ -260,7 +260,7 @@ class App extends React.Component {
                 ...prevState.ui_props[applet_id],
                 properties: {
                   ...prevState.ui_props[applet_id].properties,
-                  [title]: parseInt(target_value || 0, 10) }}}}))
+                  [title]: parseInt(target_value || 0, 10), }, }, }, }))
           : this.setState(prevState => ({
             ...prevState,
             ui_props: {
@@ -269,7 +269,7 @@ class App extends React.Component {
                 ...prevState.ui_props[applet_id],
                 properties: {
                   ...prevState.ui_props[applet_id].properties,
-                  [title]: target_value }}}}))
+                  [title]: target_value, }, }, }, }))
     }};
   }
 
