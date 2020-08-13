@@ -1,23 +1,23 @@
-import React from 'react'
+import React from 'react';
 
-import Checkbox from '@material-ui/core/Checkbox'
+import Checkbox from '@material-ui/core/Checkbox';
 import Switch from '@material-ui/core/Switch';
-import MaUTable from '@material-ui/core/Table'
-import PropTypes from 'prop-types'
-import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
-import TableContainer from '@material-ui/core/TableContainer'
-import TableFooter from '@material-ui/core/TableFooter'
-import TableHead from '@material-ui/core/TableHead'
-import TablePagination from '@material-ui/core/TablePagination'
-import TablePaginationActions from './TablePaginationActions'
-import TableRow from '@material-ui/core/TableRow'
-import TableSortLabel from '@material-ui/core/TableSortLabel'
-import TableToolbar from './TableToolbar'
+import MaUTable from '@material-ui/core/Table';
+import PropTypes from 'prop-types';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableFooter from '@material-ui/core/TableFooter';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TablePaginationActions from './TablePaginationActions';
+import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import TableToolbar from './TableToolbar';
 
 import SettingsIcon from '@material-ui/icons/Settings';
 
-import './EnhancedTable.css'
+import './EnhancedTable.css';
 
 import {
   useGlobalFilter,
@@ -25,31 +25,29 @@ import {
   useRowSelect,
   useSortBy,
   useTable,
-} from 'react-table'
+} from 'react-table';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef()
-    const resolvedRef = ref || defaultRef
+    const defaultRef = React.useRef();
+    const resolvedRef = ref || defaultRef;
 
     React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate
-    }, [resolvedRef, indeterminate])
+      resolvedRef.current.indeterminate = indeterminate;
+    }, [resolvedRef, indeterminate]);
 
     return (
-      <>
-        <Checkbox className="Checkbox" disableRipple ref={resolvedRef} {...rest} />
-      </>
-    )
+      <Checkbox className="ms-checkbox" disableRipple ref={resolvedRef} {...rest} />
+    );
   }
-)
+);
 
 const inputStyle = {
   padding: 0,
   margin: 0,
   border: 0,
   background: 'transparent',
-}
+};
 
 // Create an editable cell renderer
 const EditableCell = ({
@@ -68,7 +66,7 @@ const EditableCell = ({
     // alert(id)
     // alert(JSON.stringify(data[index]))
     //setValue(e.target.value)
-  }
+  };
 
   // We'll only update the external data when the input is blurred
   // const onBlur = () => {
@@ -81,25 +79,25 @@ const EditableCell = ({
   // }, [initialValue])
 
   return (
-    (id === "settings")
+    (id === 'settings')
     ? (initialValue.available)
       //?<div className="en"><SettingsIcon className="pork" fontSize="large" onClick={initialValue.open}/></div>
-      ? <div className="table_image"><img className="rot60" src={require("./gear1.png")} alt="Girl in a jacket" width="20" height="20" onClick={initialValue.open} /></div>//<div className="en"><img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" /></div>
-      : <div className="table_image"><img src={require("./gear2.png")} alt="Girl in a jacket" width="20" height="20" /></div>//<SettingsIcon className="dis"/>
+      ? <div className="ms-image"><img className="ms-rot60" src={require('./gear1.png')} alt="Girl in a jacket" width="20" height="20" onClick={initialValue.open} /></div>//<div className="en"><img className="en" src={require("./gear1.png")} alt="Girl in a jacket" width="25" height="25" /></div>
+      : <div className="ms-image"><img src={require('./gear2.png')} alt="Girl in a jacket" width="20" height="20" /></div>//<SettingsIcon className="dis"/>
     : (state_functions.hasOwnProperty(id))
-      ? (typeof initialValue === "boolean")
+      ? (typeof initialValue === 'boolean')
         ? <Switch value={state_functions[id](data[index].id_applet).checked.toString()} size="small" {...state_functions[id](data[index].id_applet)} className="non-drag" />
         : <input {...state_functions[id](data[index].id_applet)} className="non-drag" style={inputStyle} />
         //style={inputStyle}
         //value={initialValue==="dumb_box" ? "fuck" : initialValue} //Change a thing here
         // onChange={onChange}
         //onBlur={onBlur}
-      : (typeof initialValue === "boolean")
+      : (typeof initialValue === 'boolean')
         ? <Switch size="small" checked={initialValue} disabled={true}/>
         : <p>{initialValue}</p>
 
-  )
-}
+  );
+};
 
 EditableCell.propTypes = {
   cell: PropTypes.shape({
@@ -112,12 +110,12 @@ EditableCell.propTypes = {
     id: PropTypes.number.isRequired,
   }),
   updateMyData: PropTypes.func.isRequired,
-}
+};
 
 // Set our editable cell renderer as the default Cell renderer
 const defaultColumn = {
   Cell: EditableCell,
-}
+};
 
 const EnhancedTable = ({
   columns,
@@ -180,25 +178,25 @@ const EnhancedTable = ({
           ),
         },
         ...columns,
-      ])
+      ]);
     }
-  )
+  );
 
   const handleChangePage = (event, newPage) => {
-    gotoPage(newPage)
-  }
+    gotoPage(newPage);
+  };
 
   const handleChangeRowsPerPage = event => {
-    setPageSize(Number(event.target.value))
-  }
+    setPageSize(Number(event.target.value));
+  };
 
   const removeByIndexs = (array, indexs) =>
-    alert(indexs)
-    //array.filter((_, i) => !indexs.includes(i))
+    alert(indexs);
+  //array.filter((_, i) => !indexs.includes(i))
 
   const deleteUserHandler = event => {
     for (var row of Object.keys(selectedRowIds).map(x => parseInt(x, 10))) {
-      data[row].remove()
+      data[row].remove();
     }
     //alert(data[0].remove)
     //alert(Object.keys(selectedRowIds).map(x => parseInt(x, 10)))
@@ -207,27 +205,27 @@ const EnhancedTable = ({
     //   Object.keys(selectedRowIds).map(x => parseInt(x, 10))
     // )
     //setData(newData)
-  }
+  };
 
   const addUserHandler = user => {
-    const newData = data.concat([user])
-    setData(newData)
-  }
+    const newData = data.concat([user]);
+    setData(newData);
+  };
 
   const getHeaderToolTip = (header, is_active, is_desc) => {
-    const title = header + "\n"
+    const title = header + '\n'
                 + (!is_active
-                  ? "<Click to Sort>"
+                  ? '<Click to Sort>'
                   : (is_desc
-                    ? "<Currently Sorted Descending>"
-                    : "<Currently Sorted Ascending>"))
-    return title
-  }
+                    ? '<Currently Sorted Descending>'
+                    : '<Currently Sorted Ascending>'));
+    return title;
+  };
 
   // Render the UI for your table
   return (
-    <TableContainer className="react-table">
-      <TableToolbar className="react-table-toolbar"
+    <TableContainer className="ms-table">
+      <TableToolbar
         numSelected={Object.keys(selectedRowIds).length}
         deleteUserHandler={deleteUserHandler}
         addUserHandler={addUserHandler}
@@ -235,7 +233,7 @@ const EnhancedTable = ({
         setGlobalFilter={setGlobalFilter}
         globalFilter={globalFilter}
       />
-      <MaUTable {...getTableProps()} className="">
+      <MaUTable {...getTableProps()}>
         <TableHead>
           {headerGroups.map(headerGroup => (
             <TableRow {...headerGroup.getHeaderGroupProps()}>
@@ -244,7 +242,7 @@ const EnhancedTable = ({
                   {...(column.id === 'selection'
                     ? column.getHeaderProps()
                     : column.getHeaderProps(column.getSortByToggleProps({
-                      title: getHeaderToolTip(column.header_title, column.isSorted, column.isSortedDesc)
+                      title: getHeaderToolTip(column.header_title, column.isSorted, column.isSortedDesc),
                     })))}
                 >
                   {column.render('Header')}
@@ -263,7 +261,7 @@ const EnhancedTable = ({
         </TableHead>
         <TableBody>
           {page.map((row, i) => {
-            prepareRow(row)
+            prepareRow(row);
             return (
               <TableRow {...row.getRowProps()}>
                 {row.cells.map(cell => {
@@ -271,39 +269,40 @@ const EnhancedTable = ({
                     <TableCell {...cell.getCellProps()} align='center'>
                       {cell.render('Cell')}
                     </TableCell>
-                  )
+                  );
                 })}
               </TableRow>
-            )
+            );
           })}
         </TableBody>
 
-        <TableFooter className="react-table-footer">
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[
-                5,
-                10,
-                // { label: 'All', value: data.length },
-              ]}
-              colSpan={3}
-              count={data.length}
-              rowsPerPage={pageSize}
-              page={pageIndex}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
+
       </MaUTable>
+      <TableFooter className="ms-footer">
+        <TableRow>
+          <TablePagination
+            rowsPerPageOptions={[
+              5,
+              10,
+              // { label: 'All', value: data.length },
+            ]}
+            colSpan={3}
+            count={data.length}
+            rowsPerPage={pageSize}
+            page={pageIndex}
+            SelectProps={{
+              inputProps: { 'aria-label': 'rows per page' },
+              native: true,
+            }}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+            ActionsComponent={TablePaginationActions}
+          />
+        </TableRow>
+      </TableFooter>
     </TableContainer>
-  )
-}
+  );
+};
 
 EnhancedTable.propTypes = {
   columns: PropTypes.array.isRequired,
@@ -311,6 +310,6 @@ EnhancedTable.propTypes = {
   updateMyData: PropTypes.func.isRequired,
   setData: PropTypes.func.isRequired,
   skipPageReset: PropTypes.bool.isRequired,
-}
+};
 
-export default EnhancedTable
+export default EnhancedTable;
