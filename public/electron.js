@@ -1,24 +1,28 @@
-const electron = require("electron");
+const electron = require('electron');
 const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;const path = require("path");
-const isDev = require("electron-is-dev");let mainWindow;
+const BrowserWindow = electron.BrowserWindow;const path = require('path');
+const isDev = require('electron-is-dev');let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
     },
-    width: 1920,
-    height: 1080,
     show: false,
     alwaysOnTop: true,
     frame: false,
-    transparent: true});
+    transparent: true,
+  });
+
+  // Don't allow resizing and force fullscreen
+  mainWindow.setResizable(false);
+  mainWindow.setFullScreen(true);
+
   mainWindow.setAlwaysOnTop(true, 'screen');
-  mainWindow.loadURL(isDev? "http://localhost:3000": `file://${path.join(__dirname, "../build/index.html")}`);
+  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   // mainWindow.on("closed", () => (mainWindow = null));
-  mainWindow.on("close", () => (mainWindow = null));
-  mainWindow.once('ready-to-show', function(){mainWindow.show()});
+  mainWindow.on('close', () => (mainWindow = null));
+  mainWindow.once('ready-to-show', function () {mainWindow.show();});
 };
 
-app.on("ready", () => setTimeout(createWindow, 2000)); // TIME BASED????
+app.on('ready', () => setTimeout(createWindow, 2000)); // TIME BASED????
