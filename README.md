@@ -1,14 +1,14 @@
 # Elysian Cannon
-### Screen Overlay Software
+> Screen Overlay Software
 
 ![Example Functionality](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/header.gif)
 
-## Working Demo
+## Setup and Usage
 A working demo can be found at the following for download:
 
 https://github.com/AncientAbysswalker/Elysian-Cannon/tree/master/dist
 
-The demo is an installer that will set up the base implementation of the overlay.
+The demo is an installer that will set up the base implementation of the overlay. The demo includes several of the functional components used for testing.
 
 ## Purpose
 The purpose of this project is to implement a screen overlay tool utilizing modern web technologies. In a manner similar to what Rainmeter achieves, the goal is to be able to implement any number of various "applets" (functional components) on the screen. The primary difference, is to allow development of functional components utilizing the full suite of modern web tools.
@@ -25,11 +25,15 @@ In order for the tool to be successful and useful, the tool must allow the user 
 
 ## Implementation
 
-The majority of the recent work has been on development of the backend to
+>> Overview?
+
+The backend is designed
 
 The following video walks through the current functionality of the  at the moment is an implementation of React running on top of an Electron Application.
 
-The current build is still very early in development, but the standard requirements above are able to be met.
+>> Settings storage and modification
+
+>> Settings storage and modification
 
 Most recent progress has been made in the implementation of loading an unspecified number of applets along with their states.
 
@@ -41,6 +45,8 @@ The following are points of current active testing and development:
 
 ## Status
 
+The current build is still very early in development, but the standard requirements above are able to be met.
+
 This is an active development project for me, and I will be continually updating this.
 
 The following are videos showing example functionality as development progresses:
@@ -51,3 +57,10 @@ The following are videos showing example functionality as development progresses
 The most recent build appears as follows:
 
 ![](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/2020-05-14.png)
+
+## Planned Features
+
+The following are planned features moving forward into the next stages of development.
+
+* Add handling so that the application main can detect if an applet would like to handle its settings dialog box itself
+* Implement ability to load user-defined applets. This will allow users to write or download custom applets outside the standard applets offered by default
