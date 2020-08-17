@@ -25,38 +25,39 @@ In order for the tool to be successful and useful, the tool must allow the user 
 
 ## Implementation
 
->> Overview?
+The application is built with the intent of supporting any number of applets, without caring about there implementation aside from a few common requirements. In order to do this, every applet instance and applet module is assigned an id in order to keep all of the data stored in an accessible manner.
 
-The backend is designed
+Any given applet needs to have settings and memory of what the value of the settings are. While each applet may have internal settings variables there is also a number of variables that are common to all applets - such as position.
 
-The following video walks through the current functionality of the  at the moment is an implementation of React running on top of an Electron Application.
+The application stores its memory regarding applet settings in a NeDB database. This memory is written to when changes are made to applet settings and read in at application startup, to restore the user's previous session.
 
->> Settings storage and modification
+#### Settings
 
->> Settings storage and modification
+All available settings for the current applets are available through the main settings dialog.
 
-Most recent progress has been made in the implementation of loading an unspecified number of applets along with their states.
+The current location of the applet is displayed on the main settings dialog, and the location can be updated directly.
 
-The following are points of current active testing and development:
+![Position Settings](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/position.gif)
 
-* Dynamically load components depending on user preferences
-* Dynamically load modules containing methods for each component definition
-* Implement settings dialog table to control applets
+The current location of the applet can be highlighted in red, to assist in finding the applet.
+
+![Highlight](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/highlight.gif)
+
+Whether or not the applet can be dragged can be set, allowing the position of the applet to be locked.
+
+![Draggable](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/draggable.gif)
+
+An applet can be hidden. This retains the memory of the applet settings, but makes it so that the applet can no longer be seen.
+
+![Hidden](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/ghost.gif)
+
+When the applet has internal settings, they can be accessed and modified as part of a separate settings dialog.
+
+![Unique Settings](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/unique_settings.gif)
 
 ## Status
 
-The current build is still very early in development, but the standard requirements above are able to be met.
-
-This is an active development project for me, and I will be continually updating this.
-
-The following are videos showing example functionality as development progresses:
-
-* [Video 1](https://github.com/AncientAbysswalker/Elysian-Cannon/blob/master/md/react-electron-menu.mp4)
-* [Video 2](https://github.com/AncientAbysswalker/Elysian-Cannon/blob/master/md/2020-04-19.mkv)
-
-The most recent build appears as follows:
-
-![](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/2020-05-14.png)
+The project is under active development
 
 ## Planned Features
 
