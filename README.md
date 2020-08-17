@@ -1,6 +1,7 @@
-### Elysian Cannon
-#### Screen Overla
+# Elysian Cannon
+### Screen Overlay Software
 
+![Example Functionality](https://raw.githubusercontent.com/AncientAbysswalker/Elysian-Cannon/master/md/header.gif)
 
 ## Working Demo
 A working demo can be found at the following for download:
