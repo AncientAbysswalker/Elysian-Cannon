@@ -1,23 +1,32 @@
-# Elysian Cannon
+### Elysian Cannon
+#### Screen Overla
+
 
 ## Working Demo
 A working demo can be found at the following for download:
 
 https://github.com/AncientAbysswalker/Elysian-Cannon/tree/master/dist
 
-## Problem Statement
-I used to play around with Rainmeter to make custom desktop skins and overlays. More recently I was considering the implementation of a similar desktop overlay with Electron JS.
+The demo is an installer that will set up the base implementation of the overlay.
 
-The following are standard requirements for the project:
+## Purpose
+The purpose of this project is to implement a screen overlay tool utilizing modern web technologies. In a manner similar to what Rainmeter achieves, the goal is to be able to implement any number of various "applets" (functional components) on the screen. The primary difference, is to allow development of functional components utilizing the full suite of modern web tools.
+
+## Criteria
+
+In order for the tool to be successful and useful, the tool must allow the user to interface with the program, while not interfering with standard screen functionality. The following are requirements for this to be true:
 
 * It should be possible to render the application as something other than a standard rectangular window
-* It should be possible to drag parts of the application around to rearrange the application(s)
-* Parts of the application may need to be click-through enabled
-* Application should not interfere with standard OS UI commands, like double or right clicking items on the desktop
+* The application must be able to pass-through clicks and dragging of files (and possibly other things) to not interfere with native screen activities
+* It should be possible to drag parts of the application around - to rearrange the applets
+* It should be possible to support multiple copies of an applet
+* It should be possible to lock the location of an applet and to identify an applet (in case there are multiples)
 
 ## Implementation
 
-The implementation at the moment is an implementation of React running on top of an Electron Application.
+The majority of the recent work has been on development of the backend to
+
+The following video walks through the current functionality of the  at the moment is an implementation of React running on top of an Electron Application.
 
 The current build is still very early in development, but the standard requirements above are able to be met.
 
